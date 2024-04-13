@@ -4,7 +4,7 @@ import time
 
 class DemoDevice(BaseDevice):
     def __init__(self, name):
-        super().__init__("demo_device", "mqtt.eclipseprojects.io", 1883)
+        super().__init__(name, "mqtt.eclipseprojects.io", 1883)
 
 
 if __name__ == '__main__':
