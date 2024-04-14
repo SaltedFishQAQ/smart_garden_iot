@@ -1,9 +1,9 @@
 from devices.common.base_actuator import BaseActuator
 
 
-class GateControl(BaseActuator):
+class GateSwitch(BaseActuator):
     def __init__(self):
-        super().__init__("gate_control")
+        super().__init__("gate switch")
 
     def _on(self):
         # TODO: open the gate

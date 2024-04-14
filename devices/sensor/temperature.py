@@ -1,3 +1,5 @@
+import json
+
 from devices.common.base_sensor import BaseSensor
 
 
@@ -7,4 +9,6 @@ class TemperatureSensor(BaseSensor):
 
     def monitor(self) -> str:
         # TODO: Raspberry Pi get temperature interface
-        return "17"
+        return json.dumps({
+            'temperature': 17
+        })

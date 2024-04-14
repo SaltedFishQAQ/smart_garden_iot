@@ -1,9 +1,9 @@
 from devices.common.base_actuator import BaseActuator
 
 
-class LightControl(BaseActuator):
+class LightSwitch(BaseActuator):
     def __init__(self):
-        super().__init__("light_control")
+        super().__init__("light switch")
 
     def _on(self):
         # TODO: turn on the light

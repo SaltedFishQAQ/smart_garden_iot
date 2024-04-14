@@ -4,6 +4,8 @@ from .mqtt import MQTTClient
 class BaseDevice:
     def __init__(self, device_id, broker, port):
         self.mqtt_client = None
+        self.sensor = None
+        self.actuator = None
         self.device_id = device_id
         self.broker = broker
         self.port = port
