@@ -22,11 +22,11 @@ class BaseDevice:
         self.mqtt_client.stop()
         self.mqtt_client = None
 
-    def mqtt_listen(self, topic_list):
+    def mqtt_listen(self, topic, callback):
         if self.mqtt_client is None:
             return False, "mqtt_client is none"
+        self.mqtt_client.subscribe(topic, callback)
 
-        self.mqtt_client.subscribe(topic_list)
         return True, ""
 
     def mqtt_publish(self, topic, message):

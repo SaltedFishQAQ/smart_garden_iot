@@ -8,6 +8,7 @@ class MQTTClient:
         self.client_id = client_id
         self.is_subscriber = False
         self.topics = []
+        self.topic_handlers = {}
 
         # init mqtt client
         self.client = mqtt_client.Client(client_id, False)
@@ -32,9 +33,10 @@ class MQTTClient:
     def publish(self, topic, msg):
         self.client.publish(topic, msg)
 
-    def subscribe(self, topic):
+    def subscribe(self, topic, handler):
         self.is_subscriber = True
         self.topics.append(topic)
+        self.topic_handlers[topic] = handler
 
         self.client.subscribe(topic, 2)
 
@@ -42,6 +44,8 @@ class MQTTClient:
         print("Connected to %s with result code: %d" % (self.broker, rc))
     
     def handle_message(self, client, userdata, msg):
-        print("current broker:", self.broker)
-        print("received '%s' under topic '%s'" % (msg.payload, msg.topic))
-
+        topic = msg.topic
+        if topic in self.topic_handlers:
+            self.topic_handlers[topic](client, userdata, msg)
+        else:
+            print(f"topic {topic} no match callback")
