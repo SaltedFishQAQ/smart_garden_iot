@@ -52,7 +52,7 @@ class HTTPClient(object):
     def GET(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.GET)
         if func is None:
-            return print(err)
+            return err
 
         return func(params)
 
@@ -60,7 +60,7 @@ class HTTPClient(object):
     def POST(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.POST)
         if func is None:
-            return print(err)
+            return err
 
         data = json.loads(cherrypy.request.body.read().decode('utf-8'))
         return func(data)
@@ -69,7 +69,7 @@ class HTTPClient(object):
     def PUT(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.PUT)
         if func is None:
-            return print(err)
+            return err
 
         data = json.loads(cherrypy.request.body.read().decode('utf-8'))
         return func(data)
@@ -78,18 +78,18 @@ class HTTPClient(object):
     def DELETE(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.DELETE)
         if func is None:
-            return print(err)
+            return err
 
         return func(params)
 
 
-def test_logic(data):
+def logic1(data):
     return str(int(data['a']) + int(data['b']))
 
 
 if __name__ == '__main__':
     c = HTTPClient('localhost', 8080)
-    c.add_route('/123/456', HTTPMethod.GET, test_logic)
+    c.add_route('/123/456', HTTPMethod.GET, logic1)
     c.start()
 
     while True:
