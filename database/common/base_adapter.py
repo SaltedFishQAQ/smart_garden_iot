@@ -1,20 +1,22 @@
 from common.mqtt import MQTTClient
 
 
-class BaseDevice:
-    def __init__(self, device_id, broker, port):
+class BaseAdapter:
+    def __init__(self, adapter_id):
         self.mqtt_client = None
-        self.sensor = None
-        self.actuator = None
-        self.device_id = device_id
-        self.broker = broker
-        self.port = port
+        self.adapter_id = adapter_id
+        self.broker = "mqtt.eclipseprojects.io"
+        self.port = 1883
+        # TODO:
+        self.routes = {}
 
-    def init_mqtt_client(self):
+    def init_mqtt_client(self, broker, port):
         if self.mqtt_client is not None:
             return
 
-        self.mqtt_client = MQTTClient(self.device_id, self.broker, self.port)
+        self.broker = broker
+        self.port = port
+        self.mqtt_client = MQTTClient(self.adapter_id, broker, port)
         self.mqtt_client.start()
 
     def remove_mqtt_client(self):
@@ -37,3 +39,10 @@ class BaseDevice:
 
         self.mqtt_client.publish(topic, message)
         return True, ""
+
+    def init_http_client(self):
+        # TODO: add http client implement
+        print(self.adapter_id)
+
+    def add_http_route(self, route, handler):
+        self.routes[route] = handler
