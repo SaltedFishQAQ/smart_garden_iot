@@ -9,16 +9,19 @@ from http import HTTPMethod
 class HTTPClient(object):
     exposed = True
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, conf=None):
         self.host = host
         self.port = port
         self.routes = {}
-        self.conf = {
-            '/': {
-                'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-                'tools.sessions.on': True
+        if conf is None:
+            self.conf = {
+                '/': {
+                    'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                    'tools.sessions.on': True
+                }
             }
-        }
+        else:
+            self.conf = conf
         cherrypy.tree.mount(self, '/', self.conf)
         cherrypy.config.update({'server.socket_port': self.port})
         self.client = cherrypy.engine
@@ -30,23 +33,29 @@ class HTTPClient(object):
         self.client.stop()
 
     def add_route(self, path, method, handler):
-        self.routes[path] = {
-            'method': method,
-            'func': handler,
-        }
+        if path not in self.routes:
+            self.routes[path] = {}
 
-    def remove_route(self, path):
-        del self.routes[path]
+        self.routes[path][method] = handler
+
+    def remove_route(self, path, method=None):
+        if path not in self.routes:
+            return
+
+        if method is None:
+            del self.routes[path]
+        else:
+            del self.routes[path][method]
 
     def _parse_request(self, uri, method):
         path = '/' + '/'.join(uri)
         if path not in self.routes:
             return None, cherrypy.HTTPError(404, 'path not found')
         info = self.routes[path]
-        if info['method'] != method:
+        if method not in info:
             return None, cherrypy.HTTPError(405, 'method not match')
 
-        return info['func'], ''
+        return info[method], ''
 
     @final
     def GET(self, *uri, **params):
