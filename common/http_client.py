@@ -41,10 +41,10 @@ class HTTPClient(object):
     def _parse_request(self, uri, method):
         path = '/' + '/'.join(uri)
         if path not in self.routes:
-            return None, 'path not found'
+            return None, cherrypy.HTTPError(404, 'path not found')
         info = self.routes[path]
         if info['method'] != method:
-            return None, 'method not match'
+            return None, cherrypy.HTTPError(405, 'method not match')
 
         return info['func'], ''
 
@@ -52,7 +52,7 @@ class HTTPClient(object):
     def GET(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.GET)
         if func is None:
-            return err
+            raise err
 
         return func(params)
 
@@ -60,7 +60,7 @@ class HTTPClient(object):
     def POST(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.POST)
         if func is None:
-            return err
+            raise err
 
         data = json.loads(cherrypy.request.body.read().decode('utf-8'))
         return func(data)
@@ -69,7 +69,7 @@ class HTTPClient(object):
     def PUT(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.PUT)
         if func is None:
-            return err
+            raise err
 
         data = json.loads(cherrypy.request.body.read().decode('utf-8'))
         return func(data)
@@ -78,19 +78,6 @@ class HTTPClient(object):
     def DELETE(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.DELETE)
         if func is None:
-            return err
+            raise err
 
         return func(params)
-
-
-def logic1(data):
-    return str(int(data['a']) + int(data['b']))
-
-
-if __name__ == '__main__':
-    c = HTTPClient('localhost', 8080)
-    c.add_route('/123/456', HTTPMethod.GET, logic1)
-    c.start()
-
-    while True:
-        time.sleep(5)
