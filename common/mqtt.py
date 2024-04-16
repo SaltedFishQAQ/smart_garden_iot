@@ -44,8 +44,31 @@ class MQTTClient:
         print("Connected to %s with result code: %d" % (self.broker, rc))
     
     def handle_message(self, client, userdata, msg):
-        topic = msg.topic
-        if topic in self.topic_handlers:
-            self.topic_handlers[topic](client, userdata, msg)
-        else:
-            print(f"topic {topic} no match callback")
+        match_list = self._topic_match(msg.topic)
+        if len(match_list) == 0:
+            print(f"topic {msg.topic} no match callback")
+            return
+
+        for register_topic in match_list:
+            self.topic_handlers[register_topic](client, userdata, msg)
+
+    def _topic_match(self, curr_topic):
+        match_list = []
+        for register_topic in self.topic_handlers.keys():
+            curr_path = curr_topic.split('/')
+            register_path = register_topic.split('/')
+            match = True
+            for index in range(len(register_path)):
+                rp = register_path[index]
+                if rp is '#':  # multi level match
+                    break
+                if rp is '+':  # single level match
+                    continue
+                cp = curr_path[index]
+                if cp != rp:  # not match
+                    match = False
+                    break
+            if match:
+                match_list.append(register_topic)
+
+        return match_list

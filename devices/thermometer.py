@@ -1,7 +1,7 @@
 import json
 
-from common.base_device import BaseDevice
-from sensor.temperature import TemperatureSensor
+from devices.common.base_device import BaseDevice
+from devices.sensor.temperature import TemperatureSensor
 
 
 class Thermometer(BaseDevice):
