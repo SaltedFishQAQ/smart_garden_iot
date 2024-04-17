@@ -39,10 +39,7 @@ class InfluxdbAdapter(BaseAdapter):
         measurement = paths[3]
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
-        print(measurement)
-        print(data_dict['tags'])
-        print(data_dict['fields'])
-        # self.db_connector.insert(measurement, data_dict['tags'], data_dict['fields'])
+        self.db_connector.insert(measurement, data_dict['tags'], data_dict['fields'])
 
     def http_temperature_get(self, params):
         measurement = "temperature"
