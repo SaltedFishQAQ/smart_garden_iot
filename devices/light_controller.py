@@ -1,6 +1,6 @@
 import json
 
-from common.base_device import BaseDevice
+from biz.base_device import BaseDevice
 from actuator.light_switch import LightSwitch
 
 

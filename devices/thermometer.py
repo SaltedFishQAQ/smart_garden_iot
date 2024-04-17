@@ -1,6 +1,6 @@
 import json
 
-from devices.common.base_device import BaseDevice
+from devices.biz.base_device import BaseDevice
 from devices.sensor.temperature import TemperatureSensor
 
 
@@ -21,12 +21,16 @@ class Thermometer(BaseDevice):
         self.sensor.stop()
         self.running = False
 
-    def record_data(self, data):
-        data_dict = json.loads(data)
-        key = 'temperature'
-        if key not in data_dict:
+    def record_data(self, data_str):
+        data = json.loads(data_str)
+        if 'value' not in data:
             print(f"data missing temperature value, data: {data}")
             return
 
-        temp = data_dict[key]
-        self.mqtt_publish(self.publish_topic, temp)
+        mqtt_data = {
+            'tags': {
+                'device_id': self.device_id,
+            },
+            'fields': data,
+        }
+        self.mqtt_publish(self.publish_topic, json.dumps(mqtt_data))

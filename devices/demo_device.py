@@ -1,4 +1,4 @@
-from common.base_device import BaseDevice
+from biz.base_device import BaseDevice
 import time
 
 

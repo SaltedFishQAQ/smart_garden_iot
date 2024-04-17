@@ -1,4 +1,4 @@
-from devices.common.base_actuator import BaseActuator
+from devices.biz.base_actuator import BaseActuator
 
 
 class Irrigator(BaseActuator):

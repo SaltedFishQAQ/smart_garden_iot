@@ -1,6 +1,7 @@
 import json
+import random
 
-from devices.common.base_sensor import BaseSensor
+from devices.biz.base_sensor import BaseSensor
 
 
 class TemperatureSensor(BaseSensor):
@@ -10,5 +11,5 @@ class TemperatureSensor(BaseSensor):
     def monitor(self) -> str:
         # TODO: Raspberry Pi get temperature interface
         return json.dumps({
-            'temperature': 17
+            'value': round(random.uniform(10.0, 30.0), 1)
         })

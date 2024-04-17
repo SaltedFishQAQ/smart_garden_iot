@@ -1,4 +1,4 @@
-from devices.common.base_sensor import BaseSensor
+from devices.biz.base_sensor import BaseSensor
 
 
 class HumiditySensor(BaseSensor):
