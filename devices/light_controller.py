@@ -1,13 +1,15 @@
 import json
 
+import constants.mqtt
 from biz.base_device import BaseDevice
 from actuator.light_switch import LightSwitch
 
 
 class LightController(BaseDevice):
     def __init__(self, name):
-        super().__init__(name, "mqtt.eclipseprojects.io", 1883)
-        self.subscribe_topic = 'iot/lwx123321/test/light'
+        self.conf = json.load(open('./configuration.json'))
+        super().__init__(name, self.conf['broker'], self.conf['port'])
+        self.subscribe_topic = constants.mqtt.LIGHT_TOPIC
         self.actuator = LightSwitch()
         self.init_mqtt_client()
         self.mqtt_listen(self.subscribe_topic, self.on_message)

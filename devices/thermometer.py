@@ -1,4 +1,5 @@
 import json
+import constants.mqtt
 
 from devices.biz.base_device import BaseDevice
 from devices.sensor.temperature import TemperatureSensor
@@ -6,8 +7,9 @@ from devices.sensor.temperature import TemperatureSensor
 
 class Thermometer(BaseDevice):
     def __init__(self, name):
-        super().__init__(name, "mqtt.eclipseprojects.io", 1883)
-        self.publish_topic = 'iot/lwx123321/test/temperature'
+        self.conf = json.load(open('./configuration.json'))
+        super().__init__(name, self.conf['broker'], self.conf['port'])
+        self.publish_topic = constants.mqtt.TEMPERATURE_TOPIC
         self.sensor = TemperatureSensor()
         self.sensor.receiver = self.record_data
         self.init_mqtt_client()
