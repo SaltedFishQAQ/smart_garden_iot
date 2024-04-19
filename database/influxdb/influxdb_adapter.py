@@ -6,6 +6,7 @@ import constants.http
 from database.biz.base_adapter import BaseAdapter
 from database.influxdb.connector import Connector
 from http import HTTPMethod
+from datetime import datetime
 
 
 class InfluxdbAdapter(BaseAdapter):
@@ -49,8 +50,29 @@ class InfluxdbAdapter(BaseAdapter):
 
     def http_temperature_get(self, params):
         measurement = constants.entity.TEMPERATURE
+        time_cond = []
+        filter_cond = None
 
-        self.db_connector.query(measurement)
+        if 'device' in params:
+            filter_cond = f'r.device_id == "{params["device"]}"'
+
+        if 'start_at' in params:
+            start_time = datetime.strptime(params["start_at"], '%Y-%m-%d %H:%M:%S')
+            time_cond.append(f'start: {start_time.strftime("%Y-%m-%dT%H:%M:%SZ")}')
+
+        if 'stop_at' in params:
+            stop_time = datetime.strptime(params["stop_at"], '%Y-%m-%d %H:%M:%S')
+            time_cond.append(f'stop: {stop_time.strftime("%Y-%m-%dT%H:%M:%SZ")}')
+
+        time_range = None
+        if len(time_cond) > 0:
+            time_range = ", ".join(time_cond)
+
+        result = self.db_connector.query(measurement, time_range=time_range, cond=filter_cond)
+
+        return json.dumps({
+            'list': result
+        })
 
     def http_humidity_get(self, params):
         measurement = constants.entity.HUMIDITY

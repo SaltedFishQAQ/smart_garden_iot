@@ -20,11 +20,33 @@ class Connector:
 
         write_api.write(bucket=self.bucket, record=point)
 
-    def query(self, measurement):
+    def query(self, measurement, time_range=None, cond=None):
+        if time_range is None:
+            time_range = "start: -10m"
+
+        if cond is not None:
+            cond = f" and {cond}"
+        else:
+            cond = ""
+
         sql = f"""from(bucket: "{self.bucket}")
-         |> range(start: -10m)
-         |> filter(fn: (r) => r._measurement == "{measurement}")"""
+         |> range({time_range})
+         |> filter(fn: (r) => r._measurement == "{measurement}" {cond})
+         |> sort(columns: ["_time"], desc: true)"""
+
         tables = self.client.query_api().query(sql, org=self.org)
+        result = []
         for table in tables:
             for record in table.records:
-                print(record)
+                line = {
+                    'measurement': record.get_measurement(),
+                    record.get_field(): record.get_value(),
+                    'created_at': record.get_time().strftime('%Y-%m-%d %H:%M:%S'),
+                    'start_at': record.values['_start'].strftime('%Y-%m-%d %H:%M:%S'),
+                    'end_at': record.values['_stop'].strftime('%Y-%m-%d %H:%M:%S'),
+                }
+                for val in record.values:
+                    if val.startswith('_') is False and val != "result" and val != "table":
+                        line[val] = record.values[val]
+                result.append(line)
+        return result
