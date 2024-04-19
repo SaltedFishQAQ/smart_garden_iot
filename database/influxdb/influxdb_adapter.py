@@ -39,7 +39,7 @@ class InfluxdbAdapter(BaseAdapter):
         self.http_client.add_route(constants.http.HUMIDITY_GET, HTTPMethod.GET, self.http_humidity_get)
 
     def mqtt_data(self, client, userdata, msg):
-        measurement = msg.topic.removeprefix(constants.http.INFLUX_BASE_ROUTE)
+        measurement = msg.topic.removeprefix(constants.mqtt.INFLUX_BASE_PATH)
         if measurement not in self.enable_measurement:
             print(f'mqtt topic invalid: {msg.topic}')
             return

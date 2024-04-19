@@ -1,4 +1,4 @@
-import entity
+from constants import entity
 
 INFLUX_BASE_ROUTE = '/device/'
 TEMPERATURE_GET = INFLUX_BASE_ROUTE + entity.TEMPERATURE

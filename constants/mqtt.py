@@ -1,4 +1,4 @@
-import entity
+from constants import entity
 
 INFLUX_BASE_PATH = "iot/lwx123321/test/"
 TEMPERATURE_TOPIC = INFLUX_BASE_PATH + entity.TEMPERATURE
