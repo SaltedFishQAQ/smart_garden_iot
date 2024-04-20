@@ -60,9 +60,9 @@ class MQTTClient:
             match = True
             for index in range(len(register_path)):
                 rp = register_path[index]
-                if rp is '#':  # multi level match
+                if rp == '#':  # multi level match
                     break
-                if rp is '+':  # single level match
+                if rp == '+':  # single level match
                     continue
                 cp = curr_path[index]
                 if cp != rp:  # not match

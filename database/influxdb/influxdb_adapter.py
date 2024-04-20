@@ -32,7 +32,7 @@ class InfluxdbAdapter(BaseService):
 
     def register_mqtt_service(self):
         # device data
-        self.mqtt_listen(constants.mqtt.INFLUX_BASE_PATH + '+', self.mqtt_data)
+        self.mqtt_listen(constants.mqtt.INFLUX_AUTH_BASE_PATH + '+', self.mqtt_data)
 
     def register_http_handler(self):
         # device data
@@ -40,7 +40,7 @@ class InfluxdbAdapter(BaseService):
         self.http_client.add_route(constants.http.HUMIDITY_GET, HTTPMethod.GET, self.http_humidity_get)
 
     def mqtt_data(self, client, userdata, msg):
-        measurement = msg.topic.removeprefix(constants.mqtt.INFLUX_BASE_PATH)
+        measurement = msg.topic.removeprefix(constants.mqtt.INFLUX_AUTH_BASE_PATH)
         if measurement not in self.enable_measurement:
             print(f'mqtt topic invalid: {msg.topic}')
             return

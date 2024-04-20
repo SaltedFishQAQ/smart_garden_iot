@@ -1,4 +1,3 @@
-import time
 from database.influxdb.influxdb_adapter import InfluxdbAdapter
 
 
@@ -9,4 +8,7 @@ if __name__ == '__main__':
     i.register_http_handler()
 
     while True:
-        time.sleep(5)
+        if input("stop running [q]:") == 'q':
+            break
+
+    i.stop()

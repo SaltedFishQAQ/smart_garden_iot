@@ -1,4 +1,3 @@
-import time
 from devices.thermometer import Thermometer
 
 
@@ -7,4 +6,7 @@ if __name__ == '__main__':
     t.start()
 
     while True:
-        time.sleep(5)
+        if input("stop running [q]:") == 'q':
+            break
+
+    t.stop()

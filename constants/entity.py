@@ -10,4 +10,7 @@ IRRIGATOR = 'irrigator'
 # third party
 TELEBOT = 'telebot'
 THING_SPEAK = 'thing_speak'
-# user service
+# service
+AUTH_SERVICE = 'auth'
+USER_SERVICE = 'user'
+RULE_SERVICE = 'rule'
