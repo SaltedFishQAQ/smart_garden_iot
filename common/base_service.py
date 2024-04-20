@@ -2,9 +2,9 @@ from common.mqtt import MQTTClient
 from common.http_client import HTTPClient
 
 
-class BaseAdapter:
-    def __init__(self, adapter_id):
-        self.adapter_id = adapter_id
+class BaseService:
+    def __init__(self, service_id):
+        self.service_id = service_id
         # mqtt
         self.mqtt_client = None
         self.mqtt_broker = None
@@ -20,7 +20,7 @@ class BaseAdapter:
 
         self.mqtt_broker = broker
         self.mqtt_port = port
-        self.mqtt_client = MQTTClient(self.adapter_id, broker, port)
+        self.mqtt_client = MQTTClient(self.service_id, broker, port)
         self.mqtt_client.start()
 
     def remove_mqtt_client(self):

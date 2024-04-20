@@ -3,13 +3,13 @@ import constants.entity
 import constants.mqtt
 import constants.http
 
-from database.biz.base_adapter import BaseAdapter
+from common.base_service import BaseService
 from database.influxdb.connector import Connector
 from http import HTTPMethod
 from datetime import datetime
 
 
-class InfluxdbAdapter(BaseAdapter):
+class InfluxdbAdapter(BaseService):
     def __init__(self):
         super().__init__(constants.entity.INFLUX)
         self.conf = json.load(open('./configuration.json'))
