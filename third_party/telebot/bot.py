@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 nest_asyncio.apply()
 
+#load configuration
 class Config:
     def __init__(self, config_file):
         self.config_file = config_file
@@ -34,14 +35,20 @@ class Config:
         self.mqtt_broker = root.find('mqtt/broker').text
         self.mqtt_port = int(root.find('mqtt/port').text)
         self.command_channel = root.find('mqtt/topic').text
+        self.data_endpoint = root.find('api/data').text
 
 
+# API Client class for fetching data and rules
 class APIClient:
     def __init__(self, config: Config):
         self.base_url = config.base_url
+        self.data_endpoint = config.data_endpoint  #temperature, humidity
+        self.rules_endpoint = "/rules"
+        self.status_endpoint = "/status"
 
     def fetch_data(self, measurement, page=1, size=10):
-        url = f"{self.base_url}/data"
+        """Fetch data from the server for a specific measurement."""
+        url = f"{self.base_url}{self.data_endpoint}"
         params = {
             "measurement": measurement,
             "page": page,
@@ -54,6 +61,37 @@ class APIClient:
                 return data.get("list", [])
         return []
 
+    def fetch_rules(self, page=1, size=10):
+        """Fetch rules from the server."""
+        url = f"{self.base_url}{self.rules_endpoint}"
+        params = {
+            "page": page,
+            "size": size
+        }
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("code") == 0:
+                return data.get("list", [])
+        return []
+
+    def fetch_status(self, device_name):
+        """Fetch status from the server for a specific device."""
+        url = f"{self.base_url}/device/status"
+        params = {
+            "name": device_name
+        }
+        response = requests.get(url, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("code") == 0:
+                return data.get("data", {})
+
+        return {}
+
+
+# handling bot operations and MQTT communication
 class IoTBot:
     def __init__(self, config: Config, authenticator: Authenticator, api_client: APIClient, notification_manager: NotificationManager):
         self.config = config
@@ -61,19 +99,18 @@ class IoTBot:
         self.api_client = api_client
         self.notification_manager = notification_manager
         self.mqtt_client = mqtt.Client()
-        self.loop = asyncio.get_event_loop() #notification purpose
+        self.loop = asyncio.get_event_loop()
 
-        self.subscribed_users = set()  # Store users who pressed /start
+        self.subscribed_users = set()
 
         # MQTT Connect
         try:
             logger.info("Connecting to MQTT broker...")
-            self.mqtt_client.on_message = self.on_mqtt_message  # Set the callback for receiving messages
+            self.mqtt_client.on_message = self.on_mqtt_message
             self.mqtt_client.connect(self.config.mqtt_broker, self.config.mqtt_port)
             self.mqtt_client.loop_start()
             logger.info(f"Connected to MQTT broker at {self.config.mqtt_broker}:{self.config.mqtt_port}")
 
-            # Subscribe to the prediction topic (the alerting system - notification)
             self.mqtt_client.subscribe(self.config.command_channel + "prediction")
             logger.info(f"Subscribed to topic: {self.config.command_channel}prediction")
         except Exception as e:
@@ -82,11 +119,12 @@ class IoTBot:
     def on_mqtt_message(self, client, userdata, msg):
         """Callback when a message is received from the MQTT broker"""
         try:
-            # Paring
             payload_str = msg.payload.decode('utf-8')
             payload_str = payload_str.replace("'", '"')
             payload = json.loads(payload_str)
             prediction = payload.get('prediction', 'No prediction data.')
+            logger.info(f"Received message from topic {msg.topic}: {prediction}")
+            logger.info(f"Notifying all subscribed users: {self.subscribed_users}")
             run_coroutine_threadsafe(self.notification_manager.notify_users(prediction), self.loop)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse MQTT message: {e}")
@@ -163,12 +201,12 @@ class IoTBot:
             await self.get_humidity(update)
         elif text == "Light":
             await self.light_menu(update)
-        elif text == "Rules":
+        elif text == "View Rules":
             await self.rules_menu(update)
         elif text == "Watering":
             await self.watering_menu(update)
         elif text == "Status":
-            await self.status(update)
+            await self.system_status(update)
         elif text == "Turn On Watering":
             self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
             await update.message.reply_text("Watering system turned on.")
@@ -189,7 +227,7 @@ class IoTBot:
     async def show_main_menu(self, update: Update):
         keyboard = [
             [KeyboardButton("Temperature"), KeyboardButton("Humidity")],
-            [KeyboardButton("Light"), KeyboardButton("Rules")],
+            [KeyboardButton("Light"), KeyboardButton("View Rules")],
             [KeyboardButton("Watering"), KeyboardButton("Status")]
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
@@ -220,12 +258,25 @@ class IoTBot:
         await update.message.reply_text("Control the light:", reply_markup=reply_markup)
 
     async def rules_menu(self, update: Update):
-        keyboard = [
-            [KeyboardButton("Add Rule"), KeyboardButton("View Rules")],
-            [KeyboardButton("Back to Main Menu")]
-        ]
-        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
-        await update.message.reply_text("Manage rules:", reply_markup=reply_markup)
+            """Fetch and display rules to the user."""
+            rules = self.api_client.fetch_rules()
+
+            if rules:
+                message = "\n\n".join([f"ID: {rule.get('id')}\n"
+                                       f"Source: {rule.get('src')}\n"
+                                       f"Entity: {rule.get('entity')}\n"
+                                       f"Field: {rule.get('field')}\n"
+                                       f"Compare: {rule.get('compare')}\n"
+                                       f"Value: {rule.get('value')}\n"
+                                       f"Destination: {rule.get('dst')}\n"
+                                       f"Action: {rule.get('opt')}\n"
+                                       f"Description: {rule.get('desc')}\n"
+                                       f"Created at: {rule.get('created_at')}\n"
+                                       f"Updated at: {rule.get('updated_at')}\n"
+                                       f"Deleted: {rule.get('is_deleted', 0)}" for rule in rules])
+                await update.message.reply_text(f"Rules:\n{message}")
+            else:
+                await update.message.reply_text("No rules available.")
 
     async def watering_menu(self, update: Update):
         keyboard = [
@@ -235,8 +286,34 @@ class IoTBot:
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
         await update.message.reply_text("Control the watering system:", reply_markup=reply_markup)
 
-    async def status(self, update: Update):
-        await update.message.reply_text("Here are the status of the system.")
+    async def system_status(self, update: Update):
+        """Fetch and display status for the devices: temperature, humidity, light, oxygen."""
+        devices = ["temperature", "humidity", "light", "oxygen"]
+        status_message = ""
+
+        for device in devices:
+            status = self.api_client.fetch_status(device)
+
+            if status:
+                device_status = status.get('device', False)
+                sensor_status = status.get('sensor', False)
+
+                device_emoji = "✅" if device_status else "❌"
+                sensor_emoji = "✅" if sensor_status else "❌"
+
+                if device in ["oxygen", "light"]:
+                    actuator_status = status.get('actuator', False)
+                    actuator_emoji = "✅" if actuator_status else "❌"
+                    status_message += f"{device.capitalize()}:\n"
+                    status_message += f"  Device: {device_emoji}  Sensor: {sensor_emoji}  Actuator: {actuator_emoji}\n\n"
+                else:
+                    status_message += f"{device.capitalize()}:\n"
+                    status_message += f"  Device: {device_emoji}  Sensor: {sensor_emoji}\n\n"
+            else:
+                status_message += f"{device.capitalize()}:\n"
+                status_message += f"  Device: ❌  Sensor: ❌\n\n"
+
+        await update.message.reply_text(status_message)
 
 
 def main():
@@ -257,4 +334,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
