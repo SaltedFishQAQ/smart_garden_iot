@@ -2,6 +2,7 @@ import json
 import constants.entity
 import constants.mqtt
 import constants.http
+from common.time import str_to_time
 
 from common.base_service import BaseService
 from database.influxdb.connector import Connector
@@ -57,11 +58,11 @@ class InfluxdbAdapter(BaseService):
             filter_cond = f'r.device_id == "{params["device"]}"'
 
         if 'start_at' in params:
-            start_time = datetime.strptime(params["start_at"], '%Y-%m-%d %H:%M:%S')
+            start_time = str_to_time(params["start_at"])
             time_cond.append(f'start: {start_time.strftime("%Y-%m-%dT%H:%M:%SZ")}')
 
         if 'stop_at' in params:
-            stop_time = datetime.strptime(params["stop_at"], '%Y-%m-%d %H:%M:%S')
+            stop_time = str_to_time(params["stop_at"])
             time_cond.append(f'stop: {stop_time.strftime("%Y-%m-%dT%H:%M:%SZ")}')
 
         time_range = None

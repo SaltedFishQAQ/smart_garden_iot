@@ -1,3 +1,5 @@
+from common.time import time_to_str
+
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -41,9 +43,9 @@ class Connector:
                 line = {
                     'measurement': record.get_measurement(),
                     record.get_field(): record.get_value(),
-                    'created_at': record.get_time().strftime('%Y-%m-%d %H:%M:%S'),
-                    'start_at': record.values['_start'].strftime('%Y-%m-%d %H:%M:%S'),
-                    'end_at': record.values['_stop'].strftime('%Y-%m-%d %H:%M:%S'),
+                    'created_at': time_to_str(record.get_time()),
+                    'start_at': time_to_str(record.values['_start']),
+                    'end_at': time_to_str(record.values['_stop']),
                 }
                 for val in record.values:
                     if val.startswith('_') is False and val != "result" and val != "table":

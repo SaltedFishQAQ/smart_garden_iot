@@ -1,5 +1,6 @@
 import pymysql
 from dbutils.pooled_db import PooledDB
+from pymysql.cursors import DictCursor
 
 
 class Connector:
@@ -34,7 +35,7 @@ class Connector:
     def query(self, sql):
         connection = self.pool.connection()
         try:
-            with connection.cursor() as cursor:
+            with connection.cursor(DictCursor) as cursor:
                 cursor.execute(sql)
                 results = cursor.fetchall()
 
