@@ -36,8 +36,8 @@ class InfluxdbAdapter(BaseService):
 
     def register_http_handler(self):
         # device data
-        self.http_client.add_route(constants.http.TEMPERATURE_GET, HTTPMethod.GET, self.http_temperature_get)
-        self.http_client.add_route(constants.http.HUMIDITY_GET, HTTPMethod.GET, self.http_humidity_get)
+        self.http_client.add_route(constants.http.INFLUX_TEMPERATURE_GET, HTTPMethod.GET, self.http_temperature_get)
+        self.http_client.add_route(constants.http.INFLUX_HUMIDITY_GET, HTTPMethod.GET, self.http_humidity_get)
 
     def mqtt_data(self, client, userdata, msg):
         measurement = msg.topic.removeprefix(constants.mqtt.INFLUX_AUTH_BASE_PATH)

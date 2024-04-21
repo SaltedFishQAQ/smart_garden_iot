@@ -1,6 +1,9 @@
 # database
 MYSQL = 'mysql'
 INFLUX = 'influxdb'
+# tables
+DEVICE_TABLE = 'device'
+USER_TABLE = 'user'
 # devices
 TEMPERATURE = 'temperature'
 HUMIDITY = 'humidity'
