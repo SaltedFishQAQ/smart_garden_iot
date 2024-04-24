@@ -32,11 +32,11 @@ class Connector:
             cursor.close()
             connection.close()
 
-    def query(self, sql):
+    def query(self, sql, args=None):
         connection = self.pool.connection()
         try:
             with connection.cursor(DictCursor) as cursor:
-                cursor.execute(sql)
+                cursor.execute(sql, args)
                 results = cursor.fetchall()
 
                 return results

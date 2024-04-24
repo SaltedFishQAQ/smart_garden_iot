@@ -1,11 +1,10 @@
 import json
 import constants.entity
 import constants.http
-from common.time import time_to_str
 
 from common.base_service import BaseService
 from database.mysql.connector import Connector
-from http import HTTPMethod
+from database.mysql.logic import device, user
 
 
 class MysqlAdapter(BaseService):
@@ -25,21 +24,5 @@ class MysqlAdapter(BaseService):
         self.remove_http_client()
 
     def register_http_service(self):
-        self.http_client.add_route(constants.http.MYSQL_DEVICE_LIST, HTTPMethod.GET, self.http_device_list)
-
-    def http_device_list(self, params):
-        records = self.db_connect.query("select * from device")
-        result = []
-        for record in records:
-            result.append({
-                'id': record['id'],
-                'name': record['name'],
-                'running_status': record['running_status'],
-                'auth_status': record['auth_status'],
-                'created_at': time_to_str(record['created_at']),
-                'updated_at': time_to_str(record['updated_at'])
-            })
-
-        return json.dumps({
-            'list': result
-        })
+        device.Logic(self).register_handler()
+        user.Logic(self).register_handler()

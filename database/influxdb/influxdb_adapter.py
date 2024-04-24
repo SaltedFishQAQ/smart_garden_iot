@@ -71,9 +71,9 @@ class InfluxdbAdapter(BaseService):
 
         result = self.db_connector.query(measurement, time_range=time_range, cond=filter_cond)
 
-        return json.dumps({
+        return {
             'list': result
-        })
+        }
 
     def http_humidity_get(self, params):
         measurement = constants.entity.HUMIDITY

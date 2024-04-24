@@ -58,6 +58,7 @@ class HTTPClient(object):
         return info[method], ''
 
     @final
+    @cherrypy.tools.json_out()
     def GET(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.GET)
         if func is None:
@@ -66,6 +67,7 @@ class HTTPClient(object):
         return func(params)
 
     @final
+    @cherrypy.tools.json_out()
     def POST(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.POST)
         if func is None:
@@ -75,6 +77,7 @@ class HTTPClient(object):
         return func(data)
 
     @final
+    @cherrypy.tools.json_out()
     def PUT(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.PUT)
         if func is None:
@@ -84,6 +87,7 @@ class HTTPClient(object):
         return func(data)
 
     @final
+    @cherrypy.tools.json_out()
     def DELETE(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.DELETE)
         if func is None:
