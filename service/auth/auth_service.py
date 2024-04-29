@@ -1,8 +1,8 @@
 import json
 import time
 import constants.entity
-import constants.mqtt
 import constants.http
+import message_broker.channels as mb_channel
 import requests
 import threading
 
@@ -12,7 +12,9 @@ from common.base_service import BaseService
 class AuthService(BaseService):
     def __init__(self):
         super().__init__(constants.entity.AUTH_SERVICE)
-        self.certified_list = []
+        self.data_channel = mb_channel.DEVICE_DATA  # channel for get data
+        self.storage_channel = mb_channel.STORAGE_DATA  # channel for store data
+        self.certified_list = []  # verified device
         self.running = False
 
     def start(self):
@@ -26,6 +28,7 @@ class AuthService(BaseService):
         self.remove_http_client()
 
     def _get_certified_device(self):
+        # reload certified list each 60 seconds
         while self.running:
             resp = requests.get('http://127.0.0.1:8081' + constants.http.MYSQL_DEVICE_CERTIFIED_LIST)
             resp_data = resp.json()
@@ -34,7 +37,7 @@ class AuthService(BaseService):
 
     def register_mqtt_service(self):
         # device data
-        self.mqtt_listen(constants.mqtt.INFLUX_BASE_PATH + '+', self.mqtt_data)
+        self.mqtt_listen(self.data_channel + '+', self.mqtt_data)
 
     def mqtt_data(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
@@ -49,11 +52,11 @@ class AuthService(BaseService):
         for item in self.certified_list:
             if device_id == item['name']:
                 is_certified = True
+                break
 
         if is_certified is not True:
             print(f"device: {device_id}, is not certified")
             return
 
-        entity = msg.topic.removeprefix(constants.mqtt.INFLUX_BASE_PATH)
-        auth_topic = constants.mqtt.INFLUX_AUTH_BASE_PATH + entity
-        self.mqtt_publish(auth_topic, msg.payload)
+        entity = msg.topic.removeprefix(self.data_channel)
+        self.mqtt_publish(self.storage_channel + entity, msg.payload)

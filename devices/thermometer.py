@@ -1,5 +1,6 @@
 import json
-import constants.mqtt
+import constants.entity
+import message_broker.channels as mb_channel
 
 from devices.biz.base_device import BaseDevice
 from devices.sensor.temperature import TemperatureSensor
@@ -9,7 +10,7 @@ class Thermometer(BaseDevice):
     def __init__(self, name):
         self.conf = json.load(open('./configuration.json'))
         super().__init__(name, self.conf['broker'], self.conf['port'])
-        self.publish_topic = constants.mqtt.TEMPERATURE_TOPIC
+        self.publish_topic = mb_channel.DEVICE_DATA + constants.entity.TEMPERATURE
         self.sensor = TemperatureSensor()
         self.sensor.receiver = self.record_data
         self.init_mqtt_client()

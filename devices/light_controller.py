@@ -1,6 +1,7 @@
 import json
 
-import constants.mqtt
+import constants.entity
+import message_broker.channels as mb_channel
 from biz.base_device import BaseDevice
 from actuator.light_switch import LightSwitch
 
@@ -9,7 +10,7 @@ class LightController(BaseDevice):
     def __init__(self, name):
         self.conf = json.load(open('./configuration.json'))
         super().__init__(name, self.conf['broker'], self.conf['port'])
-        self.subscribe_topic = constants.mqtt.LIGHT_TOPIC
+        self.subscribe_topic = mb_channel.DEVICE_COMMAND + constants.entity.LIGHT
         self.actuator = LightSwitch()
         self.init_mqtt_client()
         self.mqtt_listen(self.subscribe_topic, self.on_message)

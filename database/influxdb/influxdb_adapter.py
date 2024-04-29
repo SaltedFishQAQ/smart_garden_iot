@@ -1,13 +1,12 @@
 import json
 import constants.entity
-import constants.mqtt
 import constants.http
-from common.time import str_to_time
+import message_broker.channels as mb_channel
 
+from common.time import str_to_time
 from common.base_service import BaseService
 from database.influxdb.connector import Connector
 from http import HTTPMethod
-from datetime import datetime
 
 
 class InfluxdbAdapter(BaseService):
@@ -18,6 +17,7 @@ class InfluxdbAdapter(BaseService):
                                       self.conf['token'],
                                       self.conf['org'],
                                       self.conf['bucket'])
+        self.storage_channel = mb_channel.STORAGE_DATA  # channel for store data
         self.enable_measurement = {
             constants.entity.TEMPERATURE: True,
             constants.entity.HUMIDITY: True
@@ -33,7 +33,7 @@ class InfluxdbAdapter(BaseService):
 
     def register_mqtt_service(self):
         # device data
-        self.mqtt_listen(constants.mqtt.INFLUX_AUTH_BASE_PATH + '+', self.mqtt_data)
+        self.mqtt_listen(self.storage_channel + '+', self.mqtt_data)
 
     def register_http_handler(self):
         # device data
@@ -41,7 +41,7 @@ class InfluxdbAdapter(BaseService):
         self.http_client.add_route(constants.http.INFLUX_HUMIDITY_GET, HTTPMethod.GET, self.http_humidity_get)
 
     def mqtt_data(self, client, userdata, msg):
-        measurement = msg.topic.removeprefix(constants.mqtt.INFLUX_AUTH_BASE_PATH)
+        measurement = msg.topic.removeprefix(self.storage_channel)
         if measurement not in self.enable_measurement:
             print(f'mqtt topic invalid: {msg.topic}')
             return

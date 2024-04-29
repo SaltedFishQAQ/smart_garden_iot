@@ -1,0 +1,1 @@
+MESSAGE_BROKER_BASE_PATH = "iot/lwx123321/test/"
