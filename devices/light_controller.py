@@ -12,14 +12,18 @@ class LightController(BaseDevice):
         super().__init__(name, self.conf['broker'], self.conf['port'])
         self.subscribe_topic = mb_channel.DEVICE_COMMAND + constants.entity.LIGHT
         self.actuator = LightSwitch()
-        self.init_mqtt_client()
-        self.mqtt_listen(self.subscribe_topic, self.on_message)
         self.running = False
 
     def start(self):
+        self.init_mqtt_client()
         self.running = True
 
+    def register_mqtt_service(self):
+        # device data
+        self.mqtt_listen(self.subscribe_topic, self.on_message)
+
     def stop(self):
+        self.remove_mqtt_client()
         self.running = False
 
     def on_message(self, client, userdata, msg):
@@ -31,4 +35,4 @@ class LightController(BaseDevice):
             return
         status = bool(data_dict[key])
         self.actuator.switch(status)
-        print(f"device_id: {int(data_dict['device_id'])}, current light switch {self.actuator.get_status()}")
+        print(f"device_id: {self.device_id}, current light switch {self.actuator.get_status()}")

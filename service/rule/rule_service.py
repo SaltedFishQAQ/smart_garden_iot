@@ -30,7 +30,13 @@ class RuleService(BaseService):
         data_dict = json.loads(content)
         # when [entity] do ([entity.field] <compare> [value]) if true then {opt}
         for r in self.rule_list:
-            if entity != r['entity']:
+            if entity != r['entity']:  # rule not match
+                print("rule not match")
+                continue
+            if ("tags" not in data_dict or
+                    "device_id" not in data_dict['tags'] or
+                    r['id'] != data_dict["tags"]["device_id"]):  # device not match
+                print("device not match")
                 continue
 
             compare = r['compare']  # comparison symbol
@@ -44,15 +50,19 @@ class RuleService(BaseService):
             if ok is False:
                 print(f"invalid rule: {r}")
             if match:
-                self.mqtt_publish(self.command_channel+entity, convert_message(opt))
+                target, msg, ok = convert_message(opt)
+                if ok is False:
+                    print(f"convert message false, opt: {opt}")
+                self.mqtt_publish(self.command_channel+target, msg)
 
 
 def demo_rule() -> list:
     # entity, field, compare, value, opt
     return [{
+        'id': 'device1',
         'entity': constants.entity.TEMPERATURE,
         'field': "value",
         'compare': constants.rule.COMPARE_GREATER_THAN,
-        'value': 30.0,
+        'value': 25.0,
         'opt': constants.rule.OPT_LIGHT_OFF
     }]
