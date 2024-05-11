@@ -29,10 +29,10 @@ Host: localhost:8080
   - type: string
   - optional
 - page - page of list
-  - type integer
+  - type: integer
   - optional
 - size - size of each page
-  - type integer
+  - type: integer
   - optional
 #### response
 ```json
@@ -198,10 +198,10 @@ GET /service/list?page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - page - page of list
-  - type integer
+  - type: integer
   - optional
 - size - size of each page
-  - type integer
+  - type: integer
   - optional
 #### response
 ```json
@@ -211,8 +211,9 @@ Host: localhost:8080
   "list": [
     {
       "id": 123,
-      "service_id": "auth service",
+      "name": "auth service",
       "running": 1,
+      "port": 8083,
       "desc": "this is a service for device permission verification"
     }
   ],
@@ -225,7 +226,83 @@ Host: localhost:8080
 }
 ```
 
+### Device List
+#### request
+```http
+GET /device/list?page=1&size=10 HTTP/1.1
+Host: localhost:8080
+```
+- page - page of list
+  - type: integer
+  - optional
+- size - size of each page
+  - type: integer
+  - optional
+#### response
+```json
+{
+  "code": 0,
+  "message:": "",
+  "list": [
+    {
+      "id": 123,
+      "device_id": "device123",
+      "running": 1,
+      "opt": {
+        "on": "open the light",
+        "off": "close the light"
+      },
+      "desc": "device for temperature"
+    }
+  ],
+  "page_info": {
+    "page": 1,
+    "page_total": 10,
+    "size": 10,
+    "total": 94
+  }
+}
+```
+
 ## Rule
-
-
-## Device
+### Rule List
+#### request
+```http
+GET /rule/list?device_id=xx&page=1&size=10 HTTP/1.1
+Host: localhost:8080
+```
+- device_id - rule for which device
+  - type: string
+- page - page of list
+  - type: integer
+  - optional
+- size - size of each page
+  - type: integer
+  - optional
+#### response
+```json
+{
+  "code": 0,
+  "message:": "",
+  "list": [
+    {
+      "id": 123,
+      "device_id": "device123",
+      "entity": "temperature",
+      "field": "value",
+      "compare": "gt",
+      "value": 25.0,
+      "target_device_id": "light",
+      "opt": "light off",
+      "is_deleted": 0, // 1:deleted 0:not deleted
+      "desc": "rule for temperature"
+    }
+  ],
+  "page_info": {
+    "page": 1,
+    "page_total": 10,
+    "size": 10,
+    "total": 94
+  }
+}
+```
