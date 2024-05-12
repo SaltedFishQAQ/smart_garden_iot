@@ -9,6 +9,26 @@
 
 ## Data
 > Display data collected by the device
+### Kinds of Data
+#### request
+```http
+GET /data/entity/list HTTP/1.1
+Host: localhost:8080
+```
+#### response
+```json
+{
+  "code": 0,
+  "message:": "",
+  "list": [
+    {
+      "entity": "temperature",
+      "desc": "temperature data"
+    }
+  ]
+}
+```
+
 ### Temperature
 #### request
 ```http
