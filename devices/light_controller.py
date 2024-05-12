@@ -32,7 +32,7 @@ class LightController(BaseDevice):
         if 'device' not in data_dict:
             return
         dst = data_dict['device']
-        if dst is not '' and dst is not self.device_name:
+        if dst != '' and dst != self.device_name:
             return
 
         key = 'status'

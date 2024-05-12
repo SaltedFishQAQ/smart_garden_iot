@@ -5,7 +5,7 @@ from devices.light_controller import LightController
 if __name__ == '__main__':
     t1 = Thermometer('device1')
     t1.start()
-    t2 = LightController('device2')
+    t2 = LightController('light')
     t2.start()
     t2.register_mqtt_service()
 

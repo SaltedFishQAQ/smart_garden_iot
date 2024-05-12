@@ -1,6 +1,6 @@
 from constants import entity
 
-SERVICE_HOST = "localhost"
+SERVICE_HOST = "http://127.0.0.1"
 # service port
 SERVICE_PORT_USER = 8083
 SERVICE_PORT_INFLUX = 8084
