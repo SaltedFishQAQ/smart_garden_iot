@@ -7,7 +7,7 @@ class DemoDevice(BaseDevice):
         super().__init__(name, "mqtt.eclipseprojects.io", 1883)
 
     def handle_message(self, client, userdata, msg):
-        print("current device:", self.device_id)
+        print("current device:", self.device_name)
         print(f"received {msg.payload.decode('utf-8')} under topic {msg.topic}")
 
 

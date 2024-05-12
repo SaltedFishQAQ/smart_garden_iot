@@ -45,15 +45,17 @@ def convert_checker(compare, dst: Union[float, str]) -> Callable[[Union[float, s
     return actuator
 
 
-def convert_message(opt):
+def convert_message(dst, opt):
     if opt == const.OPT_LIGHT_ON:
         target = constants.entity.LIGHT
         msg = json.dumps({
+            'device': dst,
             'status': True
         })
     elif opt == const.OPT_LIGHT_OFF:
         target = constants.entity.LIGHT
         msg = json.dumps({
+            'device': dst,
             'status': False
         })
     else:

@@ -29,10 +29,16 @@ class LightController(BaseDevice):
     def on_message(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
+        if 'device' not in data_dict:
+            return
+        dst = data_dict['device']
+        if dst is not '' and dst is not self.device_name:
+            return
+
         key = 'status'
         if key not in data_dict:
             print(f"data missing status value, data: {content}")
             return
         status = bool(data_dict[key])
         self.actuator.switch(status)
-        print(f"device_id: {self.device_id}, current light switch {self.actuator.get_status()}")
+        print(f"device: {self.device_name}, current light switch {self.actuator.get_status()}")

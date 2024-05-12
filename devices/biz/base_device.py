@@ -2,11 +2,11 @@ from common.mqtt import MQTTClient
 
 
 class BaseDevice:
-    def __init__(self, device_id, broker, port):
+    def __init__(self, name, broker, port):
         self.mqtt_client = None
         self.sensor = None
         self.actuator = None
-        self.device_id = device_id
+        self.device_name = name
         self.broker = broker
         self.port = port
 
@@ -14,7 +14,7 @@ class BaseDevice:
         if self.mqtt_client is not None:
             return
 
-        self.mqtt_client = MQTTClient(self.device_id, self.broker, self.port)
+        self.mqtt_client = MQTTClient(self.device_name, self.broker, self.port)
         self.mqtt_client.start()
 
     def remove_mqtt_client(self):

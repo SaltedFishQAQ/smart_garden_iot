@@ -44,19 +44,19 @@ class AuthService(BaseService):
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
         print(data_dict)
-        if 'tags' not in data_dict or 'device_id' not in data_dict['tags']:
-            print(f"topic {msg.topic} without device_id")
+        if 'tags' not in data_dict or 'device' not in data_dict['tags']:
+            print(f"topic {msg.topic} message without device")
             return
 
         is_certified = False
-        device_id = data_dict['tags']['device_id']
+        device = data_dict['tags']['device']
         for item in self.certified_list:
-            if device_id == item['name']:
+            if device == item['name']:
                 is_certified = True
                 break
 
         if is_certified is not True:
-            print(f"device: {device_id}, is not certified")
+            print(f"device: {device}, is not certified")
             return
 
         entity = msg.topic.removeprefix(self.data_channel)

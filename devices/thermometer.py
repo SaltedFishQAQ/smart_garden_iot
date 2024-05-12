@@ -32,7 +32,7 @@ class Thermometer(BaseDevice):
 
         mqtt_data = {
             'tags': {
-                'device_id': self.device_id,
+                'device': self.device_name,
             },
             'fields': data,
         }
