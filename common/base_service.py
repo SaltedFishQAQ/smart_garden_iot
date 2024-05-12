@@ -3,8 +3,8 @@ from common.http_client import HTTPClient
 
 
 class BaseService:
-    def __init__(self, service_id):
-        self.service_id = service_id
+    def __init__(self, name):
+        self.service_name = name
         # mqtt
         self.mqtt_client = None
         self.mqtt_broker = None
@@ -20,7 +20,7 @@ class BaseService:
 
         self.mqtt_broker = broker
         self.mqtt_port = port
-        self.mqtt_client = MQTTClient(self.service_id, broker, port)
+        self.mqtt_client = MQTTClient(self.service_name, broker, port)
         self.mqtt_client.start()
 
     def remove_mqtt_client(self):

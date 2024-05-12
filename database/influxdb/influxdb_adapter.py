@@ -12,6 +12,8 @@ from http import HTTPMethod
 class InfluxdbAdapter(BaseService):
     def __init__(self):
         super().__init__(constants.entity.INFLUX)
+        self.host = constants.http.SERVICE_HOST
+        self.port = constants.http.SERVICE_PORT_INFLUX
         self.conf = json.load(open('./configuration.json'))
         self.db_connector = Connector(self.conf['url'],
                                       self.conf['token'],
@@ -25,7 +27,7 @@ class InfluxdbAdapter(BaseService):
 
     def start(self):
         self.init_mqtt_client()
-        self.init_http_client()
+        self.init_http_client(host=self.host, port=self.port)
 
     def stop(self):
         self.remove_mqtt_client()

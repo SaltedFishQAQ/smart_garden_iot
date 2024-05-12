@@ -1,5 +1,11 @@
 from constants import entity
 
+SERVICE_HOST = "localhost"
+# service port
+SERVICE_PORT_USER = 8083
+SERVICE_PORT_INFLUX = 8084
+SERVICE_PORT_MYSQL = 8085
+
 # influx
 INFLUX_BASE_ROUTE = '/influx/'
 INFLUX_TEMPERATURE_GET = INFLUX_BASE_ROUTE + entity.TEMPERATURE
@@ -11,5 +17,7 @@ INFLUX_IRRIGATOR_GET = INFLUX_BASE_ROUTE + entity.IRRIGATOR
 MYSQL_BASE_ROUTE = '/mysql/'
 MYSQL_DEVICE_LIST = MYSQL_BASE_ROUTE + entity.DEVICE_TABLE  # get device list
 MYSQL_DEVICE_CERTIFIED_LIST = MYSQL_BASE_ROUTE + entity.DEVICE_TABLE + '/certified'  # get certified device list
-MYSQL_USER_LIST = MYSQL_BASE_ROUTE + entity.USER_TABLE
-MYSQL_USER_LOGIN = MYSQL_BASE_ROUTE + entity.USER_TABLE + '/login' # user login
+MYSQL_USER_LIST = MYSQL_BASE_ROUTE + entity.USER_TABLE  # get user list
+MYSQL_USER_LOGIN = MYSQL_BASE_ROUTE + entity.USER_TABLE + '/login'  # user login
+MYSQL_SERVICE_LIST = MYSQL_BASE_ROUTE + entity.SERVICE_TABLE  # get service list
+MYSQL_SERVICE_REGISTER = MYSQL_BASE_ROUTE + entity.SERVICE_TABLE + 'register'  # register service

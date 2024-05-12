@@ -15,6 +15,7 @@ class AuthService(BaseService):
         self.data_channel = mb_channel.DEVICE_DATA  # channel for get data
         self.storage_channel = mb_channel.STORAGE_DATA  # channel for store data
         self.certified_list = []  # verified device
+        self.mysql_base_url = f'{constants.http.SERVICE_HOST}:{constants.http.SERVICE_PORT_MYSQL}'
         self.running = False
 
     def start(self):
@@ -30,7 +31,7 @@ class AuthService(BaseService):
     def _get_certified_device(self):
         # reload certified list each 60 seconds
         while self.running:
-            resp = requests.get('http://127.0.0.1:8081' + constants.http.MYSQL_DEVICE_CERTIFIED_LIST)
+            resp = requests.get(self.mysql_base_url + constants.http.MYSQL_DEVICE_CERTIFIED_LIST)
             resp_data = resp.json()
             self.certified_list = resp_data['list']
             time.sleep(60)

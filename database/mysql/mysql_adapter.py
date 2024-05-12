@@ -4,12 +4,14 @@ import constants.http
 
 from common.base_service import BaseService
 from database.mysql.connector import Connector
-from database.mysql.logic import device, user
+from database.mysql.logic import device, user, service
 
 
 class MysqlAdapter(BaseService):
     def __init__(self):
         super().__init__(constants.entity.MYSQL)
+        self.host = constants.http.SERVICE_HOST
+        self.port = constants.http.SERVICE_PORT_MYSQL
         self.conf = json.load(open('./configuration.json'))
         self.db_connect = Connector(self.conf['host'],
                                     self.conf['port'],
@@ -18,7 +20,7 @@ class MysqlAdapter(BaseService):
                                     self.conf['database'])
 
     def start(self):
-        self.init_http_client()
+        self.init_http_client(host=self.host, port=self.port)
 
     def stop(self):
         self.remove_http_client()
@@ -26,3 +28,4 @@ class MysqlAdapter(BaseService):
     def register_http_service(self):
         device.Logic(self).register_handler()
         user.Logic(self).register_handler()
+        service.Logic(self).register_handler()

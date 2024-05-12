@@ -4,6 +4,8 @@ INFLUX = 'influxdb'
 # tables
 DEVICE_TABLE = 'device'
 USER_TABLE = 'user'
+SERVICE_TABLE = 'service'
+RULE_TABLE = "rule"
 # devices
 TEMPERATURE = 'temperature'
 HUMIDITY = 'humidity'
