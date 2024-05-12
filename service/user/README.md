@@ -2,19 +2,17 @@
 > Service for handling Dashboard or Telebot requests
 
 ## Modules
-- Device Data
-- Device Command
+- Data
+- Device
 - Catalog
-  - Service
-  - Device
 - Rule
 
-## Device Data
+## Data
 > Display data collected by the device
 ### Temperature
 #### request
 ```http
-GET /device/data/temperature/list?start_at=xx&end_at=xx&device_id=xx&page=1&size=10 HTTP/1.1
+GET /data/temperature/list?start_at=xx&end_at=xx&name=xx&page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - data after what time
@@ -25,7 +23,7 @@ Host: localhost:8080
   - type: string
   - format: 2024-05-10 13:42:00
   - optional
-- device_id - data collected by which device
+- name - data collected by which device
   - type: string
   - optional
 - page - page of list
@@ -41,7 +39,7 @@ Host: localhost:8080
   "message:": "",
   "list": [
     {
-      "device_id": "device11",
+      "name": "device11",
       "value": 25.4,
       "time": "2024-05-05 10:45:13"
     }
@@ -58,7 +56,7 @@ Host: localhost:8080
 ### Humidity
 #### request
 ```http
-GET /device/data/humidity/list?start_at=xx&end_at=xx&device_id=xx&page=1&size=10 HTTP/1.1
+GET /data/humidity/list?start_at=xx&end_at=xx&name=xx&page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - data after what time
@@ -69,7 +67,7 @@ Host: localhost:8080
   - type: string
   - format: 2024-05-10 13:42:00
   - optional
-- device_id - data collected by which device
+- name - data collected by which device
   - type: string
   - optional
 - page - page of list
@@ -86,7 +84,7 @@ Host: localhost:8080
   "message:": "",
   "list": [
     {
-      "device_id": "device11",
+      "name": "device11",
       "value": 60.0,
       "time": "2024-05-05 10:45:13"
     }
@@ -103,7 +101,7 @@ Host: localhost:8080
 ### Light
 #### request
 ```http
-GET /device/data/light/list?start_at=xx&end_at=xx&device_id=xx&page=1&size=10 HTTP/1.1
+GET /data/light/list?start_at=xx&end_at=xx&name=xx&page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - the light status after this time point
@@ -114,7 +112,7 @@ Host: localhost:8080
   - type: string
   - format: 2024-05-10 13:42:00
   - optional
-- device_id - which light device
+- name - which light device
   - type: string
   - optional
 - page - page of list
@@ -131,7 +129,7 @@ Host: localhost:8080
   "message:": "",
   "list": [
     {
-      "device_id": "light1",
+      "name": "light1",
       "status": "on",
       "time": "2024-05-05 10:45:13"
     }
@@ -145,18 +143,18 @@ Host: localhost:8080
 }
 ```
 
-## Device Command
-> send command to device
+## Device
+> device-related operations
 ### Turn device on or off
 #### request
 ```http request
-POST /device/command/running HTTP/1.1
+POST /device/running HTTP/1.1
 Host: localhost:8080
 ```
 ##### request body
 ```json
 {
-  "device_id": "device11", // control which device 
+  "name": "device11", // control which device 
   "status": 1 // 1:start / 0:stop
 }
 ```
@@ -177,7 +175,7 @@ Host: localhost:8080
 ##### request body
 ```json
 {
-  "device_id": "light",
+  "name": "light",
   "opt": "on"
 }
 ```
@@ -194,7 +192,7 @@ Host: localhost:8080
 ### Service List
 #### request
 ```http
-GET /service/list?page=1&size=10 HTTP/1.1
+GET /catalog/service/list?page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - page - page of list
@@ -229,7 +227,7 @@ Host: localhost:8080
 ### Device List
 #### request
 ```http
-GET /device/list?page=1&size=10 HTTP/1.1
+GET /catalog/device/list?page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - page - page of list
@@ -246,7 +244,7 @@ Host: localhost:8080
   "list": [
     {
       "id": 123,
-      "device_id": "device123",
+      "name": "device123",
       "running": 1,
       "opt": {
         "on": "open the light",
@@ -265,13 +263,14 @@ Host: localhost:8080
 ```
 
 ## Rule
+> Auto Rule for the device data
 ### Rule List
 #### request
 ```http
-GET /rule/list?device_id=xx&page=1&size=10 HTTP/1.1
+GET /rule/list?name=xx&page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
-- device_id - rule for which device
+- name - rule for which device
   - type: string
 - page - page of list
   - type: integer
@@ -287,12 +286,12 @@ Host: localhost:8080
   "list": [
     {
       "id": 123,
-      "device_id": "device123",
+      "src": "device123", // data from which device
       "entity": "temperature",
       "field": "value",
       "compare": "gt",
       "value": 25.0,
-      "target_device_id": "light",
+      "dst": "light11", // command send to which device
       "opt": "light off",
       "is_deleted": 0, // 1:deleted 0:not deleted
       "desc": "rule for temperature"
@@ -304,5 +303,54 @@ Host: localhost:8080
     "size": 10,
     "total": 94
   }
+}
+```
+
+### Save Rule
+#### request
+```http request
+POST /rule/save HTTP/1.1
+Host: localhost:8080
+```
+##### request body
+```json
+{
+  "id": 123, // rule_id, optional (if id == 0 means insert new rule) 
+  "src": "device123", // data from which device
+  "entity": "temperature", // rule for which kind of data 
+  "field": "value", // which data indicator
+  "compare": "gt",
+  "value": 25.0,
+  "dst": "light11", // command send to which device
+  "opt": "light off",
+  "desc": "rule for temperature"
+}
+```
+#### response
+```json
+{
+  "code": 0,
+  "message:": ""
+}
+```
+
+### Turn rule on or off
+#### request
+```http request
+POST /rule/running HTTP/1.1
+Host: localhost:8080
+```
+##### request body
+```json
+{
+  "id": 123, // rule_id 
+  "status": 1 // 1:start / 0:stop
+}
+```
+#### response
+```json
+{
+  "code": 0,
+  "message:": ""
 }
 ```
