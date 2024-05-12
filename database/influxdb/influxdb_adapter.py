@@ -56,8 +56,8 @@ class InfluxdbAdapter(BaseService):
         time_cond = []
         filter_cond = None
 
-        if 'device' in params:
-            filter_cond = f'r.device == "{params["device"]}"'
+        if 'name' in params:
+            filter_cond = f'r.device == "{params["name"]}"'
 
         if 'start_at' in params:
             start_time = str_to_time(params["start_at"])

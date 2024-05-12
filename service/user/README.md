@@ -32,7 +32,7 @@ Host: localhost:8080
 ### Temperature
 #### request
 ```http
-GET /data/temperature/list?start_at=xx&end_at=xx&name=xx&page=1&size=10 HTTP/1.1
+GET /data/temperature/list?start_at=xx&end_at=xx&name=xx HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - data after what time
@@ -45,12 +45,6 @@ Host: localhost:8080
   - optional
 - name - data collected by which device
   - type: string
-  - optional
-- page - page of list
-  - type: integer
-  - optional
-- size - size of each page
-  - type: integer
   - optional
 #### response
 ```json
@@ -63,20 +57,14 @@ Host: localhost:8080
       "value": 25.4,
       "time": "2024-05-05 10:45:13"
     }
-  ],
-  "page_info": {
-    "page": 1,
-    "page_total": 10,
-    "size": 10,
-    "total": 94
-  }
+  ]
 }
 ```
 
 ### Humidity
 #### request
 ```http
-GET /data/humidity/list?start_at=xx&end_at=xx&name=xx&page=1&size=10 HTTP/1.1
+GET /data/humidity/list?start_at=xx&end_at=xx&name=xx HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - data after what time
@@ -90,14 +78,7 @@ Host: localhost:8080
 - name - data collected by which device
   - type: string
   - optional
-- page - page of list
-  - type integer
-  - optional
-- size - size of each page
-  - type integer
-  - optional
 #### response
-
 ```json
 {
   "code": 0,
@@ -108,20 +89,14 @@ Host: localhost:8080
       "value": 60.0,
       "time": "2024-05-05 10:45:13"
     }
-  ],
-  "page_info": {
-    "page": 1,
-    "page_total": 10,
-    "size": 10,
-    "total": 94
-  }
+  ]
 }
 ```
 
 ### Light
 #### request
 ```http
-GET /data/light/list?start_at=xx&end_at=xx&name=xx&page=1&size=10 HTTP/1.1
+GET /data/light/list?start_at=xx&end_at=xx&name=xx HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - the light status after this time point
@@ -135,14 +110,7 @@ Host: localhost:8080
 - name - which light device
   - type: string
   - optional
-- page - page of list
-  - type integer
-  - optional
-- size - size of each page
-  - type integer
-  - optional
 #### response
-
 ```json
 {
   "code": 0,
@@ -153,13 +121,7 @@ Host: localhost:8080
       "status": "on",
       "time": "2024-05-05 10:45:13"
     }
-  ],
-  "page_info": {
-    "page": 1,
-    "page_total": 10,
-    "size": 10,
-    "total": 94
-  }
+  ]
 }
 ```
 
@@ -292,6 +254,7 @@ Host: localhost:8080
 ```
 - name - rule for which device
   - type: string
+  - optional
 - page - page of list
   - type: integer
   - optional
@@ -312,7 +275,7 @@ Host: localhost:8080
       "compare": "gt",
       "value": 25.0,
       "dst": "light11", // command send to which device
-      "opt": "light off",
+      "opt": "off",
       "is_deleted": 0, // 1:deleted 0:not deleted
       "desc": "rule for temperature"
     }
@@ -342,7 +305,7 @@ Host: localhost:8080
   "compare": "gt",
   "value": 25.0,
   "dst": "light11", // command send to which device
-  "opt": "light off",
+  "opt": "off",
   "desc": "rule for temperature"
 }
 ```

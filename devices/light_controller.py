@@ -10,7 +10,7 @@ class LightController(BaseDevice):
     def __init__(self, name):
         self.conf = json.load(open('./configuration.json'))
         super().__init__(name, self.conf['broker'], self.conf['port'])
-        self.subscribe_topic = mb_channel.DEVICE_COMMAND + constants.entity.LIGHT
+        self.subscribe_topic = mb_channel.DEVICE_COMMAND + name
         self.actuator = LightSwitch()
         self.running = False
 
@@ -29,11 +29,6 @@ class LightController(BaseDevice):
     def on_message(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
-        if 'device' not in data_dict:
-            return
-        dst = data_dict['device']
-        if dst != '' and dst != self.device_name:
-            return
 
         key = 'status'
         if key not in data_dict:

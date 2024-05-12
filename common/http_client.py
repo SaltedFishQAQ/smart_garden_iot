@@ -68,22 +68,24 @@ class HTTPClient(object):
 
     @final
     @cherrypy.tools.json_out()
+    @cherrypy.tools.json_in()
     def POST(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.POST)
         if func is None:
             raise err
 
-        data = json.loads(cherrypy.request.body.read().decode('utf-8'))
+        data = cherrypy.request.json
         return func(data)
 
     @final
     @cherrypy.tools.json_out()
+    @cherrypy.tools.json_in()
     def PUT(self, *uri, **params):
         func, err = self._parse_request(uri, HTTPMethod.PUT)
         if func is None:
             raise err
 
-        data = json.loads(cherrypy.request.body.read().decode('utf-8'))
+        data = cherrypy.request.json
         return func(data)
 
     @final

@@ -52,7 +52,7 @@ class RuleService(BaseService):
             if match:
                 target, msg, ok = convert_message(r['dst'], opt)
                 if ok is False:
-                    print(f"convert message false, opt: {opt}")
+                    print(f"convert message false, rule: {r}")
                 self.mqtt_publish(self.command_channel+target, msg)
 
 
@@ -65,5 +65,5 @@ def demo_rule() -> list:
         'compare': constants.rule.COMPARE_GREATER_THAN,
         'value': 25.0,
         'opt': constants.rule.OPT_LIGHT_OFF,
-        'dst': ''
+        'dst': 'light'
     }]

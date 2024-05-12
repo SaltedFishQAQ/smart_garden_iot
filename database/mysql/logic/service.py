@@ -16,9 +16,11 @@ class Logic:
         records = self.delegate.db_connect.query("select * from service")
         result = []
         for record in records:
-            running = 0
-            if record['last_running'] > time_add(datetime.now(), -30 * 60) or \
-                    record['name'] == self.delegate.service_name:
+            running = 1
+            if record['last_running'] is None or record['last_running'] < time_add(datetime.now(), -30 * 60):
+                running = 0
+
+            if record['name'] == self.delegate.service_name:
                 running = 1
 
             result.append({
