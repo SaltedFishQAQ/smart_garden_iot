@@ -18,3 +18,4 @@ if __name__ == '__main__':
 
     t1.stop()
     t2.stop()
+    t3.stop()

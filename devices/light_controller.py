@@ -1,9 +1,8 @@
 import json
 
-import constants.entity
 import message_broker.channels as mb_channel
-from biz.base_device import BaseDevice
-from actuator.light_switch import LightSwitch
+from devices.biz.base_device import BaseDevice
+from devices.actuator.light_switch import LightSwitch
 
 
 class LightController(BaseDevice):

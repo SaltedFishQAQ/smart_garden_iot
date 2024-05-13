@@ -1,5 +1,4 @@
 import json
-import constants.entity
 import message_broker.channels as mb_channel
 
 from devices.biz.base_device import BaseDevice
@@ -10,7 +9,7 @@ class Hygrometer(BaseDevice):
     def __init__(self, name):
         self.conf = json.load(open('./configuration.json'))
         super().__init__(name, self.conf['broker'], self.conf['port'])
-        self.publish_topic = mb_channel.DEVICE_DATA + constants.entity.HUMIDITY
+        self.publish_topic = mb_channel.DEVICE_DATA + name
         self.sensor = HumiditySensor()
         self.sensor.receiver = self.record_data
         self.init_mqtt_client()
