@@ -1,5 +1,5 @@
 import json
-import random
+import Adafruit_DHT
 
 from devices.biz.base_sensor import BaseSensor
 
@@ -7,9 +7,14 @@ from devices.biz.base_sensor import BaseSensor
 class TemperatureSensor(BaseSensor):
     def __init__(self):
         super().__init__("temperature")
+        self._sensor = Adafruit_DHT.DHT11
+        self.pin = 4
 
     def monitor(self) -> str:
-        # TODO: Raspberry Pi get temperature interface
+        _, temperature = Adafruit_DHT.read_retry(self._sensor, self.pin)
+        if temperature is None:
+            print('Failed to get reading. Try again!')
+
         return json.dumps({
-            'value': round(random.uniform(10.0, 30.0), 1)
+            'value': round(temperature, 1)
         })
