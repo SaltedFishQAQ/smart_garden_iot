@@ -1,7 +1,10 @@
+import os
 from constants import entity
 
 SERVICE_HOST = "0.0.0.0"
 INNER_SERVICE_HOST = "http://127.0.0.1"
+MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
+INFLUX_HOST = os.getenv('INFLUXDB_HOST', 'localhost')
 # service port
 SERVICE_PORT_USER = 8083
 SERVICE_PORT_INFLUX = 8084

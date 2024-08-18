@@ -15,6 +15,8 @@ services:
       - INFLUXDB_PORT=8084
       - MYSQL_HOST=mysql_service
       - MYSQL_PORT=8085
+    networks:
+      - app-network
 
   influx_service:
     build:
@@ -24,6 +26,8 @@ services:
       - "8084:8084"
     volumes:
       - influxdb_data:/var/lib/influxdb
+    networks:
+      - app-network
 
   mysql_service:
     build:
@@ -33,7 +37,13 @@ services:
       - "8085:8085"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
 
 volumes:
   influxdb_data:
   mysql_data:
+
+networks:
+  app-network:
+    driver: bridge

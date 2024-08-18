@@ -15,7 +15,7 @@ class AuthService(BaseService):
         self.data_channel = mb_channel.DEVICE_DATA  # channel for get data
         self.storage_channel = mb_channel.STORAGE_DATA  # channel for store data
         self.certified_list = []  # verified device
-        self.mysql_base_url = f'{constants.http.INNER_SERVICE_HOST}:{constants.http.SERVICE_PORT_MYSQL}'
+        self.mysql_base_url = f'{constants.http.MYSQL_HOST}:{constants.http.SERVICE_PORT_MYSQL}'
         self.running = False
 
     def start(self):
