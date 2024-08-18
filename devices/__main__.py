@@ -1,3 +1,4 @@
+import time
 from devices.thermometer import Thermometer
 from devices.hygrometer import Hygrometer
 from devices.light_controller import LightController
@@ -11,11 +12,12 @@ if __name__ == '__main__':
     t2.register_mqtt_service()
     t3 = Hygrometer('humidity')
     t3.start()
+    try:
+        while True:
+            time.sleep(1)
+    except (KeyboardInterrupt, SystemExit):
+        t1.stop()
+        t2.stop()
+        t3.stop()
 
-    while True:
-        if input("stop running [q]:") == 'q':
-            break
 
-    t1.stop()
-    t2.stop()
-    t3.stop()

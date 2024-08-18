@@ -20,6 +20,9 @@ if __name__ == '__main__':
     device2.init_mqtt_client()
     device2.mqtt_publish("iot/lwx123321/test1", "this is a message")
 
-    while True:
-        time.sleep(10)
+    try:
+        while True:
+            time.sleep(1)
+    except (KeyboardInterrupt, SystemExit):
+        print()
 
