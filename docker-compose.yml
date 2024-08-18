@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   user_service:
-    build: ./service/user
+    build:
+      context: .
+      dockerfile: Dockerfile-user
     ports:
       - "8083:8083"
     depends_on:
@@ -15,14 +17,18 @@ services:
       - MYSQL_PORT=8085
 
   influx_service:
-    build: ./database/influxdb
+    build:
+      context: .
+      dockerfile: Dockerfile-influx
     ports:
       - "8084:8084"
     volumes:
       - influxdb_data:/var/lib/influxdb
 
   mysql_service:
-    build: ./database/mysql
+    build:
+      context: .
+      dockerfile: Dockerfile-mysql
     ports:
       - "8085:8085"
     volumes:

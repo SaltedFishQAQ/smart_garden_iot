@@ -6,4 +6,4 @@ COPY . /app
 
 EXPOSE 8085
 
-CMD ["python", "__main__.py"]
+CMD ["python", "database/mysql/__main__.py"]

@@ -6,4 +6,4 @@ COPY . /app
 
 EXPOSE 8084
 
-CMD ["python", "__main__.py"]
+CMD ["python", "database/influx/__main__.py"]
