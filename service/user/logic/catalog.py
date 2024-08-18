@@ -6,7 +6,8 @@ from http import HTTPMethod
 class Logic:
     def __init__(self, delegate):
         self.delegate = delegate
-        self.mysql_base_url = f'{const_h.INNER_SERVICE_HOST}:{const_h.SERVICE_PORT_MYSQL}'
+        # self.mysql_base_url = f'{const_h.INNER_SERVICE_HOST}:{const_h.SERVICE_PORT_MYSQL}'
+        self.mysql_base_url = 'mysql_service'
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.USER_CATALOG_SERVICE, HTTPMethod.GET, self.service_list)
