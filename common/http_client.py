@@ -23,7 +23,10 @@ class HTTPClient(object):
         else:
             self.conf = conf
         cherrypy.tree.mount(self, '/', self.conf)
-        cherrypy.config.update({'server.socket_port': self.port})
+        cherrypy.config.update({
+            'server.socket_host': self.host,
+            'server.socket_port': self.port
+        })
         self.client = cherrypy.engine
 
     def start(self):
