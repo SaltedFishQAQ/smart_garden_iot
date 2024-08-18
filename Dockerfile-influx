@@ -8,4 +8,4 @@ EXPOSE 8084
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "database/influx/__main__.py"]
+CMD ["python", "database/influxdb/__main__.py"]
