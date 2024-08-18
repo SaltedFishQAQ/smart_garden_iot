@@ -6,4 +6,6 @@ COPY ../../ /app
 
 EXPOSE 8083
 
+ENV PYTHONPATH="/app"
+
 CMD ["python", "service/user/__main__.py"]
