@@ -1,3 +1,4 @@
+import os
 import json
 import constants.entity
 import constants.http
@@ -14,7 +15,9 @@ class InfluxdbAdapter(BaseService):
         super().__init__(constants.entity.INFLUX)
         self.host = constants.http.SERVICE_HOST
         self.port = constants.http.SERVICE_PORT_INFLUX
-        self.conf = json.load(open('./configuration.json'))
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configuration.json')
+        # self.conf = json.load(open('./configuration.json'))
+        self.conf = json.load(open(config_path))
         self.db_connector = Connector(self.conf['url'],
                                       self.conf['token'],
                                       self.conf['org'],
