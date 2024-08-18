@@ -6,4 +6,4 @@ COPY . /app
 
 EXPOSE 8083
 
-CMD ["python", "__main__.py"]
+CMD ["bash", "-c", "PYTHONPATH=/app python service/user/__main__.py"]
