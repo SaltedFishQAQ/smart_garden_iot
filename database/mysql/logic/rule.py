@@ -1,5 +1,6 @@
 import constants.http as const_h
 from http import HTTPMethod
+from common.time import time_to_str
 
 
 class Logic:
@@ -22,6 +23,10 @@ class Logic:
             sql = "select * from rule limit %s, %s"
             args = (offset, size)
         records = self.delegate.db_connect.query(sql, args)
+        for i in range(len(records)):
+            records[i]['created_at'] = time_to_str(records[i]['created_at'])
+            records[i]['updated_at'] = time_to_str(records[i]['updated_at'])
+
         return {
             'list': records
         }
