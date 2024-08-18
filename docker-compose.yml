@@ -22,7 +22,7 @@ services:
       - influxdb_data:/var/lib/influxdb
 
   mysql_service:
-    build: ./mysql_service
+    build: ./database/mysql
     ports:
       - "8085:8085"
     volumes:
