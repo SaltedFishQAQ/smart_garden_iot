@@ -1,8 +1,8 @@
 FROM python:3.11-slim
 
-WORKDIR .
+WORKDIR /app
 
-COPY ../../ .
+COPY ../../ /app
 
 EXPOSE 8083
 
