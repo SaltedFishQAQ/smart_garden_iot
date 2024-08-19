@@ -13,9 +13,7 @@ class MysqlAdapter(BaseService):
         super().__init__(constants.entity.MYSQL)
         self.host = constants.http.SERVICE_HOST
         self.port = constants.http.SERVICE_PORT_MYSQL
-        # self.conf = json.load(open('./configuration.json'))
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configuration.json')
-        # self.conf = json.load(open('./configuration.json'))
         self.conf = json.load(open(config_path))
         self.db_connect = Connector(self.conf['host'],
                                     self.conf['port'],
