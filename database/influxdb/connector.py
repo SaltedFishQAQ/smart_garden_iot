@@ -22,7 +22,7 @@ class Connector:
 
         write_api.write(bucket=self.bucket, record=point)
 
-    def query(self, measurement, time_range=None, cond=None):
+    def query(self, measurement, time_range=None, cond=None, page=1, size=10):
         if time_range is None:
             time_range = "start: -10m"
 
@@ -31,10 +31,13 @@ class Connector:
         else:
             cond = ""
 
+        offset = (page-1)*size
+
         sql = f"""from(bucket: "{self.bucket}")
          |> range({time_range})
          |> filter(fn: (r) => r._measurement == "{measurement}" {cond})
-         |> sort(columns: ["_time"], desc: true)"""
+         |> sort(columns: ["_time"], desc: true)
+         |> limit(n: {size}, offset: {offset})"""
 
         tables = self.client.query_api().query(sql, org=self.org)
         result = []

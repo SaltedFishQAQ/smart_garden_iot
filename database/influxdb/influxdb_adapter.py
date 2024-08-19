@@ -70,11 +70,22 @@ class InfluxdbAdapter(BaseService):
             stop_time = str_to_time(params["stop_at"])
             time_cond.append(f'stop: {stop_time.strftime("%Y-%m-%dT%H:%M:%SZ")}')
 
+        if 'page' not in params:
+            params['page'] = 1
+        else:
+            params['page'] = int(params['page'])
+
+        if 'size' not in params:
+            params['size'] = 10
+        else:
+            params['size'] = int(params['size'])
+
         time_range = None
         if len(time_cond) > 0:
             time_range = ", ".join(time_cond)
 
-        result = self.db_connector.query(measurement, time_range=time_range, cond=filter_cond)
+        result = self.db_connector.query(measurement, time_range=time_range, cond=filter_cond,
+                                         page=params['page'], size=params['size'])
 
         return {
             'list': result
