@@ -1,6 +1,7 @@
 import requests
 import constants.http as const_h
 import constants.entity as const_e
+from devices.mock_device import MockDevice
 from http import HTTPMethod
 
 
@@ -15,6 +16,7 @@ class Logic:
         self.delegate.http_client.add_route(const_h.USER_DATA_TEMPERATURE, HTTPMethod.GET, self.temperature_data)
         self.delegate.http_client.add_route(const_h.USER_DATA_HUMIDITY, HTTPMethod.GET, self.humidity_data)
         self.delegate.http_client.add_route(const_h.USER_DATA_LIGHT, HTTPMethod.GET, self.light_data)
+        self.delegate.http_client.add_route(const_h.USER_DATA_MOCK, HTTPMethod.POST, self.mock_data)
 
     @staticmethod
     def entity_list(params):
@@ -52,3 +54,14 @@ class Logic:
             'message': "success",
             'list': resp.json()['list']
         }
+
+    @staticmethod
+    def mock_data(params):
+        d = MockDevice()
+        d.init_mock_data(params['number'])
+
+        return {
+            'code': 0,
+            'message': "success",
+        }
+
