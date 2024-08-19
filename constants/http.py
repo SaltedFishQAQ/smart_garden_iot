@@ -4,7 +4,7 @@ from constants import entity
 SERVICE_HOST = "0.0.0.0"
 INNER_SERVICE_HOST = "http://127.0.0.1"
 MYSQL_HOST = "http://" + os.getenv('MYSQL_HOST', 'localhost')
-INFLUX_HOST = "http://" +  os.getenv('INFLUXDB_HOST', 'localhost')
+INFLUX_HOST = "http://" + os.getenv('INFLUXDB_HOST', 'localhost')
 # service port
 SERVICE_PORT_USER = 8083
 SERVICE_PORT_INFLUX = 8084
@@ -24,6 +24,7 @@ MYSQL_DEVICE_CERTIFIED_LIST = MYSQL_BASE_ROUTE + entity.DEVICE_TABLE + '/certifi
 MYSQL_DEVICE_RUNNING = MYSQL_BASE_ROUTE + entity.DEVICE_TABLE + '/running'  # change device running status
 MYSQL_USER_LIST = MYSQL_BASE_ROUTE + entity.USER_TABLE  # get user list
 MYSQL_USER_LOGIN = MYSQL_BASE_ROUTE + entity.USER_TABLE + '/login'  # user login
+MYSQL_USER_REGISTER = MYSQL_BASE_ROUTE + entity.USER_TABLE + '/register'  # user register
 MYSQL_SERVICE_LIST = MYSQL_BASE_ROUTE + entity.SERVICE_TABLE  # get service list
 MYSQL_SERVICE_REGISTER = MYSQL_BASE_ROUTE + entity.SERVICE_TABLE + 'register'  # register service
 MYSQL_RULE_LIST = MYSQL_BASE_ROUTE + entity.RULE_TABLE  # get rule list
@@ -42,3 +43,5 @@ USER_CATALOG_DEVICE = USER_BASE_ROUTE + 'catalog/device/list'
 USER_RULE_LIST = USER_BASE_ROUTE + 'rule/list'
 USER_RULE_SAVE = USER_BASE_ROUTE + 'rule/save'
 USER_RULE_RUNNING = USER_BASE_ROUTE + 'rule/running'
+USER_LOGIN = USER_BASE_ROUTE + 'user/login'
+USER_REGISTER = USER_BASE_ROUTE + 'user/register'
