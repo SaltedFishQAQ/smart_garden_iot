@@ -21,13 +21,16 @@ class Connector:
                              autocommit=True,
                              charset='utf8mb4')
 
-    def insert(self, sql, args):
+    def insert(self, sql, args, is_create=False):
         connection = self.pool.connection()
         try:
             with connection.cursor() as cursor:
                 cursor.execute(sql, args)
+            connection.commit()
+            if is_create:
+                return cursor.lastrowid
 
-                return cursor.rowcount
+            return cursor.rowcount
         finally:
             cursor.close()
             connection.close()

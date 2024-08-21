@@ -27,6 +27,11 @@ class Logic:
             'running': params['status']
         }))
 
+        return {
+            "code": 0,
+            "message": "success"
+        }
+
     def command(self, params):
         if 'name' not in params or 'opt' not in params:
             return {
@@ -41,3 +46,8 @@ class Logic:
                 "message": "invalid command"
             }
         self.delegate.mqtt_publish(self.command_channel+target, msg)
+
+        return {
+            "code": 0,
+            "message": "success"
+        }

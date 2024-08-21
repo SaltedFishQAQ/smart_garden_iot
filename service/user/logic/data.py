@@ -31,28 +31,40 @@ class Logic:
     def temperature_data(self, params):
         resp = requests.get(self.influx_base_url + const_h.INFLUX_TEMPERATURE_GET, params)
 
+        result = []
+        if resp.json() is not None:
+            result = resp.json()['list']
+
         return {
             'code': 0,
             'message': "success",
-            'list': resp.json()['list']
+            'list': result
         }
 
     def humidity_data(self, params):
         resp = requests.get(self.influx_base_url + const_h.INFLUX_HUMIDITY_GET, params)
 
+        result = []
+        if resp.json() is not None:
+            result = resp.json()['list']
+
         return {
             'code': 0,
             'message': "success",
-            'list': resp.json()['list']
+            'list': result
         }
 
     def light_data(self, params):
         resp = requests.get(self.influx_base_url + const_h.INFLUX_LIGHT_GET, params)
 
+        result = []
+        if resp.json() is not None:
+            result = resp.json()['list']
+
         return {
             'code': 0,
             'message': "success",
-            'list': resp.json()['list']
+            'list': result
         }
 
     @staticmethod
