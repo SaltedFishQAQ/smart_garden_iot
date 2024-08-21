@@ -32,19 +32,24 @@ class Logic:
         }
 
     def save(self, params):
+        is_create = False
         if 'id' not in params:
             sql = ('INSERT INTO rule (src, entity, `field`, compare, value, dst, opt, is_deleted, `desc`)'
                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)')
             args = (params['src'], params['entity'], params['field'],
                     params['compare'], params['value'], params['dst'],
                     params['opt'], 0, params['desc'])
+            is_create = True
         else:
             sql = ('update rule set src=%s, entity=%s, `field`=%s, compare=%s, value=%s, dst=%s, opt=%s, `desc`=%s'
                    ' where id=%s')
             args = (params['src'], params['entity'], params['field'],
                     params['compare'], params['value'], params['dst'],
                     params['opt'], params['desc'], params['id'])
-        self.delegate.db_connect.insert(sql, args)
+        n = self.delegate.db_connect.insert(sql, args, is_create=is_create)
+        return {
+            "row": n
+        }
 
     def running(self, params):
         if params['status'] == 0:

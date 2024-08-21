@@ -2,17 +2,71 @@
 > Service for handling Dashboard or Telebot requests
 
 ## Modules
+- User
 - Data
 - Device
 - Catalog
 - Rule
+
+## User
+> User operation
+### Login
+#### request
+```http
+POST /user/login HTTP/1.1
+Host: localhost:8080
+```
+##### request body
+```json
+{
+  "name": "abcd",
+  "password": "password",
+}
+```
+#### response
+```json
+{
+  "code": 0,
+  "message:": "",
+  "data": [
+    {
+      "id": 1,
+      "name": "abcd"
+      "role": 1
+      "created_at": "2024-08-10 00:00:00"
+      "updated_at": "2024-08-10 00:00:00"
+    }
+  ]
+}
+```
+
+### Register
+#### request
+```http
+GET /user/register HTTP/1.1
+Host: localhost:8080
+```
+##### request body
+```json
+{
+  "name": "abcd",
+  "password": "password",
+}
+```
+#### response
+```json
+{
+  "code": 0,
+  "message:": ""
+}
+```
 
 ## Data
 > Display data collected by the device
 ### Kinds of Data
 #### request
 ```http
-GET /data/entity/list HTTP/1.1
+GET /data/entities HTTP/1.1
 Host: localhost:8080
 ```
 #### response
@@ -32,7 +86,7 @@ Host: localhost:8080
 ### Temperature
 #### request
 ```http
-GET /data/temperature/list?start_at=xx&end_at=xx&name=xx HTTP/1.1
+GET /data/temperature?start_at=xx&end_at=xx&name=xx HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - data after what time
@@ -64,7 +118,7 @@ Host: localhost:8080
 ### Humidity
 #### request
 ```http
-GET /data/humidity/list?start_at=xx&end_at=xx&name=xx HTTP/1.1
+GET /data/humidity?start_at=xx&end_at=xx&name=xx HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - data after what time
@@ -96,7 +150,7 @@ Host: localhost:8080
 ### Light
 #### request
 ```http
-GET /data/light/list?start_at=xx&end_at=xx&name=xx HTTP/1.1
+GET /data/light?start_at=xx&end_at=xx&name=xx HTTP/1.1
 Host: localhost:8080
 ```
 - start_at - the light status after this time point
@@ -174,7 +228,7 @@ Host: localhost:8080
 ### Service List
 #### request
 ```http
-GET /catalog/service/list?page=1&size=10 HTTP/1.1
+GET /catalog/services?page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - page - page of list
@@ -209,7 +263,7 @@ Host: localhost:8080
 ### Device List
 #### request
 ```http
-GET /catalog/device/list?page=1&size=10 HTTP/1.1
+GET /catalog/devices?page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - page - page of list
@@ -249,7 +303,7 @@ Host: localhost:8080
 ### Rule List
 #### request
 ```http
-GET /rule/list?name=xx&page=1&size=10 HTTP/1.1
+GET /rules?name=xx&page=1&size=10 HTTP/1.1
 Host: localhost:8080
 ```
 - name - rule for which device
@@ -289,16 +343,47 @@ Host: localhost:8080
 }
 ```
 
-### Save Rule
+### Create Rule
 #### request
 ```http request
-POST /rule/save HTTP/1.1
+POST /rules/create HTTP/1.1
 Host: localhost:8080
 ```
 ##### request body
 ```json
 {
-  "id": 123, // rule_id, optional (if id == 0 means insert new rule) 
+  "src": "device123", // data from which device
+  "entity": "temperature", // rule for which kind of data 
+  "field": "value", // which data indicator
+  "compare": "gt",
+  "value": 25.0,
+  "dst": "light11", // command send to which device
+  "opt": "off",
+  "desc": "rule for temperature"
+}
+```
+#### response
+```json
+{
+  "code": 0,
+  "message:": "",
+  "data": {
+    "id": 1
+  }
+}
+```
+
+
+### UPDATE Rule
+#### request
+```http request
+POST /rules/update HTTP/1.1
+Host: localhost:8080
+```
+##### request body
+```json
+{
+  "id": 123, // rule_id
   "src": "device123", // data from which device
   "entity": "temperature", // rule for which kind of data 
   "field": "value", // which data indicator
@@ -320,7 +405,7 @@ Host: localhost:8080
 ### Turn rule on or off
 #### request
 ```http request
-POST /rule/running HTTP/1.1
+POST /rules/running HTTP/1.1
 Host: localhost:8080
 ```
 ##### request body
