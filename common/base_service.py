@@ -14,7 +14,7 @@ class BaseService:
         self.http_host = None
         self.http_port = None
 
-    def init_mqtt_client(self, broker="mosquitto", port=1883):
+    def init_mqtt_client(self, broker="172.18.0.2", port=1883):
         if self.mqtt_client is not None:
             return
 
