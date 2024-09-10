@@ -44,7 +44,7 @@ services:
     image: eclipse-mosquitto:2.0
     container_name: mosquitto
     ports:
-      - "11883:11883"
+      - "1883:1883"
       - "9001:9001"
     volumes:
       - ./message_broker/mosquitto.conf:/mosquitto/config/mosquitto.conf
