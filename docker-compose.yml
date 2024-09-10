@@ -59,3 +59,5 @@ volumes:
 networks:
   app-network:
     driver: bridge
+  mqtt_network:
+    driver: bridge
