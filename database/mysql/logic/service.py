@@ -38,5 +38,17 @@ class Logic:
 
     def register(self, params):
         name = params['name']
-        sql = 'update service set last_running = %s where name = %s'
-        self.delegate.db_connect.insert(sql, (datetime.now(), name))
+
+        select = 'select id from service where name = %s limit 1'
+        records = self.delegate.db_connect.query(select, name)
+
+        is_create = False
+        if len(records) == 0:
+            sql = ('INSERT INTO service (name, `desc`, last_running) '
+                   'VALUES (%s, %s, %s)')
+            args = (name, '', datetime.now())
+            is_create = True
+        else:
+            sql = 'update service set last_running = %s where name = %s'
+            args = (datetime.now(), name)
+        self.delegate.db_connect.insert(sql, args, is_create=is_create)
