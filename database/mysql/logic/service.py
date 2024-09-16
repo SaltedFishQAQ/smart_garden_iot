@@ -24,9 +24,9 @@ class Logic:
                 running = 1
 
             result.append({
-                'id': records[0]['id'],
-                'name': records[0]['name'],
-                'desc': records[0]['desc'],
+                'id': record['id'],
+                'name': record['name'],
+                'desc': record['desc'],
                 'running': running,
                 'created_at': time_to_str(record['created_at']),
                 'updated_at': time_to_str(record['updated_at'])
