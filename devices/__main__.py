@@ -9,7 +9,6 @@ if __name__ == '__main__':
     t1.start()
     t2 = LightController('light')
     t2.start()
-    t2.register_mqtt_service()
     t3 = Hygrometer('humidity')
     t3.start()
     try:
@@ -19,5 +18,3 @@ if __name__ == '__main__':
         t1.stop()
         t2.stop()
         t3.stop()
-
-

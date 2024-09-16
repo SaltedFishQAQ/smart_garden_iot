@@ -1,6 +1,4 @@
 import json
-import message_broker.channels as mb_channel
-
 from devices.biz.base_device import BaseDevice
 from devices.sensor.temperature import TemperatureSensor
 
@@ -9,30 +7,31 @@ class Thermometer(BaseDevice):
     def __init__(self, name):
         self.conf = json.load(open('./configuration.json'))
         super().__init__(name, self.conf['broker'], self.conf['port'])
-        self.publish_topic = mb_channel.DEVICE_DATA + name
         self.sensor = TemperatureSensor()
-        self.sensor.receiver = self.record_data
-        self.init_mqtt_client()
-        self.running = False
+        self.sensor.receiver = self.handle_data
 
     def start(self):
+        super().start()
         self.sensor.start()
-        self.running = True
 
     def stop(self):
+        super().stop()
         self.sensor.stop()
-        self.running = False
 
-    def record_data(self, data_str):
+    def handle_working(self, status):
+        if status is False:
+            self.sensor.stop()
+
+    def handle_opt(self, opt, status):
+        if status:
+            self.sensor.start()
+        else:
+            self.sensor.stop()
+
+    def handle_data(self, data_str):
         data = json.loads(data_str)
         if 'value' not in data:
             print(f"data missing temperature value, data: {data}")
             return
 
-        mqtt_data = {
-            'tags': {
-                'device': self.device_name,
-            },
-            'fields': data,
-        }
-        self.mqtt_publish(self.publish_topic, json.dumps(mqtt_data))
+        self.record_data(data)
