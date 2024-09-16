@@ -19,6 +19,7 @@ class AuthService(BaseService):
         self.running = False
 
     def start(self):
+        super().start()
         self.running = True
         threading.Thread(target=self._get_certified_device).start()
         self.init_mqtt_client()

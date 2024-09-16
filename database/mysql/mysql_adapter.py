@@ -22,6 +22,7 @@ class MysqlAdapter(BaseService):
                                     self.conf['database'])
 
     def start(self):
+        super().start()
         self.init_http_client(host=self.host, port=self.port)
 
     def stop(self):

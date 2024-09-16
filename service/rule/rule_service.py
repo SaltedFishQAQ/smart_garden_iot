@@ -15,6 +15,7 @@ class RuleService(BaseService):
         self.rule_list = demo_rule()
 
     def start(self):
+        super().start()
         self.init_mqtt_client()
 
     def stop(self):
