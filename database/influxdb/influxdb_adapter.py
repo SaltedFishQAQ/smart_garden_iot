@@ -29,6 +29,7 @@ class InfluxdbAdapter(BaseService):
         }
 
     def start(self):
+        super().start()
         self.init_mqtt_client()
         self.init_http_client(host=self.host, port=self.port)
 

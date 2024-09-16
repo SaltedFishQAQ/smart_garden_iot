@@ -1,3 +1,7 @@
+import time
+import requests
+import threading
+import constants.http as const_h
 from common.mqtt import MQTTClient
 from common.http_client import HTTPClient
 
@@ -5,14 +9,17 @@ from common.http_client import HTTPClient
 class BaseService:
     def __init__(self, name):
         self.service_name = name
-        # mqtt
-        self.mqtt_client = None
         self.mqtt_broker = None
         self.mqtt_port = None
-        # http
-        self.http_client = None
         self.http_host = None
         self.http_port = None
+        # communication
+        self.mqtt_client = None
+        self.http_client = None
+        self.register_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}{const_h.MYSQL_SERVICE_REGISTER}'
+
+    def start(self):
+        threading.Thread(target=self._heart_beat).start()
 
     def init_mqtt_client(self, broker="mqtt.eclipseprojects.io", port=1883):
         if self.mqtt_client is not None:
@@ -59,3 +66,11 @@ class BaseService:
 
         self.http_client.stop()
         self.http_client = None
+
+    def _heart_beat(self):
+        while True:
+            data = {
+                'name': self.service_name
+            }
+            _ = requests.post(self.register_url, json=data)
+            time.sleep(60)

@@ -17,7 +17,7 @@ class Logic:
         result = []
         for record in records:
             running = 1
-            if record['last_running'] is None or record['last_running'] < time_add(datetime.now(), -30 * 60):
+            if record['last_running'] is None or record['last_running'] < time_add(datetime.now(), -5 * 60):
                 running = 0
 
             if record['name'] == self.delegate.service_name:
