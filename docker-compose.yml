@@ -24,6 +24,8 @@ services:
       dockerfile: Dockerfile-influx
     ports:
       - "8084:8084"
+    depends_on:
+      - mysql_service
     volumes:
       - influxdb_data:/var/lib/influxdb
     networks:
