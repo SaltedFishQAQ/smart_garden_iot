@@ -41,7 +41,7 @@ class MQTTClient:
         self.client.subscribe(topic, 2)
 
     def handle_connect(self, client, userdata, flags, rc):
-        print("Connected to %s with result code: %d" % (self.broker, rc))
+        pass
     
     def handle_message(self, client, userdata, msg):
         match_list = self._topic_match(msg.topic)
