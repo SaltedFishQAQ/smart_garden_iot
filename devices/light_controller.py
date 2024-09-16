@@ -1,6 +1,4 @@
 import json
-
-import message_broker.channels as mb_channel
 from devices.biz.base_device import BaseDevice
 from devices.actuator.light_switch import LightSwitch
 
@@ -9,30 +7,12 @@ class LightController(BaseDevice):
     def __init__(self, name):
         self.conf = json.load(open('./configuration.json'))
         super().__init__(name, self.conf['broker'], self.conf['port'])
-        self.subscribe_topic = mb_channel.DEVICE_COMMAND + name
         self.actuator = LightSwitch()
-        self.running = False
 
-    def start(self):
-        self.init_mqtt_client()
-        self.running = True
+    def handle_working(self, status):
+        if status is False:  # light turn off while device stop working
+            self.actuator.switch(False)
 
-    def register_mqtt_service(self):
-        # device data
-        self.mqtt_listen(self.subscribe_topic, self.on_message)
-
-    def stop(self):
-        self.remove_mqtt_client()
-        self.running = False
-
-    def on_message(self, client, userdata, msg):
-        content = msg.payload.decode('utf-8')
-        data_dict = json.loads(content)
-
-        key = 'status'
-        if key not in data_dict:
-            print(f"data missing status value, data: {content}")
-            return
-        status = bool(data_dict[key])
+    def handle_opt(self, opt, status):
         self.actuator.switch(status)
         print(f"device: {self.device_name}, current light switch {self.actuator.get_status()}")
