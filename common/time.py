@@ -10,4 +10,4 @@ def str_to_time(time_str, str_format="%Y-%m-%d %H:%M:%S") -> datetime:
 
 
 def time_add(time_obj, seconds: int):
-    return time_obj - timedelta(seconds=seconds)
+    return time_obj + timedelta(seconds=seconds)
