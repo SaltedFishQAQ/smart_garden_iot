@@ -26,6 +26,9 @@ services:
       - "8084:8084"
     depends_on:
       - mysql_service
+    environment:
+      - MYSQL_HOST=mysql_service
+      - MYSQL_PORT=8085
     volumes:
       - influxdb_data:/var/lib/influxdb
     networks:
