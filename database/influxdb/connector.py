@@ -36,6 +36,7 @@ class Connector:
         sql = f"""from(bucket: "{self.bucket}")
          |> range({time_range})
          |> filter(fn: (r) => r._measurement == "{measurement}" {cond})
+         |> group(columns: [])
          |> sort(columns: ["_time"], desc: true)
          |> limit(n: {size}, offset: {offset})"""
 
