@@ -77,7 +77,11 @@ class InfluxdbAdapter(BaseService):
         return self.http_data_get(params)
 
     def http_measurement_list(self, param):
-        self.db_connector.measurement_list()
+        result = self.db_connector.measurement_list()
+
+        return {
+            'list': result
+        }
 
     def http_data_get(self, params):
         if 'measurement' not in params:
