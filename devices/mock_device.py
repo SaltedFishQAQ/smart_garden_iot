@@ -30,7 +30,7 @@ class MockDevice(BaseDevice):
         for measurement in actuators:
             for _ in range(number):
                 self.send(measurement, {
-                    'opt': random.choice(["on", "off"])
+                    'value': random.choice(["on", "off"])
                 })
                 time.sleep(1)
 
