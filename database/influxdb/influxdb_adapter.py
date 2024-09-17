@@ -25,7 +25,10 @@ class InfluxdbAdapter(BaseService):
         self.storage_channel = mb_channel.STORAGE_DATA  # channel for store data
         self.enable_measurement = {
             constants.entity.TEMPERATURE: True,
-            constants.entity.HUMIDITY: True
+            constants.entity.HUMIDITY: True,
+            constants.entity.LIGHT: True,
+            constants.entity.GATE: True,
+            constants.entity.IRRIGATOR: True
         }
 
     def start(self):
@@ -42,7 +45,9 @@ class InfluxdbAdapter(BaseService):
         self.mqtt_listen(self.storage_channel + '+', self.mqtt_data)
 
     def register_http_handler(self):
+        self.http_client.add_route(constants.http.INFLUX_MEASUREMENT_LIST, HTTPMethod.GET, self.http_measurement_list)
         # device data
+        self.http_client.add_route(constants.http.INFLUX_DATA_GET, HTTPMethod.GET, self.http_data_get)
         self.http_client.add_route(constants.http.INFLUX_TEMPERATURE_GET, HTTPMethod.GET, self.http_temperature_get)
         self.http_client.add_route(constants.http.INFLUX_HUMIDITY_GET, HTTPMethod.GET, self.http_humidity_get)
         self.http_client.add_route(constants.http.INFLUX_LIGHT_GET, HTTPMethod.GET, self.http_light_get)
@@ -57,7 +62,34 @@ class InfluxdbAdapter(BaseService):
         self.db_connector.insert(measurement, data_dict['tags'], data_dict['fields'])
 
     def http_temperature_get(self, params):
-        measurement = constants.entity.TEMPERATURE
+        params['measurement'] = constants.entity.TEMPERATURE
+
+        return self.http_data_get(params)
+
+    def http_humidity_get(self, params):
+        params['measurement'] = constants.entity.HUMIDITY
+
+        return self.http_data_get(params)
+
+    def http_light_get(self, params):
+        params['measurement'] = constants.entity.LIGHT
+
+        return self.http_data_get(params)
+
+    def http_measurement_list(self, param):
+        result = self.db_connector.measurement_list()
+
+        return {
+            'list': result
+        }
+
+    def http_data_get(self, params):
+        if 'measurement' not in params:
+            return {
+                'list': []
+            }
+
+        measurement = params['measurement']
         time_cond = []
         filter_cond = None
 
@@ -92,16 +124,6 @@ class InfluxdbAdapter(BaseService):
         return {
             'list': result
         }
-
-    def http_humidity_get(self, params):
-        measurement = constants.entity.HUMIDITY
-
-        self.db_connector.query(measurement)
-
-    def http_light_get(self, params):
-        measurement = constants.entity.LIGHT
-
-        self.db_connector.query(measurement)
 
 
 
