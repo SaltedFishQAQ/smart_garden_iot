@@ -16,6 +16,7 @@ class Logic:
         self.delegate.http_client.add_route(const_h.USER_DATA_TEMPERATURE, HTTPMethod.GET, self.temperature_data)
         self.delegate.http_client.add_route(const_h.USER_DATA_HUMIDITY, HTTPMethod.GET, self.humidity_data)
         self.delegate.http_client.add_route(const_h.USER_DATA_LIGHT, HTTPMethod.GET, self.light_data)
+        self.delegate.http_client.add_route(const_h.USER_DATA_GET, HTTPMethod.GET, self.data_get)
         self.delegate.http_client.add_route(const_h.USER_DATA_MOCK, HTTPMethod.POST, self.mock_data)
 
     @staticmethod
@@ -69,6 +70,19 @@ class Logic:
 
     def measurement_list(self, params):
         resp = requests.get(self.influx_base_url + const_h.INFLUX_MEASUREMENT_LIST, params)
+
+        result = []
+        if resp.json() is not None:
+            result = resp.json()['list']
+
+        return {
+            'code': 0,
+            'message': "success",
+            'list': result
+        }
+
+    def data_get(self, params):
+        resp = requests.get(self.influx_base_url + const_h.INFLUX_DATA_GET, params)
 
         result = []
         if resp.json() is not None:
