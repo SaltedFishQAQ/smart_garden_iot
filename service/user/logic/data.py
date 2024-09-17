@@ -17,6 +17,7 @@ class Logic:
         self.delegate.http_client.add_route(const_h.USER_DATA_HUMIDITY, HTTPMethod.GET, self.humidity_data)
         self.delegate.http_client.add_route(const_h.USER_DATA_LIGHT, HTTPMethod.GET, self.light_data)
         self.delegate.http_client.add_route(const_h.USER_DATA_GET, HTTPMethod.GET, self.data_get)
+        self.delegate.http_client.add_route(const_h.USER_MEASUREMENT_LIST, HTTPMethod.GET, self.measurement_list)
         self.delegate.http_client.add_route(const_h.USER_DATA_MOCK, HTTPMethod.POST, self.mock_data)
 
     @staticmethod
