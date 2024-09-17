@@ -56,3 +56,17 @@ class Connector:
                         line[val] = record.values[val]
                 result.append(line)
         return result
+
+    def measurement_list(self):
+        sql = f"""
+        import "influxdata/influxdb/schema"
+        schema.measurements(bucket: "{self.bucket}")
+        """
+
+        tables = self.client.query_api().query(query=sql)
+        result = []
+        for table in tables:
+            for record in table.records:
+                result.append(record.get_value())
+
+        return result

@@ -67,6 +67,19 @@ class Logic:
             'list': result
         }
 
+    def measurement_list(self, params):
+        resp = requests.get(self.influx_base_url + const_h.INFLUX_MEASUREMENT_LIST, params)
+
+        result = []
+        if resp.json() is not None:
+            result = resp.json()['list']
+
+        return {
+            'code': 0,
+            'message': "success",
+            'list': result
+        }
+
     @staticmethod
     def mock_data(params):
         d = MockDevice()

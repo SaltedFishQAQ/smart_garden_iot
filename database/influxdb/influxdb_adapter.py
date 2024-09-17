@@ -25,7 +25,10 @@ class InfluxdbAdapter(BaseService):
         self.storage_channel = mb_channel.STORAGE_DATA  # channel for store data
         self.enable_measurement = {
             constants.entity.TEMPERATURE: True,
-            constants.entity.HUMIDITY: True
+            constants.entity.HUMIDITY: True,
+            constants.entity.LIGHT: True,
+            constants.entity.GATE: True,
+            constants.entity.IRRIGATOR: True
         }
 
     def start(self):
@@ -42,6 +45,7 @@ class InfluxdbAdapter(BaseService):
         self.mqtt_listen(self.storage_channel + '+', self.mqtt_data)
 
     def register_http_handler(self):
+        self.http_client.add_route(constants.http.INFLUX_MEASUREMENT_LIST, HTTPMethod.GET, self.http_measurement_list)
         # device data
         self.http_client.add_route(constants.http.INFLUX_TEMPERATURE_GET, HTTPMethod.GET, self.http_temperature_get)
         self.http_client.add_route(constants.http.INFLUX_HUMIDITY_GET, HTTPMethod.GET, self.http_humidity_get)
@@ -102,6 +106,9 @@ class InfluxdbAdapter(BaseService):
         measurement = constants.entity.LIGHT
 
         self.db_connector.query(measurement)
+
+    def http_measurement_list(self, param):
+        self.db_connector.measurement_list()
 
 
 
