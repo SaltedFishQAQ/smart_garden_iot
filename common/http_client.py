@@ -6,6 +6,12 @@ from typing import final
 from http import HTTPMethod
 
 
+def cors():
+    cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
+    cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    cherrypy.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+
+
 class HTTPClient(object):
     exposed = True
 
@@ -17,12 +23,14 @@ class HTTPClient(object):
             self.conf = {
                 '/': {
                     'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-                    'tools.sessions.on': True
+                    'tools.sessions.on': True,
+                    'tools.cors.on': True
                 }
             }
         else:
             self.conf = conf
         cherrypy.tree.mount(self, '/', self.conf)
+        cherrypy.tools.cors = cherrypy.Tool('before_handler', cors)
         cherrypy.config.update({
             'server.socket_host': self.host,
             'server.socket_port': self.port
@@ -99,3 +107,10 @@ class HTTPClient(object):
             raise err
 
         return func(params)
+
+    @final
+    def OPTIONS(self, *uri, **params):
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+        cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        cherrypy.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return ''
