@@ -11,6 +11,7 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_LIST, HTTPMethod.GET, self.list)
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_CERTIFIED_LIST, HTTPMethod.GET, self.certified_list)
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_REGISTER, HTTPMethod.POST, self.register)
+        self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_APPROVE, HTTPMethod.POST, self.approve)
 
     def list(self, params):
         records = self.delegate.db_connect.query("select * from device")
@@ -60,3 +61,25 @@ class Logic:
             args = (status, name)
 
         self.delegate.db_connect.insert(sql, args, is_create=is_create)
+
+    def approve(self, params):
+        name = params['name']
+        status = params['status']
+
+        select = 'select id from device where name = %s limit 1'
+        records = self.delegate.db_connect.query(select, name)
+
+        if len(records) == 0:
+            return {
+                'code': 400,
+                'message': 'record not found'
+            }
+
+        sql = 'update device set auth_status = %s where name = %s'
+        args = (status, name)
+        self.delegate.db_connect.insert(sql, args)
+
+        return {
+            'code': 0,
+            'message': 'success'
+        }
