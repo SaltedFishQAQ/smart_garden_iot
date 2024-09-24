@@ -1,11 +1,32 @@
 import requests
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 import time
 import pytz
 import paho.mqtt.client as mqtt
 
+class ConfigLoader:
+    def __init__(self, config_file):
+        self.config_file = config_file
+        self.config_data = self.load_config()
+
+    def load_config(self):
+        tree = ET.parse(self.config_file)
+        root = tree.getroot()
+
+        config_data = {
+            "api_url": root.find("./weather/api_url").text,
+            "api_key": root.find("./weather/api_key").text,
+            "city": root.find("./weather/city").text,
+            "mqtt_broker": root.find("./mqtt/broker").text,
+            "mqtt_port": int(root.find("./mqtt/port").text),
+            "command_channel": root.find("./mqtt/command_channel").text
+        }
+        return config_data
+
 class WeatherService:
-    def __init__(self, api_key, city, mqtt_client, command_channel):
+    def __init__(self, api_url, api_key, city, mqtt_client, command_channel):
+        self.api_url = api_url
         self.api_key = api_key
         self.city = city
         self.sunrise = None
@@ -15,7 +36,7 @@ class WeatherService:
         self.command_channel = command_channel
 
     def fetch_weather_data(self):
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={self.city}&appid={self.api_key}"
+        url = f"{self.api_url}?q={self.city}&appid={self.api_key}"
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -42,15 +63,15 @@ class WeatherService:
             self.trigger_sunset_action()
 
     def trigger_sunrise_action(self):
-        ## Action Triggered: Turn off the light")
-        self.mqtt_publish(self.command_channel + 'luminosity' ,{'status': False})
+        print("Action Triggered: Turn off the light")
+        self.mqtt_publish(self.command_channel + 'sunrise', {'status': False})
 
     def trigger_sunset_action(self):
-        ## Action Triggered: Turn on the light")
-        self.mqtt_publish(self.command_channel + 'luminosity' , {'status': True})
+        print("Action Triggered: Turn on the light")
+        self.mqtt_publish(self.command_channel + 'sunset', {'status': True})
 
     def check_rain_probability(self):
-        ## Rain Probability Check
+        print(f"Rain Probability Check: {self.rain_probability} mm")
         if self.rain_probability > 0:
             self.trigger_irrigator_action()
 
@@ -87,18 +108,22 @@ class WeatherMicroservice:
             self.weather_service.fetch_weather_data()
             self.weather_service.check_sun_times()
 
-# MQTT setup
-mqtt_broker = "mqtt.eclipseprojects.io"
-mqtt_port = 1883
-command_channel = "home/garden/"
+# Load configuration from config.xml
+config_loader = ConfigLoader('config.xml')
+config = config_loader.config_data
 
+# MQTT setup
 mqtt_client = mqtt.Client()
-mqtt_client.connect(mqtt_broker, mqtt_port)
+mqtt_client.connect(config['mqtt_broker'], config['mqtt_port'])
 
 # Usage
-api_key = "5dc8ece6e02d649d870e2e3a67ffc128"
-city = "Turin,it"
-weather_service = WeatherService(api_key, city, mqtt_client, command_channel)
+weather_service = WeatherService(
+    config['api_url'],
+    config['api_key'],
+    config['city'],
+    mqtt_client,
+    config['command_channel']
+)
 microservice = WeatherMicroservice(weather_service)
 
 # Run the microservice
