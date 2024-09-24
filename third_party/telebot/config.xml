@@ -1,0 +1,18 @@
+<config>
+    <server>
+        <address>http://mock-server:8080</address>
+    </server>
+    <api>
+        <temperature>/data/temperature/list</temperature>
+        <humidity>/data/humidity/list</humidity>
+        <light>/data/light/list</light>
+        <control>/device/running</control>
+        <rules>/rule/list</rules>
+        <save_rule>/rule/save</save_rule>
+        <set_rule_status>/rule/running</set_rule_status>
+    </api>
+    <bot>
+        <token>7074896722:AAF34S5tMXWem4IJs3o8tY7Cjut0LvJKqxE</token>
+    </bot>
+</config>
+
