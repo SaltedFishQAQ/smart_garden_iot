@@ -34,6 +34,9 @@ MYSQL_SERVICE_REGISTER = MYSQL_BASE_ROUTE + entity.SERVICE_TABLE + '/register'  
 MYSQL_RULE_LIST = MYSQL_BASE_ROUTE + entity.RULE_TABLE  # get rule list
 MYSQL_RULE_SAVE = MYSQL_BASE_ROUTE + entity.RULE_TABLE + '/save'  # save rule list
 MYSQL_RULE_RUNNING = MYSQL_BASE_ROUTE + entity.RULE_TABLE + '/running'  # change rule running status
+MYSQL_SCHEDULE_LIST = MYSQL_BASE_ROUTE + entity.SCHEDULE_TABLE  # get schedule list
+MYSQL_SCHEDULE_SAVE = MYSQL_BASE_ROUTE + entity.SCHEDULE_TABLE + '/save'  # save schedule list
+MYSQL_SCHEDULE_RUNNING = MYSQL_BASE_ROUTE + entity.SCHEDULE_TABLE + '/running'  # change schedule running status
 # user
 USER_BASE_ROUTE = '/'
 USER_DATA_ENTITY_LIST = USER_BASE_ROUTE + 'data/entities'

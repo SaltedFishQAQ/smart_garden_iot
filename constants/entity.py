@@ -6,6 +6,7 @@ DEVICE_TABLE = 'device'
 USER_TABLE = 'user'
 SERVICE_TABLE = 'service'
 RULE_TABLE = "rule"
+SCHEDULE_TABLE = 'schedule'
 # devices
 TEMPERATURE = 'temperature'
 HUMIDITY = 'humidity'
@@ -19,3 +20,4 @@ THING_SPEAK = 'thing_speak'
 AUTH_SERVICE = 'auth'
 USER_SERVICE = 'user'
 RULE_SERVICE = 'rule'
+SCHEDULE_SERVICE = 'schedule'

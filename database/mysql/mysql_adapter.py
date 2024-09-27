@@ -5,7 +5,7 @@ import constants.http
 
 from common.base_service import BaseService
 from database.mysql.connector import Connector
-from database.mysql.logic import device, user, service, rule
+from database.mysql.logic import device, user, service, rule, schedule
 
 
 class MysqlAdapter(BaseService):
@@ -33,3 +33,4 @@ class MysqlAdapter(BaseService):
         user.Logic(self).register_handler()
         service.Logic(self).register_handler()
         rule.Logic(self).register_handler()
+        schedule.Logic(self).register_handler()
