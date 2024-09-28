@@ -1,7 +1,7 @@
 import constants.entity
 import constants.http
 from common.base_service import BaseService
-from service.user.logic import data, device, catalog, rule, user
+from service.user.logic import data, device, catalog, rule, user, schedule
 
 
 class UserService(BaseService):
@@ -25,3 +25,5 @@ class UserService(BaseService):
         catalog.Logic(self).register_handler()
         rule.Logic(self).register_handler()
         user.Logic(self).register_handler()
+        schedule.Logic(self).register_handler()
+
