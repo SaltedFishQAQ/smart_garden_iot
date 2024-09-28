@@ -6,6 +6,8 @@ INNER_SERVICE_HOST = "http://127.0.0.1"
 MYSQL_HOST = "http://" + os.getenv('MYSQL_HOST', 'localhost')
 INFLUX_HOST = "http://" + os.getenv('INFLUXDB_HOST', 'localhost')
 # service port
+SERVICE_PORT_AUTH = 8081
+SERVICE_PORT_RULE = 8082
 SERVICE_PORT_USER = 8083
 SERVICE_PORT_INFLUX = 8084
 SERVICE_PORT_MYSQL = 8085

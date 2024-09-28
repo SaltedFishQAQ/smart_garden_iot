@@ -26,7 +26,10 @@ class ScheduleService(BaseService):
 
     def get_schedule_list(self):
         while True:
-            resp = requests.get(self.mysql_base_url + const_h.MYSQL_SCHEDULE_LIST)
+            params = {
+                'is_deleted': 0
+            }
+            resp = requests.get(self.mysql_base_url + const_h.MYSQL_SCHEDULE_LIST, params)
             self.schedule_list = resp.json()['list']
             time.sleep(60)
 

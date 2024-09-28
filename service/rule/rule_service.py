@@ -1,6 +1,12 @@
 import json
+import threading
+import time
+
+import requests
+
 import constants.entity
 import constants.rule
+import constants.http as const_h
 import message_broker.channels as mb_channel
 
 from common.base_service import BaseService
@@ -12,14 +18,25 @@ class RuleService(BaseService):
         super().__init__(constants.entity.RULE_SERVICE)
         self.data_channel = mb_channel.DEVICE_DATA  # channel for get data
         self.command_channel = mb_channel.DEVICE_COMMAND  # channel for send command
+        self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
         self.rule_list = demo_rule()
 
     def start(self):
         super().start()
         self.init_mqtt_client()
+        threading.Thread(target=self.get_rule_list).start()
 
     def stop(self):
         self.remove_mqtt_client()
+
+    def get_rule_list(self):
+        while True:
+            params = {
+                'is_deleted': 0
+            }
+            resp = requests.get(self.mysql_base_url + const_h.MYSQL_RULE_LIST, params)
+            self.rule_list = resp.json()['list']
+            time.sleep(60)
 
     def register_mqtt_service(self):
         # device data

@@ -13,7 +13,18 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_SCHEDULE_RUNNING, HTTPMethod.POST, self.running)
 
     def list(self, params):
-        records = self.delegate.db_connect.query("select * from schedule")
+        sql = "select * from schedule where 1=1"
+
+        if 'page' in params and 'size' in params:
+            page = int(params['page'])
+            size = int(params['size'])
+            offset = (page - 1) * size
+            sql += f" limit {offset}, {size}"
+
+        if 'is_deleted' in params:
+            sql += f' and is_deleted = {int(params["is_deleted"])}'
+
+        records = self.delegate.db_connect.query(sql)
         for i in range(len(records)):
             records[i]['created_at'] = time_to_str(records[i]['created_at'])
             records[i]['updated_at'] = time_to_str(records[i]['updated_at'])
