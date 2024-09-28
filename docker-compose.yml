@@ -1,6 +1,40 @@
 version: '3.8'
 
 services:
+  auth_service:
+    build:
+      context: .
+      dockerfile: Dockerfile-auth
+    ports:
+      - "8081:8081"
+    depends_on:
+      - influx_service
+      - mysql_service
+    environment:
+      - INFLUXDB_HOST=influx_service
+      - INFLUXDB_PORT=8084
+      - MYSQL_HOST=mysql_service
+      - MYSQL_PORT=8085
+    networks:
+      - app-network
+
+  rule_service:
+    build:
+      context: .
+      dockerfile: Dockerfile-rule
+    ports:
+      - "8082:8082"
+    depends_on:
+      - influx_service
+      - mysql_service
+    environment:
+      - INFLUXDB_HOST=influx_service
+      - INFLUXDB_PORT=8084
+      - MYSQL_HOST=mysql_service
+      - MYSQL_PORT=8085
+    networks:
+      - app-network
+
   user_service:
     build:
       context: .
