@@ -89,7 +89,10 @@ class BaseDevice:
                 self.handle_opt(types, status)
 
     def _set_working(self, status):
+        if self.working == status:
+            return
         self.working = status
+        self.handle_working(status)
 
         data = {
             'name': self.device_name,

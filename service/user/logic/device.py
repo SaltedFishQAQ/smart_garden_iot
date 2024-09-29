@@ -25,8 +25,14 @@ class Logic:
                 "message": "missing params: name or status"
             }
 
+        if params['status'] == 1:
+            opt = True
+        else:
+            opt = False
+
         self.delegate.mqtt_publish(self.command_channel+params['name'], json.dumps({
-            'running': params['status']
+            'type': 'running',
+            'status': opt
         }))
 
         return {
