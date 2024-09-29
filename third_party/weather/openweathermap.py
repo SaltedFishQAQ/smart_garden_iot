@@ -20,7 +20,7 @@ class ConfigLoader:
             "city": root.find("./weather/city").text,
             "mqtt_broker": root.find("./mqtt/broker").text,
             "mqtt_port": int(root.find("./mqtt/port").text),
-            "command_channel": root.find("./mqtt/command_channel").text
+            "command_channel": root.find("./mqtt/topic").text
         }
         return config_data
 
@@ -64,11 +64,11 @@ class WeatherService:
 
     def trigger_sunrise_action(self):
         print("Action Triggered: Turn off the light")
-        self.mqtt_publish(self.command_channel + 'sunrise', {'status': False})
+        self.mqtt_publish(self.command_channel + 'luminance', {'status': False})
 
     def trigger_sunset_action(self):
         print("Action Triggered: Turn on the light")
-        self.mqtt_publish(self.command_channel + 'sunset', {'status': True})
+        self.mqtt_publish(self.command_channel + 'luminance', {'status': True})
 
     def check_rain_probability(self):
         print(f"Rain Probability Check: {self.rain_probability} mm")
@@ -109,7 +109,7 @@ class WeatherMicroservice:
             self.weather_service.check_sun_times()
 
 # Load configuration from config.xml
-config_loader = ConfigLoader('config.xml')
+config_loader = ConfigLoader('weather_config.xml')
 config = config_loader.config_data
 
 # MQTT setup
