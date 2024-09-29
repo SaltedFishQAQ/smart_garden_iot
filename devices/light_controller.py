@@ -6,8 +6,7 @@ from devices.sensor.light import LightSensor
 
 class LightController(BaseDevice):
     def __init__(self, name):
-        self.conf = json.load(open('./configuration.json'))
-        super().__init__(name, self.conf['broker'], self.conf['port'])
+        super().__init__(name)
         self.sensor = LightSensor()
         self.sensor.receiver = self.handle_data
         self.actuator = LightSwitch()
