@@ -1,6 +1,6 @@
 <config>
     <server>
-        <address>http://mock-server:8080</address>
+        <address>http://43.131.48.203:8083</address>
     </server>
     <api>
         <temperature>/data/temperature/list</temperature>
@@ -14,5 +14,10 @@
     <bot>
         <token>7074896722:AAF34S5tMXWem4IJs3o8tY7Cjut0LvJKqxE</token>
     </bot>
+    <mqtt>
+        <broker>mqtt.eclipseprojects.io</broker>
+        <port>1883</port>
+        <topic>/home/garden/</topic>
+    </mqtt>
 </config>
 

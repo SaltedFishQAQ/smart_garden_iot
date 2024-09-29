@@ -7,6 +7,6 @@
     <mqtt>
         <broker>mqtt.eclipseprojects.io</broker>
         <port>1883</port>
-        <command_channel>home/garden/</command_channel>
+	<topic>/home/garden/</topic>
     </mqtt>
 </config>
