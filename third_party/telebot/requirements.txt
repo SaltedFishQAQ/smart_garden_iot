@@ -1,0 +1,5 @@
+python-telegram-bot==20.0b0
+requests==2.26.0
+nest-asyncio==1.5.1
+paho-mqtt
+
