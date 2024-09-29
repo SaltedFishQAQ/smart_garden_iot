@@ -13,16 +13,21 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_RULE_RUNNING, HTTPMethod.POST, self.running)
 
     def list(self, params):
-        page = int(params['page'])
-        size = int(params['size'])
-        offset = (page-1) * size
+        sql = "select * from rule where 1=1"
+
+        if 'is_deleted' in params:
+            sql += f' and is_deleted = {int(params["is_deleted"])}'
+
         if 'name' in params and params['name'] != "":
-            sql = "select * from rule where src = %s limit %s, %s"
-            args = (params['name'], offset, size)
-        else:
-            sql = "select * from rule limit %s, %s"
-            args = (offset, size)
-        records = self.delegate.db_connect.query(sql, args)
+            sql += f" and src = {params['name']}"
+
+        if 'page' in params and 'size' in params:
+            page = int(params['page'])
+            size = int(params['size'])
+            offset = (page-1) * size
+            sql += f" limit {offset}, {size}"
+
+        records = self.delegate.db_connect.query(sql)
         for i in range(len(records)):
             records[i]['created_at'] = time_to_str(records[i]['created_at'])
             records[i]['updated_at'] = time_to_str(records[i]['updated_at'])
