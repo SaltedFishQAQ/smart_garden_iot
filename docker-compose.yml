@@ -82,7 +82,7 @@ services:
   device_service:
     build:
       context: .
-      dockerfile: Dockerfile-auth
+      dockerfile: Dockerfile-device
     ports:
       - "8087:8087"
     depends_on:
