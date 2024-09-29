@@ -17,5 +17,5 @@ class BaseActuator(object):
         else:
             self._off()
 
-    def get_status(self):
+    def display_status(self):
         return "on" if self.status else "off"
