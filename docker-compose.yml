@@ -79,6 +79,23 @@ services:
     networks:
       - app-network
 
+  device_service:
+    build:
+      context: .
+      dockerfile: Dockerfile-auth
+    ports:
+      - "8087:8087"
+    depends_on:
+      - influx_service
+      - mysql_service
+    environment:
+      - INFLUXDB_HOST=influx_service
+      - INFLUXDB_PORT=8084
+      - MYSQL_HOST=mysql_service
+      - MYSQL_PORT=8085
+    networks:
+      - app-network
+
 volumes:
   influxdb_data:
   mysql_data:
