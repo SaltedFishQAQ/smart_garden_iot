@@ -6,6 +6,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 import xml.etree.ElementTree as ET
 import json
 import logging
+from authenticator import Authenticator  # Import the new Authenticator class
 
 # Enable logging to file
 logging.basicConfig(
@@ -17,6 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 nest_asyncio.apply()
+
 
 # Config Class to Read XML
 class Config:
@@ -33,6 +35,7 @@ class Config:
         self.mqtt_port = int(root.find('mqtt/port').text)
         self.command_channel = root.find('mqtt/topic').text
 
+
 # API Client Class
 class APIClient:
     def __init__(self, config: Config):
@@ -44,11 +47,13 @@ class APIClient:
             return response.json()
         return {}
 
+
 # Bot Handler Class
 class IoTBot:
-    def __init__(self, config: Config, api_client: APIClient):
+    def __init__(self, config: Config, authenticator: Authenticator, api_client: APIClient):
         self.config = config
-        self.api_client = api_client
+        self.authenticator = authenticator
+        self.api_client = api_client  # Add the api_client here
         self.mqtt_client = mqtt.Client()
 
         # MQTT Connect
@@ -71,21 +76,47 @@ class IoTBot:
             logger.error(f"Failed to publish to MQTT: {e}")
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await self.show_main_menu(update)
+        user_id = update.message.from_user.id
 
-    async def show_main_menu(self, update: Update):
-        keyboard = [
-            [KeyboardButton("Temperature"), KeyboardButton("Humidity")],
-            [KeyboardButton("Light"), KeyboardButton("Rules")],
-            [KeyboardButton("Watering"), KeyboardButton("Status")]
-        ]
-        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
-        await update.message.reply_text("Please choose an option:", reply_markup=reply_markup)
+        # If the user is not authenticated, ask for login credentials
+        if not self.authenticator.is_authenticated(user_id):
+            await update.message.reply_text("Please enter your username:")
+            return  # Exit until the user provides username
+
+        # If the user is authenticated, show the main menu
+        await self.show_main_menu(update)
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text = update.message.text
-        logger.info(f"Received message: {text}")
+        user_id = update.message.from_user.id
 
+        # Handle authentication process
+        if not self.authenticator.is_authenticated(user_id):
+            if 'password_prompt' not in context.user_data:
+                # This means the user is providing the username
+                context.user_data['username'] = text
+                await update.message.reply_text("Please enter your password:")
+                context.user_data['password_prompt'] = True
+            else:
+                # The user is providing the password now
+                username = context.user_data['username']
+                password = text
+                success, message = self.authenticator.authenticate(username, password)
+                if success:
+                    await update.message.reply_text(f"Welcome, {message}!")
+                    self.authenticator.add_authenticated_user(user_id)
+                    await self.show_main_menu(update)
+                else:
+                    await update.message.reply_text(message)
+                    await update.message.reply_text("Please enter your username:")
+                    context.user_data.clear()  # Clear user data to restart the process
+            return
+
+        # If user is authenticated, proceed with handling commands
+        await self.process_commands(update, text)
+
+    async def process_commands(self, update: Update, text: str):
+        logger.info(f"Received message: {text}")
         if text == "Temperature":
             await self.get_temperature(update)
         elif text == "Humidity":
@@ -115,6 +146,15 @@ class IoTBot:
         else:
             await update.message.reply_text("Invalid command.")
 
+    async def show_main_menu(self, update: Update):
+        keyboard = [
+            [KeyboardButton("Temperature"), KeyboardButton("Humidity")],
+            [KeyboardButton("Light"), KeyboardButton("Rules")],
+            [KeyboardButton("Watering"), KeyboardButton("Status")]
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
+        await update.message.reply_text("Please choose an option:", reply_markup=reply_markup)
+
     async def get_temperature(self, update: Update):
         params = {
             'page': 1,
@@ -136,6 +176,7 @@ class IoTBot:
         await update.message.reply_text(f"Humidity data:\n{message}")
 
     async def light_menu(self, update: Update):
+        """Menu for controlling lights"""
         keyboard = [
             [KeyboardButton("Turn On Light"), KeyboardButton("Turn Off Light")],
             [KeyboardButton("Back to Main Menu")]
@@ -144,6 +185,7 @@ class IoTBot:
         await update.message.reply_text("Control the light:", reply_markup=reply_markup)
 
     async def rules_menu(self, update: Update):
+        """Menu for managing rules"""
         keyboard = [
             [KeyboardButton("Add Rule"), KeyboardButton("View Rules")],
             [KeyboardButton("Back to Main Menu")]
@@ -151,10 +193,8 @@ class IoTBot:
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
         await update.message.reply_text("Manage rules:", reply_markup=reply_markup)
 
-    async def status(self, update: Update):
-        await update.message.reply_text("Here are the status of the system.")
-
     async def watering_menu(self, update: Update):
+        """Menu for controlling watering system"""
         keyboard = [
             [KeyboardButton("Turn On Watering"), KeyboardButton("Turn Off Watering")],
             [KeyboardButton("Back to Main Menu")]
@@ -162,11 +202,17 @@ class IoTBot:
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
         await update.message.reply_text("Control the watering system:", reply_markup=reply_markup)
 
+    async def status(self, update: Update):
+        """Show the system status"""
+        await update.message.reply_text("Here are the status of the system.")
+
+
 # Main Application Runner
 def main():
     config = Config('config.xml')
-    api_client = APIClient(config)
-    bot = IoTBot(config, api_client)
+    authenticator = Authenticator(config.base_url)  # Create an instance of the Authenticator class
+    api_client = APIClient(config)  # Create an instance of the APIClient
+    bot = IoTBot(config, authenticator, api_client)  # Pass the api_client to IoTBot
     application = Application.builder().token(config.token).build()
 
     application.add_handler(CommandHandler("start", bot.start))
@@ -174,7 +220,7 @@ def main():
 
     application.run_polling()
 
+
 if __name__ == "__main__":
     main()
-
 
