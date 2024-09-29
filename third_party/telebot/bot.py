@@ -8,7 +8,7 @@ nest_asyncio.apply()
 # Read the configuration from config.xml (server address, paths, token, etc.)
 import xml.etree.ElementTree as ET
 
-tree = ET.parse('config.xml')
+tree = ET.parse('telegram_config.xml')
 root = tree.getroot()
 
 BASE_URL = root.find('server_address').text  # Fetch the server address from config.xml
