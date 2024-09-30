@@ -11,6 +11,7 @@ class BaseSensor(object):
 
     @final
     def start(self):
+        print(f"sensor: {self.name} start")
         self.running = True
         threading.Thread(target=self._thread_main).start()
 
@@ -23,7 +24,6 @@ class BaseSensor(object):
 
     @final
     def _thread_main(self):
-        print(f"sensor: {self.name} start")
         while self.running:
             self.receiver(self.monitor())
             for _ in range(60):
