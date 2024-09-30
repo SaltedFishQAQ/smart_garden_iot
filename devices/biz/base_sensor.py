@@ -23,9 +23,13 @@ class BaseSensor(object):
 
     @final
     def _thread_main(self):
+        print(f"sensor: {self.name} start")
         while self.running:
             self.receiver(self.monitor())
-            time.sleep(60*10)
+            for _ in range(60):
+                time.sleep(10)
+                if self.running is False:
+                    return
 
     @property
     def receiver(self):

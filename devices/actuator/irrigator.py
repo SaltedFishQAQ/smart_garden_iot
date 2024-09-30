@@ -6,9 +6,7 @@ class Irrigator(BaseActuator):
         super().__init__("irrigator")
 
     def _on(self):
-        # TODO: start spraying
-        print("start spraying")
+        return "start watering"
 
     def _off(self):
-        # TODO: stop spraying
-        print("stop spraying")
+        return "stop watering"
