@@ -24,8 +24,8 @@ class BaseSensor(object):
     @final
     def _thread_main(self):
         while self.running:
-            time.sleep(5)
             self.receiver(self.monitor())
+            time.sleep(60*10)
 
     @property
     def receiver(self):
