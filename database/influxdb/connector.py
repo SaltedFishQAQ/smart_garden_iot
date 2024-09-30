@@ -24,7 +24,7 @@ class Connector:
 
     def query(self, measurement, time_range=None, cond=None, page=1, size=10):
         if time_range is None:
-            time_range = "start: -30m"
+            time_range = "start: -120m"
 
         if cond is not None:
             cond = f" and {cond}"

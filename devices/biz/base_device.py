@@ -24,7 +24,7 @@ class BaseDevice:
 
     def start(self):
         self.init_mqtt_client()
-        self._set_working(False)
+        self._set_working(True)
 
     def stop(self):
         self.remove_mqtt_client()
