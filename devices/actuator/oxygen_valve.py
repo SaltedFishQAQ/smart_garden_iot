@@ -6,7 +6,7 @@ class OxygenValve(BaseActuator):
         super().__init__("oxygen valve")
 
     def _on(self):
-        print("valve on")
+        return "open the oxygen valve"
 
     def _off(self):
-        print("valve off")
+        return "close the oxygen valve"

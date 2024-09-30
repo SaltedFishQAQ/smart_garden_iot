@@ -28,8 +28,9 @@ class OxygenController(BaseDevice):
 
     def handle_opt(self, opt, status):
         if self.actuator.status != status:
-            self.actuator.switch(status)
-            print(f"device: {self.device_name}, current light switch {self.actuator.display_status()}")
+            logs = self.actuator.switch(status)
+            print(f"device: {self.device_name}, {logs}")
+            self.record_operation(logs)
 
     def handle_data(self, data_str):
         data = json.loads(data_str)

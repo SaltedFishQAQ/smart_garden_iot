@@ -1,8 +1,11 @@
+import message_broker.channels as mb_channel
+
 
 class BaseActuator(object):
     def __init__(self, name):
         self.name = name
         self.status = False
+        self.operation_topic = mb_channel.DEVICE_OPERATION
 
     def _on(self):
         pass
@@ -13,9 +16,9 @@ class BaseActuator(object):
     def switch(self, set_on):
         self.status = set_on
         if set_on:
-            self._on()
+            return self._on()
         else:
-            self._off()
+            return self._off()
 
     def display_status(self):
         return "on" if self.status else "off"
