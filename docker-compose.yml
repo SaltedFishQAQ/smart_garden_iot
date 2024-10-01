@@ -79,6 +79,22 @@ services:
     networks:
       - app-network
 
+  schedule_service:
+    build:
+      context: .
+      dockerfile: Dockerfile-schedule
+    ports:
+      - "8086:8086"
+    depends_on:
+      - mysql_service
+    environment:
+      - INFLUXDB_HOST=influx_service
+      - INFLUXDB_PORT=8084
+      - MYSQL_HOST=mysql_service
+      - MYSQL_PORT=8085
+    networks:
+      - app-network
+
   device_service:
     build:
       context: .
