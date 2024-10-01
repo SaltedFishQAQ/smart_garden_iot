@@ -9,8 +9,20 @@ class Logic:
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.MYSQL_SCHEDULE_LIST, HTTPMethod.GET, self.list)
+        self.delegate.http_client.add_route(const_h.MYSQL_SCHEDULE_COUNT, HTTPMethod.GET, self.count)
         self.delegate.http_client.add_route(const_h.MYSQL_SCHEDULE_SAVE, HTTPMethod.POST, self.save)
         self.delegate.http_client.add_route(const_h.MYSQL_SCHEDULE_RUNNING, HTTPMethod.POST, self.running)
+
+    def count(self, params):
+        records = self.delegate.db_connect.query("select count(*) from schedule")
+        count = 0
+        # TODO: count
+        for record in records:
+            print(record)
+
+        return {
+            'count': count
+        }
 
     def list(self, params):
         sql = "select * from schedule where 1=1"

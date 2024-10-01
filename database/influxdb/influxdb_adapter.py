@@ -55,6 +55,8 @@ class InfluxdbAdapter(BaseService):
         self.http_client.add_route(constants.http.INFLUX_MEASUREMENT_LIST, HTTPMethod.GET, self.http_measurement_list)
         # device data
         self.http_client.add_route(constants.http.INFLUX_DATA_GET, HTTPMethod.GET, self.http_data_get)
+        # data count
+        self.http_client.add_route(constants.http.INFLUX_DATA_COUNT, HTTPMethod.GET, self.http_data_count)
         # device operation
         self.http_client.add_route(constants.http.INFLUX_OPERATION_GET, HTTPMethod.GET, self.http_operation_get)
 
@@ -77,6 +79,17 @@ class InfluxdbAdapter(BaseService):
 
         return {
             'list': result
+        }
+
+    def http_data_count(self, params):
+        measurement = ''
+        if 'measurement' in params:
+            measurement = params['measurement']
+
+        self.data_db_connector.count(measurement)
+
+        return {
+            'list': 0
         }
 
     def http_data_get(self, params):

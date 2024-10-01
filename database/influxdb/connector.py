@@ -57,6 +57,24 @@ class Connector:
                 result.append(line)
         return result
 
+    def count(self, measurement):
+        if measurement != "":
+            sql = f"""from(bucket: "{self.bucket}")
+                     |> range(start: 0)
+                     |> filter(fn: (r) => r._measurement == "{measurement}")
+                     |> count() """
+        else:
+            sql = f"""from(bucket: "{self.bucket}")
+                     |> range(start: 0)
+                     |> count() """
+
+        tables = self.client.query_api().query(sql, org=self.org)
+
+        # TODO: return counts
+        for table in tables:
+            for record in table.records:
+                print(f"Record count: {record.get_value()}")
+
     def measurement_list(self):
         sql = f"""
         import "influxdata/influxdb/schema"

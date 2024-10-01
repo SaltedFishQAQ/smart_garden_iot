@@ -10,6 +10,7 @@ class Logic:
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.USER_SCHEDULE_LIST, HTTPMethod.GET, self.list)
+        self.delegate.http_client.add_route(const_h.USER_SCHEDULE_COUNT, HTTPMethod.GET, self.count)
         self.delegate.http_client.add_route(const_h.USER_SCHEDULE_CREATE, HTTPMethod.POST, self.create)
         self.delegate.http_client.add_route(const_h.USER_SCHEDULE_UPDATE, HTTPMethod.PUT, self.update)
         self.delegate.http_client.add_route(const_h.USER_SCHEDULE_RUNNING, HTTPMethod.POST, self.running)
@@ -21,6 +22,15 @@ class Logic:
             'code': 0,
             'message': "success",
             'list': resp.json()['list']
+        }
+
+    def count(self, params):
+        resp = requests.get(self.mysql_base_url + const_h.MYSQL_SCHEDULE_COUNT, params)
+
+        return {
+            'code': 0,
+            'message': "success",
+            'count': resp.json()['count']
         }
 
     def create(self, params):
