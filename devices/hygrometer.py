@@ -19,10 +19,15 @@ class Hygrometer(BaseDevice):
         self.sensor.stop()
 
     def handle_working(self, status):
-        if status is False:
+        if status:
+            self.sensor.start()
+        else:
             self.sensor.stop()
 
     def handle_opt(self, opt, status):
+        if self.sensor.running == status:
+            return
+
         if status:
             self.sensor.start()
         else:
