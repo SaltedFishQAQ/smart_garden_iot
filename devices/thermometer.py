@@ -5,8 +5,7 @@ from devices.sensor.temperature import TemperatureSensor
 
 class Thermometer(BaseDevice):
     def __init__(self, name):
-        self.conf = json.load(open('./configuration.json'))
-        super().__init__(name, self.conf['broker'], self.conf['port'])
+        super().__init__(name)
         self.sensor = TemperatureSensor()
         self.sensor.receiver = self.handle_data
 

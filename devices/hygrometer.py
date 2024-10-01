@@ -5,8 +5,7 @@ from devices.sensor.humidity import HumiditySensor
 
 class Hygrometer(BaseDevice):
     def __init__(self, name):
-        self.conf = json.load(open('./configuration.json'))
-        super().__init__(name, self.conf['broker'], self.conf['port'])
+        super().__init__(name)
         self.sensor = HumiditySensor()
         self.sensor.receiver = self.handle_data
 
