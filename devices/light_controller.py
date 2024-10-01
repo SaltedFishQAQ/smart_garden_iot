@@ -30,7 +30,9 @@ class LightController(BaseDevice):
         if self.actuator.status != status:
             logs = self.actuator.switch(status)
             print(f"device: {self.device_name}, {logs}")
-            self.record_operation(logs)
+            self.record_operation({
+                'value': logs
+            })
 
     def handle_data(self, data_str):
         data = json.loads(data_str)
