@@ -9,7 +9,7 @@ class Logic:
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.MYSQL_RULE_LIST, HTTPMethod.GET, self.list)
-        self.delegate.http_client.add_route(const_h.MYSQL_RULE_COUNT, HTTPMethod.GET, self.list)
+        self.delegate.http_client.add_route(const_h.MYSQL_RULE_COUNT, HTTPMethod.GET, self.count)
         self.delegate.http_client.add_route(const_h.MYSQL_RULE_SAVE, HTTPMethod.POST, self.save)
         self.delegate.http_client.add_route(const_h.MYSQL_RULE_RUNNING, HTTPMethod.POST, self.running)
 
