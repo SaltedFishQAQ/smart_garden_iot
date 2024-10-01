@@ -7,6 +7,7 @@ class BaseSensor(object):
     def __init__(self, name):
         self.name = name
         self.running = False
+        self.lock = False
         self._receiver = mock_receiver
 
     @final
@@ -24,11 +25,16 @@ class BaseSensor(object):
 
     @final
     def _thread_main(self):
+        if self.lock:
+            return
+        self.lock = True
+
         while self.running:
             self.receiver(self.monitor())
             for _ in range(60):
                 time.sleep(10)
                 if self.running is False:
+                    self.lock = False
                     return
 
     @property
