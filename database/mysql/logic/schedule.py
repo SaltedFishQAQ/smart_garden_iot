@@ -14,11 +14,10 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_SCHEDULE_RUNNING, HTTPMethod.POST, self.running)
 
     def count(self, params):
-        records = self.delegate.db_connect.query("select count(*) from schedule")
+        records = self.delegate.db_connect.query("select count(*) as total from schedule")
         count = 0
-        # TODO: count
         for record in records:
-            print(record)
+            count += record['total']
 
         return {
             'count': count

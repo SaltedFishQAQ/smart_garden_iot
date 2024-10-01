@@ -15,11 +15,10 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_APPROVE, HTTPMethod.POST, self.approve)
 
     def count(self, params):
-        records = self.delegate.db_connect.query("select count(*) from device")
+        records = self.delegate.db_connect.query("select count(*) as total from device")
         count = 0
-        # TODO: count
         for record in records:
-            print(record)
+            count += record['total']
 
         return {
             'count': count
