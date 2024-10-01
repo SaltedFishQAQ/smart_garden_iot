@@ -70,10 +70,12 @@ class Connector:
 
         tables = self.client.query_api().query(sql, org=self.org)
 
-        # TODO: return counts
+        counts = 0
         for table in tables:
             for record in table.records:
-                print(f"Record count: {record.get_value()}")
+                counts += record.get_value()
+
+        return counts
 
     def measurement_list(self):
         sql = f"""

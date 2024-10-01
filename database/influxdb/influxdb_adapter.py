@@ -86,10 +86,10 @@ class InfluxdbAdapter(BaseService):
         if 'measurement' in params:
             measurement = params['measurement']
 
-        self.data_db_connector.count(measurement)
+        counts = self.data_db_connector.count(measurement)
 
         return {
-            'list': 0
+            'count': counts
         }
 
     def http_data_get(self, params):
