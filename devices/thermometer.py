@@ -37,5 +37,5 @@ class Thermometer(BaseDevice):
         if 'value' not in data:
             print(f"data missing temperature value, data: {data}")
             return
-
+        print(f"record data: {self.device_name}, {data}")
         self.record_data(data)

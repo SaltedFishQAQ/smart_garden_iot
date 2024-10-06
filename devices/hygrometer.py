@@ -37,5 +37,5 @@ class Hygrometer(BaseDevice):
         if 'value' not in data:
             print("data missing humidity value, data: {}".format(data))
             return
-
+        print(f"record data: {self.device_name}, {data}")
         self.record_data(data)
