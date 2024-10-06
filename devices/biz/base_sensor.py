@@ -32,7 +32,7 @@ class BaseSensor(object):
         print(f'sensor: {self.name} working...')
         while self.running:
             self.receiver(self.monitor())
-            for _ in range(60):
+            for _ in range(30):
                 time.sleep(10)
                 if self.running is False:
                     self.lock = False
