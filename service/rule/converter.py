@@ -6,7 +6,10 @@ import constants.rule as const
 from typing import Union, Callable, Tuple
 
 
-def convert_checker(compare, dst: Union[float, str]) -> Callable[[Union[float, str]], Tuple[bool, bool]]:
+def convert_checker(compare, dst: Union[int, float, str]) -> Callable[[Union[float, str]], Tuple[bool, bool]]:
+    if isinstance(dst, int):
+        dst = float(dst)
+
     def actuator(src: Union[float, str]) -> Tuple[bool, bool]:
         if isinstance(src, str):
             if isinstance(dst, str) is False:
