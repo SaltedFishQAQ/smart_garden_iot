@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import time
 import pytz
 import paho.mqtt.client as mqtt
+from constants.entity import LIGHT, IRRIGATOR
 
 class ConfigLoader:
     def __init__(self, config_file):
@@ -64,11 +65,11 @@ class WeatherService:
 
     def trigger_sunrise_action(self):
         print("Action Triggered: Turn off the light")
-        self.mqtt_publish(self.command_channel + 'luminance', {'status': False})
+        self.mqtt_publish(self.command_channel + LIGHT, {'status': False})
 
     def trigger_sunset_action(self):
         print("Action Triggered: Turn on the light")
-        self.mqtt_publish(self.command_channel + 'luminance', {'status': True})
+        self.mqtt_publish(self.command_channel + LIGHT, {'status': True})
 
     def check_rain_probability(self):
         print(f"Rain Probability Check: {self.rain_probability} mm")
@@ -77,7 +78,7 @@ class WeatherService:
 
     def trigger_irrigator_action(self):
         print("Action Triggered: Close watering system")
-        self.mqtt_publish(self.command_channel + 'irrigator', {'status': False})
+        self.mqtt_publish(self.command_channel + IRRIGATOR, {'status': False})
 
     def mqtt_publish(self, topic, message):
         self.mqtt_client.publish(topic, str(message))
