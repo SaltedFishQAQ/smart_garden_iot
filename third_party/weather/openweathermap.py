@@ -6,6 +6,7 @@ import pytz
 import paho.mqtt.client as mqtt
 from constants.entity import LIGHT, IRRIGATOR
 
+
 class ConfigLoader:
     def __init__(self, config_file):
         self.config_file = config_file
@@ -24,6 +25,7 @@ class ConfigLoader:
             "command_channel": root.find("./mqtt/topic").text
         }
         return config_data
+
 
 class WeatherService:
     def __init__(self, api_url, api_key, city, mqtt_client, command_channel):
@@ -58,7 +60,7 @@ class WeatherService:
         current_time = datetime.now(pytz.timezone('Europe/Rome'))
         print(f"Current time: {current_time}")
 
-        if current_time >= self.sunrise and current_time < self.sunset:
+        if self.sunrise <= current_time < self.sunset:
             self.trigger_sunrise_action()
         elif current_time >= self.sunset:
             self.trigger_sunset_action()
@@ -89,10 +91,11 @@ class WeatherMicroservice:
         self.weather_service = weather_service
 
     def run(self):
-        self.weather_service.fetch_weather_data()
-        self.weather_service.check_sun_times()
-
         while True:
+            # fetch data
+            self.weather_service.fetch_weather_data()
+            self.weather_service.check_sun_times()
+
             current_time = datetime.utcnow()
             next_sun_check = current_time + timedelta(hours=12)
             next_rain_check = current_time + timedelta(minutes=10)
@@ -106,26 +109,25 @@ class WeatherMicroservice:
                 time.sleep(60)
                 current_time = datetime.utcnow()
 
-            self.weather_service.fetch_weather_data()
-            self.weather_service.check_sun_times()
 
-# Load configuration from config.xml
-config_loader = ConfigLoader('weather_config.xml')
-config = config_loader.config_data
+if __name__ == '__main__':
+    # Load configuration from config.xml
+    config_loader = ConfigLoader('weather_config.xml')
+    config = config_loader.config_data
 
-# MQTT setup
-mqtt_client = mqtt.Client()
-mqtt_client.connect(config['mqtt_broker'], config['mqtt_port'])
+    # MQTT setup
+    mqtt_client = mqtt.Client()
+    mqtt_client.connect(config['mqtt_broker'], config['mqtt_port'])
 
-# Usage
-weather_service = WeatherService(
-    config['api_url'],
-    config['api_key'],
-    config['city'],
-    mqtt_client,
-    config['command_channel']
-)
-microservice = WeatherMicroservice(weather_service)
+    # Usage
+    weather_service = WeatherService(
+        config['api_url'],
+        config['api_key'],
+        config['city'],
+        mqtt_client,
+        config['command_channel']
+    )
+    microservice = WeatherMicroservice(weather_service)
 
-# Run the microservice
-microservice.run()
+    # Run the microservice
+    microservice.run()
