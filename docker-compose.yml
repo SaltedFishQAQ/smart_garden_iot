@@ -112,6 +112,23 @@ services:
     networks:
       - app-network
 
+  weather_service:
+    build:
+      context: .
+      dockerfile: Dockerfile-weather
+    ports:
+      - "8089:8089"
+    depends_on:
+      - influx_service
+      - mysql_service
+    environment:
+      - INFLUXDB_HOST=influx_service
+      - INFLUXDB_PORT=8084
+      - MYSQL_HOST=mysql_service
+      - MYSQL_PORT=8085
+    networks:
+      - app-network
+
 volumes:
   influxdb_data:
   mysql_data:

@@ -86,6 +86,7 @@ class WeatherService:
         self.mqtt_client.publish(topic, str(message))
         print(f"Published to {topic}: {message}")
 
+
 class WeatherMicroservice:
     def __init__(self, weather_service):
         self.weather_service = weather_service
