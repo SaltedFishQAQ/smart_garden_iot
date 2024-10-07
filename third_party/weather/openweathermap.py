@@ -2,6 +2,7 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 import time
+import os
 import pytz
 import paho.mqtt.client as mqtt
 from constants.entity import LIGHT, IRRIGATOR
@@ -9,7 +10,7 @@ from constants.entity import LIGHT, IRRIGATOR
 
 class ConfigLoader:
     def __init__(self, config_file):
-        self.config_file = config_file
+        self.config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), config_file)
         self.config_data = self.load_config()
 
     def load_config(self):
