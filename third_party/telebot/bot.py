@@ -66,11 +66,10 @@ class IoTBot:
             logger.error(f"Failed to connect to MQTT broker: {e}")
 
     def mqtt_publish(self, topic, message):
-        """Simplified MQTT publish function"""
         try:
             logger.info(f"Publishing to {topic}: {message}")
             result = self.mqtt_client.publish(topic, json.dumps(message))
-            result.wait_for_publish()  # Make sure the message is sent
+            result.wait_for_publish()
             logger.info(f"Published to {topic} with message: {message}")
         except Exception as e:
             logger.error(f"Failed to publish to MQTT: {e}")
@@ -81,9 +80,9 @@ class IoTBot:
         # If the user is not authenticated, ask for login credentials
         if not self.authenticator.is_authenticated(user_id):
             await update.message.reply_text("Please enter your username:")
-            return  # Exit until the user provides username
+            return
 
-        # If the user is authenticated, show the main menu
+        # show the main menu only If the user is authenticated,
         await self.show_main_menu(update)
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -93,12 +92,10 @@ class IoTBot:
         # Handle authentication process
         if not self.authenticator.is_authenticated(user_id):
             if 'password_prompt' not in context.user_data:
-                # This means the user is providing the username
                 context.user_data['username'] = text
                 await update.message.reply_text("Please enter your password:")
                 context.user_data['password_prompt'] = True
             else:
-                # The user is providing the password now
                 username = context.user_data['username']
                 password = text
                 success, message = self.authenticator.authenticate(username, password)
@@ -176,7 +173,7 @@ class IoTBot:
         await update.message.reply_text(f"Humidity data:\n{message}")
 
     async def light_menu(self, update: Update):
-        """Menu for controlling lights"""
+        """controlling lights"""
         keyboard = [
             [KeyboardButton("Turn On Light"), KeyboardButton("Turn Off Light")],
             [KeyboardButton("Back to Main Menu")]
@@ -185,7 +182,7 @@ class IoTBot:
         await update.message.reply_text("Control the light:", reply_markup=reply_markup)
 
     async def rules_menu(self, update: Update):
-        """Menu for managing rules"""
+        """managing rules"""
         keyboard = [
             [KeyboardButton("Add Rule"), KeyboardButton("View Rules")],
             [KeyboardButton("Back to Main Menu")]
@@ -194,7 +191,7 @@ class IoTBot:
         await update.message.reply_text("Manage rules:", reply_markup=reply_markup)
 
     async def watering_menu(self, update: Update):
-        """Menu for controlling watering system"""
+        """controlling watering system"""
         keyboard = [
             [KeyboardButton("Turn On Watering"), KeyboardButton("Turn Off Watering")],
             [KeyboardButton("Back to Main Menu")]
