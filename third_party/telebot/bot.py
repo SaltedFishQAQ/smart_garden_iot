@@ -6,9 +6,8 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 import xml.etree.ElementTree as ET
 import json
 import logging
-from authenticator import Authenticator  # Import the new Authenticator class
+from authenticator import Authenticator
 
-# Enable logging to file
 logging.basicConfig(
     filename='/tmp/bot.log',
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -19,8 +18,6 @@ logger = logging.getLogger(__name__)
 
 nest_asyncio.apply()
 
-
-# Config Class to Read XML
 class Config:
     def __init__(self, config_file):
         self.config_file = config_file
@@ -66,10 +63,11 @@ class IoTBot:
             logger.error(f"Failed to connect to MQTT broker: {e}")
 
     def mqtt_publish(self, topic, message):
+        """publish function"""
         try:
             logger.info(f"Publishing to {topic}: {message}")
             result = self.mqtt_client.publish(topic, json.dumps(message))
-            result.wait_for_publish()
+            result.wait_for_publish()  # Make sure the message is sent
             logger.info(f"Published to {topic} with message: {message}")
         except Exception as e:
             logger.error(f"Failed to publish to MQTT: {e}")
@@ -82,14 +80,14 @@ class IoTBot:
             await update.message.reply_text("Please enter your username:")
             return
 
-        # show the main menu only If the user is authenticated,
+        #  show the main menu only If the user is authenticated,
         await self.show_main_menu(update)
 
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text = update.message.text
         user_id = update.message.from_user.id
 
-        # Handle authentication process
+        # Handle authentication
         if not self.authenticator.is_authenticated(user_id):
             if 'password_prompt' not in context.user_data:
                 context.user_data['username'] = text
@@ -106,10 +104,9 @@ class IoTBot:
                 else:
                     await update.message.reply_text(message)
                     await update.message.reply_text("Please enter your username:")
-                    context.user_data.clear()  # Clear user data to restart the process
+                    context.user_data.clear()
             return
 
-        # If user is authenticated, proceed with handling commands
         await self.process_commands(update, text)
 
     async def process_commands(self, update: Update, text: str):
@@ -127,19 +124,19 @@ class IoTBot:
         elif text == "Status":
             await self.status(update)
         elif text == "Turn On Watering":
-            self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
+            self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt",'status': True})
             await update.message.reply_text("Watering system turned on.")
         elif text == "Turn Off Watering":
-            self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': False})
+            self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt",'status': False})
             await update.message.reply_text("Watering system turned off.")
         elif text == "Turn On Light":
-            self.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': True})
+            self.mqtt_publish(self.config.command_channel + 'light', {"type": "opt",'status': True})
             await update.message.reply_text("Light turned on.")
         elif text == "Turn Off Light":
-            self.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': False})
+            self.mqtt_publish(self.config.command_channel + 'light', {"type": "opt",'status': False})
             await update.message.reply_text("Light turned off.")
         elif text == "Back to Main Menu":
-            await self.show_main_menu(update)  # Call the main menu function to return to main menu
+            await self.show_main_menu(update)
         else:
             await update.message.reply_text("Invalid command.")
 
@@ -191,7 +188,7 @@ class IoTBot:
         await update.message.reply_text("Manage rules:", reply_markup=reply_markup)
 
     async def watering_menu(self, update: Update):
-        """controlling watering system"""
+        """watering system"""
         keyboard = [
             [KeyboardButton("Turn On Watering"), KeyboardButton("Turn Off Watering")],
             [KeyboardButton("Back to Main Menu")]
@@ -200,11 +197,10 @@ class IoTBot:
         await update.message.reply_text("Control the watering system:", reply_markup=reply_markup)
 
     async def status(self, update: Update):
-        """Show the system status"""
+        """system status"""
         await update.message.reply_text("Here are the status of the system.")
 
 
-# Main Application Runner
 def main():
     config = Config('config.xml')
     authenticator = Authenticator(config.base_url)  # Create an instance of the Authenticator class
@@ -220,4 +216,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
