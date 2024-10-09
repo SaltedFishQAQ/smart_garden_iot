@@ -130,16 +130,16 @@ class IoTBot:
         elif text == "Status":
             await self.status(update)
         elif text == "Turn On Watering":
-            self.mqtt_publish(self.config.command_channel + 'irrigator', {'status': True})
+            self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
             await update.message.reply_text("Watering system turned on.")
         elif text == "Turn Off Watering":
-            self.mqtt_publish(self.config.command_channel + 'irrigator', {'status': False})
+            self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': False})
             await update.message.reply_text("Watering system turned off.")
         elif text == "Turn On Light":
-            self.mqtt_publish(self.config.command_channel + 'luminance', {'status': True})
+            self.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': True})
             await update.message.reply_text("Light turned on.")
         elif text == "Turn Off Light":
-            self.mqtt_publish(self.config.command_channel + 'luminance', {'status': False})
+            self.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': False})
             await update.message.reply_text("Light turned off.")
         elif text == "Back to Main Menu":
             await self.show_main_menu(update)  # Call the main menu function to return to main menu
