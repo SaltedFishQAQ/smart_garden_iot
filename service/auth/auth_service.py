@@ -13,7 +13,9 @@ class AuthService(BaseService):
     def __init__(self):
         super().__init__(constants.entity.AUTH_SERVICE)
         self.data_channel = mb_channel.DEVICE_DATA  # channel for get data
-        self.storage_channel = mb_channel.STORAGE_DATA  # channel for store data
+        self.data_storage_channel = mb_channel.STORAGE_DATA  # channel for store data
+        self.operation_channel = mb_channel.DEVICE_OPERATION  # channel for get operation
+        self.operation_storage_channel = mb_channel.STORAGE_OPERATION  # channel for store operation
         self.certified_list = []  # verified device
         self.mysql_base_url = f'{constants.http.MYSQL_HOST}:{constants.http.SERVICE_PORT_MYSQL}'
         self.running = False
@@ -40,8 +42,31 @@ class AuthService(BaseService):
     def register_mqtt_service(self):
         # device data
         self.mqtt_listen(self.data_channel + '+', self.mqtt_data)
+        # device operation
+        self.mqtt_listen(self.operation_channel, self.mqtt_operation)
+
+    def is_certified(self, name):
+        for item in self.certified_list:
+            if name == item['name']:
+                return True
+        return False
 
     def mqtt_data(self, client, userdata, msg):
+        content = msg.payload.decode('utf-8')
+        data_dict = json.loads(content)
+        if 'tags' not in data_dict or 'device' not in data_dict['tags']:
+            print(f"topic {msg.topic} message without device")
+            return
+
+        name = data_dict['tags']['device']
+        if self.is_certified(name) is False:
+            print(f"device: {name}, is not certified")
+            return
+
+        entity = msg.topic.removeprefix(self.data_channel)
+        self.mqtt_publish(self.data_storage_channel + entity, msg.payload)
+
+    def mqtt_operation(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
         print(data_dict)
@@ -49,16 +74,9 @@ class AuthService(BaseService):
             print(f"topic {msg.topic} message without device")
             return
 
-        is_certified = False
-        device = data_dict['tags']['device']
-        for item in self.certified_list:
-            if device == item['name']:
-                is_certified = True
-                break
-
-        if is_certified is not True:
-            print(f"device: {device}, is not certified")
+        name = data_dict['tags']['device']
+        if self.is_certified(name) is False:
+            print(f"device: {name}, is not certified")
             return
 
-        entity = msg.topic.removeprefix(self.data_channel)
-        self.mqtt_publish(self.storage_channel + entity, msg.payload)
+        self.mqtt_publish(self.operation_storage_channel, msg.payload)

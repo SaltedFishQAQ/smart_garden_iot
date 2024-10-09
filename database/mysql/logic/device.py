@@ -9,9 +9,20 @@ class Logic:
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_LIST, HTTPMethod.GET, self.list)
+        self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_COUNT, HTTPMethod.GET, self.count)
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_CERTIFIED_LIST, HTTPMethod.GET, self.certified_list)
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_REGISTER, HTTPMethod.POST, self.register)
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_APPROVE, HTTPMethod.POST, self.approve)
+
+    def count(self, params):
+        records = self.delegate.db_connect.query("select count(*) as total from device")
+        count = 0
+        for record in records:
+            count += record['total']
+
+        return {
+            'count': count
+        }
 
     def list(self, params):
         records = self.delegate.db_connect.query("select * from device")

@@ -5,8 +5,7 @@ from devices.sensor.humidity import HumiditySensor
 
 class Hygrometer(BaseDevice):
     def __init__(self, name):
-        self.conf = json.load(open('./configuration.json'))
-        super().__init__(name, self.conf['broker'], self.conf['port'])
+        super().__init__(name)
         self.sensor = HumiditySensor()
         self.sensor.receiver = self.handle_data
 
@@ -19,10 +18,15 @@ class Hygrometer(BaseDevice):
         self.sensor.stop()
 
     def handle_working(self, status):
-        if status is False:
+        if status:
+            self.sensor.start()
+        else:
             self.sensor.stop()
 
     def handle_opt(self, opt, status):
+        if self.sensor.running == status:
+            return
+
         if status:
             self.sensor.start()
         else:
@@ -33,5 +37,5 @@ class Hygrometer(BaseDevice):
         if 'value' not in data:
             print("data missing humidity value, data: {}".format(data))
             return
-
+        print(f"record data: {self.device_name}, {data}")
         self.record_data(data)

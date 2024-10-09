@@ -1,6 +1,7 @@
 import time
 import requests
 import threading
+import constants.entity
 import constants.http as const_h
 from common.mqtt import MQTTClient
 from common.http_client import HTTPClient
@@ -68,6 +69,9 @@ class BaseService:
         self.http_client = None
 
     def _heart_beat(self):
+        if self.service_name == constants.entity.MYSQL:
+            time.sleep(100)
+
         while True:
             data = {
                 'name': self.service_name

@@ -66,7 +66,7 @@ class RuleService(BaseService):
             checker = convert_checker(compare, compare_val)  # compare function
             match, ok = checker(data_val)  # compare result
             if ok is False:
-                print(f"invalid rule: {r}")
+                print(f"invalid rule: {r}, data value: {data_val}, compare value: {compare_val}")
             if match:
                 target, msg, ok = convert_message(r['dst'], opt)
                 if ok is False:

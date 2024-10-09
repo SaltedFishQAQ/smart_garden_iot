@@ -24,7 +24,7 @@ class Connector:
 
     def query(self, measurement, time_range=None, cond=None, page=1, size=10):
         if time_range is None:
-            time_range = "start: -30m"
+            time_range = "start: -120m"
 
         if cond is not None:
             cond = f" and {cond}"
@@ -56,6 +56,26 @@ class Connector:
                         line[val] = record.values[val]
                 result.append(line)
         return result
+
+    def count(self, measurement):
+        if measurement != "":
+            sql = f"""from(bucket: "{self.bucket}")
+                     |> range(start: 0)
+                     |> filter(fn: (r) => r._measurement == "{measurement}")
+                     |> count() """
+        else:
+            sql = f"""from(bucket: "{self.bucket}")
+                     |> range(start: 0)
+                     |> count() """
+
+        tables = self.client.query_api().query(sql, org=self.org)
+
+        counts = 0
+        for table in tables:
+            for record in table.records:
+                counts += record.get_value()
+
+        return counts
 
     def measurement_list(self):
         sql = f"""

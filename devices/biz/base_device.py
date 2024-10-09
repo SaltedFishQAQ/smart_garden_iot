@@ -6,7 +6,7 @@ from common.mqtt import MQTTClient
 
 
 class BaseDevice:
-    def __init__(self, name, broker, port):
+    def __init__(self, name, broker="mqtt.eclipseprojects.io", port=1883):
         # meta
         self.device_name = name
         self.working = False
@@ -17,13 +17,14 @@ class BaseDevice:
         self.register_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}{const_h.MYSQL_DEVICE_REGISTER}'
         self.data_topic = mb_channel.DEVICE_DATA + name
         self.command_topic = mb_channel.DEVICE_COMMAND + name
+        self.operation_topic = mb_channel.DEVICE_OPERATION
         # func
         self.sensor = None
         self.actuator = None
 
     def start(self):
         self.init_mqtt_client()
-        self._set_working(False)
+        self._set_working(True)
 
     def stop(self):
         self.remove_mqtt_client()
@@ -67,6 +68,15 @@ class BaseDevice:
         }
         self.mqtt_publish(self.data_topic, json.dumps(mqtt_data))
 
+    def record_operation(self, message):
+        mqtt_data = {
+            'tags': {
+                'device': self.device_name,
+            },
+            'fields': message,
+        }
+        self.mqtt_publish(self.operation_topic, json.dumps(mqtt_data))
+
     def _handle_command(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
@@ -89,7 +99,10 @@ class BaseDevice:
                 self.handle_opt(types, status)
 
     def _set_working(self, status):
+        if self.working == status:
+            return
         self.working = status
+        self.handle_working(status)
 
         data = {
             'name': self.device_name,

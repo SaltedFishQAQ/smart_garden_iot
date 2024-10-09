@@ -59,6 +59,7 @@ class ScheduleService(BaseService):
                 continue
             device = schedule['target']
             msg = json.dumps({
+                'type': 'opt',
                 'status': schedule['opt']
             })
             self.mqtt_publish(self.command_channel + device, msg)

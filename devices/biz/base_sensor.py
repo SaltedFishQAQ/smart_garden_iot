@@ -7,10 +7,12 @@ class BaseSensor(object):
     def __init__(self, name):
         self.name = name
         self.running = False
+        self.lock = False
         self._receiver = mock_receiver
 
     @final
     def start(self):
+        print(f"sensor: {self.name} start")
         self.running = True
         threading.Thread(target=self._thread_main).start()
 
@@ -23,9 +25,18 @@ class BaseSensor(object):
 
     @final
     def _thread_main(self):
+        if self.lock:
+            return
+        self.lock = True
+
+        print(f'sensor: {self.name} working...')
         while self.running:
-            time.sleep(5)
             self.receiver(self.monitor())
+            for _ in range(30):
+                time.sleep(10)
+                if self.running is False:
+                    self.lock = False
+                    return
 
     @property
     def receiver(self):
