@@ -3,8 +3,6 @@
         <address>http://43.131.48.203:8083</address>
     </server>
     <api>
-        <temperature>/data/temperature/list</temperature>
-        <humidity>/data/humidity/list</humidity>
         <light>/data/light/list</light>
         <control>/device/running</control>
         <rules>/rule/list</rules>
