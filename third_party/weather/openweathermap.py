@@ -54,8 +54,20 @@ class WeatherService:
 
             self.rain_probability = data.get('rain', {}).get('1h', 0)
             print(f"Sunrise: {self.sunrise}, Sunset: {self.sunset}, Rain Probability: {self.rain_probability} mm")
+
+            #publish rain information
+            if self.rain_probability >= 0:
+                self.publish_rain_prediction(data)
         else:
             print(f"Error fetching data: {response.status_code} - {response.text}")
+
+    def publish_rain_prediction(self, weather_data):
+        # Extract rain prediction details
+        rain_volume = weather_data.get('rain', {}).get('1h', 0)
+        message = {
+            "prediction": f"Rain expected in the next hour with a volume of {rain_volume} mm."
+        }
+        self.mqtt_publish(self.command_channel + 'prediction', message)
 
     def check_sun_times(self):
         current_time = datetime.now(pytz.timezone('Europe/Rome'))
@@ -113,7 +125,7 @@ class WeatherMicroservice:
 
 
 if __name__ == '__main__':
-    # Load configuration from config.xml
+    # Load configuration
     config_loader = ConfigLoader('weather_config.xml')
     config = config_loader.config_data
 
@@ -131,5 +143,4 @@ if __name__ == '__main__':
     )
     microservice = WeatherMicroservice(weather_service)
 
-    # Run the microservice
     microservice.run()
