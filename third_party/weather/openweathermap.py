@@ -68,11 +68,11 @@ class WeatherService:
 
     def trigger_sunrise_action(self):
         print("Action Triggered: Turn off the light")
-        self.mqtt_publish(self.command_channel + LIGHT, {'status': False})
+        self.mqtt_publish(self.command_channel + LIGHT, {"type": "opt",'status': False})
 
     def trigger_sunset_action(self):
         print("Action Triggered: Turn on the light")
-        self.mqtt_publish(self.command_channel + LIGHT, {'status': True})
+        self.mqtt_publish(self.command_channel + LIGHT, {"type": "opt",'status': True})
 
     def check_rain_probability(self):
         print(f"Rain Probability Check: {self.rain_probability} mm")
@@ -81,7 +81,7 @@ class WeatherService:
 
     def trigger_irrigator_action(self):
         print("Action Triggered: Close watering system")
-        self.mqtt_publish(self.command_channel + IRRIGATOR, {'status': False})
+        self.mqtt_publish(self.command_channel + IRRIGATOR, {"type": "opt",'status': False})
 
     def mqtt_publish(self, topic, message):
         self.mqtt_client.publish(topic, str(message))
