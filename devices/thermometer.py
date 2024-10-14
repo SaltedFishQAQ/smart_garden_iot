@@ -39,3 +39,10 @@ class Thermometer(BaseDevice):
             return
         print(f"record data: {self.device_name}, {data}")
         self.record_data(data)
+
+    def status(self):
+        return {
+            'device': self.working,
+            'sensor': self.sensor.running,
+            'actuator': self.actuator.status
+        }

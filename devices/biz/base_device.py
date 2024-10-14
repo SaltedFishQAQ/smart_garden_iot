@@ -3,6 +3,8 @@ import requests
 import constants.http as const_h
 import message_broker.channels as mb_channel
 from common.mqtt import MQTTClient
+from common.http_client import HTTPClient
+from http import HTTPMethod
 
 
 class BaseDevice:
@@ -14,6 +16,7 @@ class BaseDevice:
         self.port = port
         # communication
         self.mqtt_client = None
+        self.http_client = None
         self.register_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}{const_h.MYSQL_DEVICE_REGISTER}'
         self.data_topic = mb_channel.DEVICE_DATA + name
         self.command_topic = mb_channel.DEVICE_COMMAND + name
@@ -24,6 +27,7 @@ class BaseDevice:
 
     def start(self):
         self.init_mqtt_client()
+        self.init_http_client()
         self._set_working(True)
 
     def stop(self):
@@ -44,6 +48,14 @@ class BaseDevice:
 
         self.mqtt_client.stop()
         self.mqtt_client = None
+
+    def init_http_client(self):
+        if self.http_client is not None:
+            return
+
+        self.http_client = HTTPClient("0.0.0.0", 8087)
+        self.http_client.start()
+        self.http_client.add_route(const_h.DEVICE_STATUS_GET, HTTPMethod.GET, self.status)
 
     def mqtt_listen(self, topic, callback):
         if self.mqtt_client is None:
@@ -118,4 +130,7 @@ class BaseDevice:
         pass
 
     def handle_opt(self, opt, status):
+        pass
+
+    def status(self):
         pass
