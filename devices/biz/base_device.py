@@ -6,7 +6,8 @@ from common.mqtt import MQTTClient
 
 
 class BaseDevice:
-    def __init__(self, name, broker="mqtt.eclipseprojects.io", port=1883):
+    # def __init__(self, name, broker="mqtt.eclipseprojects.io", port=1883):
+    def __init__(self, name, broker="10.9.0.10", port=1883):
         # meta
         self.device_name = name
         self.working = False
