@@ -12,7 +12,6 @@ class Logic:
         self.delegate = delegate
         self.command_channel = mb_channel.DEVICE_COMMAND
         self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
-        self.device_base_url = 'http://device_service:8087'
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.USER_DEVICE_RUNNING, HTTPMethod.POST, self.running)
@@ -73,6 +72,15 @@ class Logic:
                 "code": 500,
                 "message": "missing params: name"
             }
-        resp = requests.post(self.device_base_url + const_h.DEVICE_STATUS_GET, json=params)
 
-        print(resp.json())
+        if params['name'] not in self.delegate.device_status:
+            return {
+                "code": 500,
+                "message": "record not found"
+            }
+
+        return {
+            "code": 0,
+            "message": "success",
+            "data": self.delegate.device_status[params['name']]
+        }
