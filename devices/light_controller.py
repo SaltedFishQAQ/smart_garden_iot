@@ -29,7 +29,7 @@ class LightController(BaseDevice):
     def handle_opt(self, opt, status):
         if self.actuator.status != status:
             logs = self.actuator.switch(status)
-            print(f"device: {self.device_name}, {logs}")
+            print(f"device: {self.device_name}, operation: {logs}")
             self.record_operation({
                 'value': logs
             })

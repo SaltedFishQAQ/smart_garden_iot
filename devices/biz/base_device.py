@@ -80,6 +80,7 @@ class BaseDevice:
     def _handle_command(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
+        print(f"device: {self.device_name}, receive command: {data_dict}")
 
         if 'type' not in data_dict:
             print(f"data missing type value, data: {content}")
