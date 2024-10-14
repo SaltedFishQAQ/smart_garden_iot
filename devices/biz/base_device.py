@@ -55,7 +55,7 @@ class BaseDevice:
 
         self.http_client = HTTPClient("0.0.0.0", 8087)
         self.http_client.start()
-        self.http_client.add_route(const_h.DEVICE_STATUS_GET, HTTPMethod.GET, self.status)
+        self.http_client.add_route(const_h.DEVICE_STATUS_GET + self.device_name, HTTPMethod.GET, self.status)
 
     def mqtt_listen(self, topic, callback):
         if self.mqtt_client is None:
@@ -133,4 +133,6 @@ class BaseDevice:
         pass
 
     def status(self):
-        pass
+        return {
+            'device': self.working
+        }
