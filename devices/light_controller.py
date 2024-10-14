@@ -45,5 +45,6 @@ class LightController(BaseDevice):
     def status(self):
         return {
             'device': self.working,
-            'sensor': self.sensor.running
+            'sensor': self.sensor.running,
+            'actuator': self.actuator.status
         }
