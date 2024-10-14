@@ -1,4 +1,6 @@
 import json
+import time
+
 import requests
 import constants.http as const_h
 import message_broker.channels as mb_channel
@@ -125,6 +127,7 @@ class BaseDevice:
     def notify_status(self):
         while True:
             self.mqtt_client.publish(mb_channel.DEVICE_STATUS + self.device_name, json.dumps(self.status()))
+            time.sleep(30)
 
     def status(self):
         return {
