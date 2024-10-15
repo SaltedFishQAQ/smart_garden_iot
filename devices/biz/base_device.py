@@ -1,12 +1,15 @@
 import json
+import time
+
 import requests
 import constants.http as const_h
 import message_broker.channels as mb_channel
+import threading
 from common.mqtt import MQTTClient
 
 
 class BaseDevice:
-    def __init__(self, name, broker="mqtt.eclipseprojects.io", port=1883):
+    def __init__(self, name, broker="10.9.0.10", port=1883):
         # meta
         self.device_name = name
         self.working = False
@@ -24,6 +27,7 @@ class BaseDevice:
 
     def start(self):
         self.init_mqtt_client()
+        threading.Thread(target=self.notify_status).start()
         self._set_working(True)
 
     def stop(self):
@@ -80,6 +84,7 @@ class BaseDevice:
     def _handle_command(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
+        print(f"device: {self.device_name}, receive command: {data_dict}")
 
         if 'type' not in data_dict:
             print(f"data missing type value, data: {content}")
@@ -118,3 +123,14 @@ class BaseDevice:
 
     def handle_opt(self, opt, status):
         pass
+
+    def notify_status(self):
+        while True:
+            data = self.status()
+            self.mqtt_client.publish(mb_channel.DEVICE_STATUS + self.device_name, json.dumps(data))
+            time.sleep(30)
+
+    def status(self):
+        return {
+            'device': self.working
+        }
