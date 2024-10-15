@@ -258,25 +258,42 @@ class IoTBot:
         await update.message.reply_text("Control the light:", reply_markup=reply_markup)
 
     async def rules_menu(self, update: Update):
-            """Fetch and display rules to the user."""
-            rules = self.api_client.fetch_rules()
+        """Fetch and display active rules to the user."""
+        rules = self.api_client.fetch_rules()
 
-            if rules:
-                message = "\n\n".join([f"ID: {rule.get('id')}\n"
-                                       f"Source: {rule.get('src')}\n"
-                                       f"Entity: {rule.get('entity')}\n"
-                                       f"Field: {rule.get('field')}\n"
-                                       f"Compare: {rule.get('compare')}\n"
-                                       f"Value: {rule.get('value')}\n"
-                                       f"Destination: {rule.get('dst')}\n"
-                                       f"Action: {rule.get('opt')}\n"
-                                       f"Description: {rule.get('desc')}\n"
-                                       f"Created at: {rule.get('created_at')}\n"
-                                       f"Updated at: {rule.get('updated_at')}\n"
-                                       f"Deleted: {rule.get('is_deleted', 0)}" for rule in rules])
-                await update.message.reply_text(f"Rules:\n{message}")
+        comparison_mapping = {
+            "gt": "greater than",
+            "lt": "less than",
+            "lte": "less than or equal to",
+        }
+
+        if rules:
+            active_rules = [rule for rule in rules if rule.get('is_deleted', 0) == 0]
+
+            if active_rules:
+                message = ""
+                for rule in active_rules:
+                    source = rule.get('src', 'Unknown')
+                    entity = rule.get('entity', 'Unknown')
+                    compare = rule.get('compare', '')
+                    value = rule.get('value', '')
+                    destination = rule.get('dst', 'Unknown')
+                    action = rule.get('opt', 'Unknown')
+                    description = rule.get('desc', 'No description')
+                    created_at = rule.get('created_at', 'N/A')
+
+                    comparison_text = comparison_mapping.get(compare, compare)
+                    condition = f"If {entity} from {source} is {comparison_text} {value}"
+                    action_description = f"turn {action} the {destination}"
+                    message += f"Rule: {condition}, {action_description}.\n"
+                    message += f"Description: {description}\n"
+                    message += f"Created: {created_at}\n\n"
+
+                await update.message.reply_text(message)
             else:
-                await update.message.reply_text("No rules available.")
+                await update.message.reply_text("No active rules available.")
+        else:
+            await update.message.reply_text("No rules available.")
 
     async def watering_menu(self, update: Update):
         keyboard = [
