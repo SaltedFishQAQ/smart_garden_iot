@@ -17,7 +17,7 @@ A Telegram bot integrated with MQTT and HTTP APIs to control an IoT system. This
     - **Light**: Control the garden light (turn on/off).
     - **Watering**: Control the watering system (turn on/off).
     - **View Rules**: Display active rules for automated actions.
-    - **Status**: Get the current system status (temperature, humidity, light, oxygen levels).
+    - **Status**: Get the current system status (temperature, humidity, light, oxygen).
 
 ## File Structure
 
