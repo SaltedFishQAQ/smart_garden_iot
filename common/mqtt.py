@@ -17,7 +17,8 @@ class MQTTClient:
         self.client.on_message = self.handle_message
 
     def start(self):
-        self.client.connect(self.broker, self.port)
+        self.client.connect(self.broker, self.port, keepalive=60)
+        self.client.reconnect_delay_set(min_delay=1, max_delay=120)
         self.client.loop_start()
 
     def stop(self):
