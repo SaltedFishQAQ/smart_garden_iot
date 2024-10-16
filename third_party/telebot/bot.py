@@ -4,7 +4,6 @@ import nest_asyncio
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, JobQueue
 import logging
-import asyncio
 from mqtt import MQTTClient
 from authenticator import Authenticator
 from notification import NotificationManager
