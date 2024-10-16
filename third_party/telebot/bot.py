@@ -1,13 +1,11 @@
-import nest_asyncio
+import xml.etree.ElementTree as ET
 import requests
-import paho.mqtt.client as mqtt
+import nest_asyncio
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, JobQueue
-import xml.etree.ElementTree as ET
-import json
 import logging
 import asyncio
-from asyncio import run_coroutine_threadsafe
+from mqtt import MQTTClient
 from authenticator import Authenticator
 from notification import NotificationManager
 
@@ -16,13 +14,12 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
-
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 nest_asyncio.apply()
 
-#load configuration
+# Load configuration
 class Config:
     def __init__(self, config_file):
         self.config_file = config_file
@@ -91,56 +88,16 @@ class APIClient:
 
         return {}
 
-
-# handling bot operations and MQTT communication
 class IoTBot:
     def __init__(self, config: Config, authenticator: Authenticator, api_client: APIClient, notification_manager: NotificationManager):
         self.config = config
         self.authenticator = authenticator
         self.api_client = api_client
         self.notification_manager = notification_manager
-        self.mqtt_client = mqtt.Client()
-        self.loop = asyncio.get_event_loop()
 
-        self.subscribed_users = set()
-
-        # MQTT Connect
-        try:
-            logger.info("Connecting to MQTT broker...")
-            self.mqtt_client.on_message = self.on_mqtt_message
-            self.mqtt_client.connect(self.config.mqtt_broker, self.config.mqtt_port)
-            self.mqtt_client.loop_start()
-            logger.info(f"Connected to MQTT broker at {self.config.mqtt_broker}:{self.config.mqtt_port}")
-
-            self.mqtt_client.subscribe(self.config.command_channel + "prediction")
-            logger.info(f"Subscribed to topic: {self.config.command_channel}prediction")
-        except Exception as e:
-            logger.error(f"Failed to connect to MQTT broker: {e}")
-
-    def on_mqtt_message(self, client, userdata, msg):
-        """Callback when a message is received from the MQTT broker"""
-        try:
-            payload_str = msg.payload.decode('utf-8')
-            payload_str = payload_str.replace("'", '"')
-            payload = json.loads(payload_str)
-            prediction = payload.get('prediction', 'No prediction data.')
-            logger.info(f"Received message from topic {msg.topic}: {prediction}")
-            logger.info(f"Notifying all subscribed users: {self.subscribed_users}")
-            run_coroutine_threadsafe(self.notification_manager.notify_users(prediction), self.loop)
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse MQTT message: {e}")
-        except Exception as e:
-            logger.error(f"Error in on_mqtt_message: {e}")
-
-    def mqtt_publish(self, topic, message):
-        """Publish function"""
-        try:
-            logger.info(f"Publishing to {topic}: {message}")
-            result = self.mqtt_client.publish(topic, json.dumps(message))
-            result.wait_for_publish()  # Make sure the message is sent
-            logger.info(f"Published to {topic} with message: {message}")
-        except Exception as e:
-            logger.error(f"Failed to publish to MQTT: {e}")
+        # Create the MQTT client
+        self.mqtt_client = MQTTClient(config, notification_manager)
+        self.mqtt_client.connect()
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         logger.info(f"Received /start command from user {update.message.from_user.id}.")
@@ -184,15 +141,7 @@ class IoTBot:
     def register_user_for_notifications(self, update):
         """Subscribe user to notifications after successful login."""
         user_id = update.message.from_user.id
-        if user_id not in self.subscribed_users:
-            logger.info(f"Subscribing user {user_id} to notifications...")
-            self.subscribed_users.add(user_id)
-            logger.info(f"User {user_id} subscribed to notifications. Subscribed users: {self.subscribed_users}")
-        else:
-            logger.info(f"User {user_id} is already subscribed.")
-
-        logger.info(f"Registering user {user_id} in NotificationManager.")
-        self.notification_manager.register_user(user_id)
+        self.mqtt_client.register_user(user_id)
 
     async def process_commands(self, update: Update, text: str):
         logger.info(f"Received message: {text}")
@@ -209,16 +158,16 @@ class IoTBot:
         elif text == "Status":
             await self.system_status(update)
         elif text == "Turn On Watering":
-            self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
+            self.mqtt_client.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
             await update.message.reply_text("Watering system turned on.")
         elif text == "Turn Off Watering":
-            self.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': False})
+            self.mqtt_client.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': False})
             await update.message.reply_text("Watering system turned off.")
         elif text == "Turn On Light":
-            self.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': True})
+            self.mqtt_client.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': True})
             await update.message.reply_text("Light turned on.")
         elif text == "Turn Off Light":
-            self.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': False})
+            self.mqtt_client.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': False})
             await update.message.reply_text("Light turned off.")
         elif text == "Back to Main Menu":
             await self.show_main_menu(update)
@@ -333,7 +282,6 @@ class IoTBot:
 
         await update.message.reply_text(status_message)
 
-
 def main():
     config = Config('config.xml')
     authenticator = Authenticator(config.base_url)
@@ -352,5 +300,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
