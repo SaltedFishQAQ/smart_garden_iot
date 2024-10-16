@@ -2,10 +2,11 @@
     <weather>
         <api_url>https://api.openweathermap.org/data/2.5/weather</api_url>
         <api_key>5dc8ece6e02d649d870e2e3a67ffc128</api_key>
+        <timezone>Europe/Rome</timezone>
         <city>Turin,it</city>
     </weather>
     <mqtt>
-        <broker>mqtt.eclipseprojects.io</broker>
+        <broker>43.131.48.203</broker>
         <port>1883</port>
 	<topic>iot/lwx123321/test/device/command/</topic>
     </mqtt>
