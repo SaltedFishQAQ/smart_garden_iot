@@ -23,16 +23,18 @@ class ConfigLoader:
             "city": root.find("./weather/city").text,
             "mqtt_broker": root.find("./mqtt/broker").text,
             "mqtt_port": int(root.find("./mqtt/port").text),
-            "command_channel": root.find("./mqtt/topic").text
+            "command_channel": root.find("./mqtt/topic").text,
+            "timezone": root.find("./weather/timezone").text,
         }
         return config_data
 
 
 class WeatherService:
-    def __init__(self, api_url, api_key, city, mqtt_client, command_channel):
+    def __init__(self, api_url, api_key, city,timezone, mqtt_client, command_channel):
         self.api_url = api_url
         self.api_key = api_key
         self.city = city
+        self.timezone = timezone
         self.sunrise = None
         self.sunset = None
         self.rain_probability = None
@@ -48,7 +50,7 @@ class WeatherService:
             utc_sunrise = datetime.utcfromtimestamp(data['sys']['sunrise'])
             utc_sunset = datetime.utcfromtimestamp(data['sys']['sunset'])
 
-            local_tz = pytz.timezone('Europe/Rome')
+            local_tz = pytz.timezone(self.timezone)
             self.sunrise = utc_sunrise.replace(tzinfo=pytz.utc).astimezone(local_tz)
             self.sunset = utc_sunset.replace(tzinfo=pytz.utc).astimezone(local_tz)
 
@@ -70,7 +72,7 @@ class WeatherService:
         self.mqtt_publish(self.command_channel + 'prediction', message)
 
     def check_sun_times(self):
-        current_time = datetime.now(pytz.timezone('Europe/Rome'))
+        current_time = datetime.now(pytz.timezone(self.timezone))
         print(f"Current time: {current_time}")
 
         if self.sunrise <= current_time < self.sunset:
@@ -134,7 +136,7 @@ class WeatherMicroservice:
         self.weather_service.check_sun_times()
 
         while True:
-            current_time = datetime.now(pytz.timezone('Europe/Rome'))
+            current_time = datetime.now(pytz.timezone(self.weather_service.timezone))
 
             # Calculate next sunrise/sunset check times based on current sunrise/sunset
             next_sunrise_check = self.weather_service.sunrise - timedelta(minutes=30)
@@ -157,7 +159,7 @@ class WeatherMicroservice:
 
                 # Sleep for 10 minutes before the next check
                 time.sleep(600)  # 10 minutes
-                current_time = datetime.now(pytz.timezone('Europe/Rome'))
+                current_time = datetime.now(pytz.timezone(self.weather_service.timezone))
 
 
 if __name__ == '__main__':
@@ -174,6 +176,7 @@ if __name__ == '__main__':
         config['api_url'],
         config['api_key'],
         config['city'],
+        config['timezone'],
         mqtt_client,
         config['command_channel']
     )
