@@ -124,6 +124,42 @@ class WeatherMicroservice:
                 current_time = datetime.utcnow()
 
 
+class WeatherMicroservice:
+    def __init__(self, weather_service):
+        self.weather_service = weather_service
+
+    def run(self):
+        # Fetch initial weather data and update sunrise/sunset times
+        self.weather_service.fetch_weather_data()
+        self.weather_service.check_sun_times()
+
+        while True:
+            current_time = datetime.now(pytz.timezone('Europe/Rome'))
+
+            # Calculate next sunrise/sunset check times based on current sunrise/sunset
+            next_sunrise_check = self.weather_service.sunrise - timedelta(minutes=30)
+            next_sunset_check = self.weather_service.sunset - timedelta(minutes=30)
+
+            # Re-fetch weather data every 12 hours to update sunrise/sunset times
+            next_weather_update = current_time + timedelta(hours=12)
+
+            while current_time < next_weather_update:
+                # Check if it's time to refetch the weather data for new sunrise/sunset times
+                if current_time >= next_sunrise_check or current_time >= next_sunset_check:
+                    # Refetch weather data 30 minutes before the next sunrise or sunset
+                    self.weather_service.fetch_weather_data()
+                    self.weather_service.check_sun_times()
+
+                    # Recalculate the next check times based on updated sunrise/sunset times
+                    next_sunrise_check = self.weather_service.sunrise - timedelta(minutes=30)
+                    next_sunset_check = self.weather_service.sunset - timedelta(minutes=30)
+                    next_weather_update = current_time + timedelta(hours=12)
+
+                # Sleep for 10 minutes before the next check
+                time.sleep(600)  # 10 minutes
+                current_time = datetime.now(pytz.timezone('Europe/Rome'))
+
+
 if __name__ == '__main__':
     # Load configuration
     config_loader = ConfigLoader('weather_config.xml')
