@@ -6,7 +6,7 @@ import time
 import pytz
 import paho.mqtt.client as mqtt
 
-# Configure logging to use local time in /tmp/weather.log
+# Configure logging
 logging.basicConfig(
     filename='/tmp/weather.log',
     level=logging.INFO,
@@ -202,7 +202,7 @@ class WeatherMicroservice:
         while True:
             current_time = datetime.now(pytz.timezone(self.weather_service.timezone))
 
-            # Check sunrise/sunset events every 15 minutes
+            # Check sunrise/sunset events
             self.sun_event_service.check_sun_times()
 
             if current_time >= next_weather_update:
@@ -220,7 +220,6 @@ config = config_loader.config_data
 mqtt_client = mqtt.Client()
 mqtt_client.connect(config['mqtt_broker'], config['mqtt_port'])
 
-# Fetch initial weather data to get sunrise/sunset times
 weather_service = WeatherService(
     config['api_url'],
     config['api_key'],
@@ -231,7 +230,6 @@ weather_service = WeatherService(
 )
 weather_service.fetch_weather_data()
 
-# Create the SunEventService with the fetched sunrise/sunset times
 sun_event_service = SunEventService(
     weather_service.sunrise,  # Use the fetched sunrise time
     weather_service.sunset,  # Use the fetched sunset time
@@ -240,7 +238,7 @@ sun_event_service = SunEventService(
     config['command_channel']
 )
 
-# Run the microservice
 microservice = WeatherMicroservice(weather_service, sun_event_service)
 microservice.run()
+
 
