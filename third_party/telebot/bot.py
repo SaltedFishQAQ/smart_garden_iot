@@ -7,6 +7,8 @@ import logging
 from mqtt import MQTTClient
 from authenticator import Authenticator
 from notification import NotificationManager
+from plant import PlantIDClient
+from io import BytesIO
 
 logging.basicConfig(
     filename='/tmp/bot.log',
@@ -33,15 +35,48 @@ class Config:
         self.mqtt_port = int(root.find('mqtt/port').text)
         self.command_channel = root.find('mqtt/topic').text
         self.data_endpoint = root.find('api/data').text
+        self.plant_api_url = root.find('plantid/api_url').text
+        self.plant_api_key = root.find('plantid/api_key').text
+
+
+def process_identification_result(result: dict) -> str:
+    """Process the plant identification result and format a response."""
+    try:
+        # Correct parsing of nested fields
+        suggestions = result.get('result', {}).get('classification', {}).get('suggestions', [])
+        if not suggestions:
+            return "No plant suggestions found."
+
+        plant_name = suggestions[0].get('name', 'Unknown')
+        probability = suggestions[0].get('probability', 0)
+        is_plant = result.get('result', {}).get('is_plant', {}).get('binary', False)
+
+        message = f"Plant identified: {plant_name}\n"
+        message += f"Probability: {probability * 100:.2f}%\n"
+        message += "This is a plant!" if is_plant else "This might not be a plant."
+
+        # Add similar images if available
+        similar_images = suggestions[0].get('similar_images', [])
+        if similar_images:
+            message += "\nSimilar images:\n"
+            for image in similar_images:
+                url = image.get('url_small', '')
+                license_name = image.get('license_name', 'Unknown License')
+                message += f"{url} (License: {license_name})\n"
+
+        return message
+    except KeyError:
+        return "Unable to process the identification result."
 
 
 # API Client class for fetching data and rules
 class APIClient:
     def __init__(self, config: Config):
         self.base_url = config.base_url
-        self.data_endpoint = config.data_endpoint  #temperature, humidity
+        self.data_endpoint = config.data_endpoint
         self.rules_endpoint = "/rules"
         self.status_endpoint = "/status"
+        self.plant_client = PlantIDClient(config.plant_api_url, config.plant_api_key)
 
     def fetch_data(self, measurement, page=1, size=10):
         """Fetch data from the server for a specific measurement."""
@@ -84,8 +119,12 @@ class APIClient:
             data = response.json()
             if data.get("code") == 0:
                 return data.get("data", {})
-
         return {}
+
+    def identify_plant(self, image_bytes: BytesIO) -> dict:
+        """Call PlantIDClient to identify a plant."""
+        return self.plant_client.identify_plant(image_bytes)
+
 
 class IoTBot:
     def __init__(self, config: Config, authenticator: Authenticator, api_client: APIClient, notification_manager: NotificationManager):
@@ -170,6 +209,8 @@ class IoTBot:
             await update.message.reply_text("Light turned off.")
         elif text == "Back to Main Menu":
             await self.show_main_menu(update)
+        elif text == "Identify plant":  # Handle the new "Identify plant" command
+            await update.message.reply_text("Please send a photo of the plant.")
         else:
             await update.message.reply_text("Invalid command.")
 
@@ -177,7 +218,8 @@ class IoTBot:
         keyboard = [
             [KeyboardButton("Temperature"), KeyboardButton("Humidity")],
             [KeyboardButton("Light"), KeyboardButton("View Rules")],
-            [KeyboardButton("Watering"), KeyboardButton("Status")]
+            [KeyboardButton("Watering"), KeyboardButton("Status")],
+            [KeyboardButton("Identify plant")]  # Added the new button
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
         await update.message.reply_text("Please choose an option:", reply_markup=reply_markup)
@@ -281,6 +323,36 @@ class IoTBot:
 
         await update.message.reply_text(status_message)
 
+    async def handle_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        user_id = update.message.from_user.id
+        if not self.authenticator.is_authenticated(user_id):
+            await update.message.reply_text("Please authenticate first.")
+            return
+
+        logger.info(f"Photo received from user {user_id}")
+
+        # Get the photo from the user's message
+        photo_file = await update.message.photo[-1].get_file()  # Get the highest resolution photo
+        photo_bytes = BytesIO()
+        await photo_file.download_to_memory(photo_bytes)
+
+        logger.info("Photo file downloaded to memory")
+
+        # Call the PlantID API
+        plant_result = self.api_client.identify_plant(photo_bytes)
+
+        if plant_result is not None:
+            logger.info(f"Plant identification successful: {plant_result}")
+            formatted_result = process_identification_result(plant_result)
+            logger.info(f"Formatted result: {formatted_result}")
+            await update.message.reply_text(formatted_result)
+        else:
+            logger.error("Failed to identify the plant, no result from Plant ID API")
+            await update.message.reply_text("Failed to identify the plant. Please try again.")
+
+        await self.show_main_menu(update)
+
+
 def main():
     config = Config('config.xml')
     authenticator = Authenticator(config.base_url)
@@ -293,9 +365,11 @@ def main():
 
     application.add_handler(CommandHandler("start", bot.start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, bot.handle_message))
+    application.add_handler(MessageHandler(filters.PHOTO, bot.handle_photo))  # Handle plant photos
 
     application.run_polling()
 
 
 if __name__ == "__main__":
     main()
+
