@@ -70,7 +70,7 @@ class WeatherService:
 
         logging.info(f"Calling OpenWeatherMap API: {url}")
 
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
 
         logging.info(f"Received response from OpenWeatherMap API: {response.status_code}")
 
@@ -134,7 +134,7 @@ class SunEventService:
         self.timezone = timezone
         self.mqtt_client = mqtt_client
         self.command_channel = command_channel
-        self.light_on = False
+        self.light_on = False  # Track the state of the light (initially off)
 
     def check_sun_times(self):
         """
@@ -146,11 +146,13 @@ class SunEventService:
         # Turn off lights if after sunrise but before sunset
         if current_time >= self.sunrise and current_time < self.sunset:
             if self.light_on:  # Only turn off if the light is on
+                logging.info(f"Light state before sunrise action: {self.light_on}")
                 self.trigger_sunrise_action()
 
         # Turn on lights if after sunset
         elif current_time >= self.sunset:
             if not self.light_on:  # Only turn on if the light is off
+                logging.info(f"Light state before sunset action: {self.light_on}")
                 self.trigger_sunset_action()
 
     def trigger_sunrise_action(self):
@@ -160,6 +162,7 @@ class SunEventService:
         logging.info("Action Triggered: Turn off the light")
         self.mqtt_publish(self.command_channel + 'light', {'type': 'opt', 'status': False})
         self.light_on = False  # Update the light state
+        logging.info(f"Light state after sunrise action: {self.light_on}")
         logging.info("Published to MQTT: Lights turned off at sunrise.")
 
     def trigger_sunset_action(self):
@@ -169,6 +172,7 @@ class SunEventService:
         logging.info("Action Triggered: Turn on the light")
         self.mqtt_publish(self.command_channel + 'light', {'type': 'opt', 'status': True})
         self.light_on = True  # Update the light state
+        logging.info(f"Light state after sunset action: {self.light_on}")
         logging.info("Published to MQTT: Lights turned on at sunset.")
 
     def mqtt_publish(self, topic, message):
@@ -177,6 +181,7 @@ class SunEventService:
         """
         self.mqtt_client.publish(topic, str(message))
         logging.info(f"Published to {topic}: {message}")
+
 
 
 class WeatherMicroservice:
