@@ -30,6 +30,7 @@ A Telegram bot integrated with MQTT and HTTP APIs to control an IoT system. This
 - **`plant.py`**: Handles plant identification by sending photos to the Plant.ID API.
 - **`config.xml`**: Configuration file storing server API endpoints, bot token, and MQTT settings.
 - **`requirements.txt`**: Python dependencies for the project.
+- **`Dockerfile`**: Docker configuration for setting up and running the bot in a container.
 
 ## Setup
 
