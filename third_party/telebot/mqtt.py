@@ -54,17 +54,24 @@ class MQTTClient:
                 logger.error(f"Failed to reconnect: {e}")
 
     def on_mqtt_message(self, client, userdata, msg):
-        """Handle incoming MQTT messages."""
+        """Handle incoming MQTT messages with a standardized format."""
         try:
             payload_str = msg.payload.decode('utf-8')
-            payload_str = payload_str.replace("'", '"')
-            payload = json.loads(payload_str)
-            prediction = payload.get('prediction', 'No prediction data.')
-            logger.info(f"Received message from topic {msg.topic}: {prediction}")
-            logger.info(f"Notifying all subscribed users: {self.subscribed_users}")
-            asyncio.run_coroutine_threadsafe(self.notification_manager.notify_users(prediction), self.loop)
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse MQTT message: {e}")
+
+            try:
+                payload = json.loads(payload_str.replace("'", '"'))
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse MQTT message as JSON: {e}")
+                return
+
+            if 'Alerts' in payload:
+                alert_message = payload['Alerts']
+                logger.info(f"Received message from topic {msg.topic}: {alert_message}")
+                logger.info(f"Notifying all subscribed users: {self.subscribed_users}")
+                asyncio.run_coroutine_threadsafe(self.notification_manager.notify_users(alert_message), self.loop)
+            else:
+                logger.error("No 'Alerts' field found in the MQTT message payload.")
+
         except Exception as e:
             logger.error(f"Error in on_mqtt_message: {e}")
 
