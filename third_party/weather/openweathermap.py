@@ -177,12 +177,14 @@ class SunEventService:
 
     def mqtt_publish(self, topic, message, qos=0):
         """
-        Publish a message to the MQTT broker.
+        Publish a message to the MQTT broker and wait for it to complete.
         """
-        self.mqtt_client.publish(topic, str(message), qos=qos)
-        logging.info(f"Published to {topic}: {message}")
-
-
+        try:
+            result = self.mqtt_client.publish(topic, str(message), qos=qos)
+            result.wait_for_publish()
+            logging.info(f"Successfully published to {topic}: {message}")
+        except Exception as e:
+            logging.error(f"Failed to publish to {topic}: {e}")
 
 class WeatherMicroservice:
     """
@@ -219,6 +221,7 @@ config = config_loader.config_data
 # MQTT setup
 mqtt_client = mqtt.Client()
 mqtt_client.connect(config['mqtt_broker'], config['mqtt_port'])
+mqtt_client.loop_start()
 
 weather_service = WeatherService(
     config['api_url'],
