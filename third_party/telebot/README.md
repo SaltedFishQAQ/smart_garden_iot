@@ -8,6 +8,7 @@ A Telegram bot integrated with MQTT and HTTP APIs to control an IoT system. This
 - **Real-time Notifications**: Registered users receive periodic updates and alerts regarding IoT device statuses.
 - **MQTT Integration**: Communicates with devices using MQTT to control the light and watering systems.
 - **REST API Integration**: Fetches sensor data and rules from an HTTP API for temperature, humidity, and device statuses.
+- **Plant Identification**: Users can identify a plant by sending a photo. The bot sends the image to the Plant.ID API and returns information such as the plant’s name, taxonomy, description, and similar images.
 - **Customizable Rules**: Allows users to view rules for automated actions based on environmental conditions.
 - **Telegram Bot Commands**:
   - `/start`: Authenticate and access the bot menu.
@@ -18,6 +19,7 @@ A Telegram bot integrated with MQTT and HTTP APIs to control an IoT system. This
     - **Watering**: Control the watering system (turn on/off).
     - **View Rules**: Display active rules for automated actions.
     - **Status**: Get the current system status (temperature, humidity, light, oxygen).
+    - **Identify Plant**: Send a plant photo to identify the species and retrieve details such as common names and similar images.
 
 ## File Structure
 
@@ -25,6 +27,7 @@ A Telegram bot integrated with MQTT and HTTP APIs to control an IoT system. This
 - **`mqtt.py`**: Handles all MQTT communication, including subscribing to topics, publishing messages, and handling reconnections.
 - **`notification.py`**: Manages user notifications and sends updates to all subscribed users.
 - **`authenticator.py`**: Handles user authentication with the server.
+- **`plant.py`**: Handles plant identification by sending photos to the Plant.ID API.
 - **`config.xml`**: Configuration file storing server API endpoints, bot token, and MQTT settings.
 - **`requirements.txt`**: Python dependencies for the project.
 
