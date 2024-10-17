@@ -6,7 +6,7 @@ from devices.sensor.temperature_pi import TemperatureSensorPi
 
 class RaspberryPiTest(BaseDevice):
     def __init__(self, name):
-        super().__init__(self, name)
+        super().__init__(name, broker="43.131.48.203", port=1883)
         self.sensor = TemperatureSensorPi()
         self.sensor.receiver = self.handle_data
         self.actuator = LightSwitchPi()
