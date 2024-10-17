@@ -39,7 +39,7 @@ class MQTTClient:
         if rc == 0:
             logger.info(f"Connected to MQTT broker at {self.config.mqtt_broker}:{self.config.mqtt_port}")
             # Subscribe to the topic
-            self.mqtt_client.subscribe(self.config.command_channel + "alerts")
+            self.mqtt_client.subscribe(self.config.command_channel + "alerts", qos=1)
             logger.info(f"Subscribed to topic: {self.config.command_channel}alerts")
         else:
             logger.error(f"Failed to connect to MQTT broker, return code {rc}")
