@@ -2,7 +2,7 @@ import time
 from devices.raspberry_pi_test import RaspberryPiTest
 
 if __name__ == '__main__':
-    pi = RaspberryPiTest("pi")
+    pi = RaspberryPiTest('pi')
     pi.start()
 
     try:
