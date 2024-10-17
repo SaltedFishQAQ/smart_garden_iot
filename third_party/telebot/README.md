@@ -23,7 +23,7 @@ A Telegram bot integrated with MQTT and HTTP APIs to control an IoT system. This
 
 ## File Structure
 
-- **`bot.py`**: Main bot application with command handling and MQTT communication.
+- **`bot.py`**: Main bot application with command handling.
 - **`mqtt.py`**: Handles all MQTT communication, including subscribing to topics, publishing messages, and handling reconnections.
 - **`notification.py`**: Manages user notifications and sends updates to all subscribed users.
 - **`authenticator.py`**: Handles user authentication with the server.
