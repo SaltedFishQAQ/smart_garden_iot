@@ -3,19 +3,18 @@
         <address>http://43.131.48.203:8083</address>
     </server>
     <api>
-        <light>/data/light/list</light>
-        <control>/device/running</control>
-        <rules>/rule/list</rules>
-        <save_rule>/rule/save</save_rule>
-        <set_rule_status>/rule/running</set_rule_status>
+	<data>/data</data>
     </api>
     <bot>
         <token>7074896722:AAF34S5tMXWem4IJs3o8tY7Cjut0LvJKqxE</token>
     </bot>
     <mqtt>
-        <broker>mqtt.eclipseprojects.io</broker>
+        <broker>43.131.48.203</broker>
         <port>1883</port>
         <topic>iot/lwx123321/test/device/command/</topic>
     </mqtt>
+    <plantid>
+        <api_url>https://plant.id/api/v3</api_url>
+        <api_key>U84sYkSbnrqVGHuXSm2wxElyZff8CRDAP03BmU3DSzIjb8LP7b</api_key>
+    </plantid>
 </config>
-
