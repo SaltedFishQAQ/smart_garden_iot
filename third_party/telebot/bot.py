@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 import requests
 import nest_asyncio
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
+from telegram.error import NetworkError, TelegramError
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, JobQueue
 import logging
 from mqtt import MQTTClient
@@ -9,6 +10,7 @@ from authenticator import Authenticator
 from notification import NotificationManager
 from plant import PlantIDClient
 from io import BytesIO
+import time
 
 logging.basicConfig(
     filename='/tmp/bot.log',
@@ -367,8 +369,18 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, bot.handle_message))
     application.add_handler(MessageHandler(filters.PHOTO, bot.handle_photo))  # Handle plant photos
 
-    application.run_polling()
-
+    while True:
+        try:
+            application.run_polling()
+        except NetworkError as e:
+            logger.error(f"NetworkError occurred: {e}")
+            time.sleep(5)  # Retry after 5 seconds
+        except TelegramError as e:
+            logger.error(f"TelegramError occurred: {e}")
+            time.sleep(5)  # Retry after 5 seconds
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
+            time.sleep(10)  # Retry after 10 seconds
 
 if __name__ == "__main__":
     main()
