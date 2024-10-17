@@ -109,7 +109,7 @@ class WeatherService:
         """
         rain_volume = weather_data.get('rain', {}).get('1h', 0)
         message = {
-            "Alerts": f"Rain expected in the next hour | volume: {rain_volume} mm."
+            "Alerts": f"Rain expected in the next hour with a volume of {rain_volume} mm."
         }
         self.mqtt_publish(self.command_channel + 'alerts', message, qos=1)
 
