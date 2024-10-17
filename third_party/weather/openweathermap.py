@@ -111,15 +111,15 @@ class WeatherService:
         message = {
             "prediction": f"Rain expected in the next hour with a volume of {rain_volume} mm."
         }
-        self.mqtt_publish(self.command_channel + 'prediction', message)
+        self.mqtt_publish(self.command_channel + 'prediction', message, qos=1)
 
         logging.info(f"Published rain prediction: Rain expected in the next hour with {rain_volume} mm volume.")
 
-    def mqtt_publish(self, topic, message):
+    def mqtt_publish(self, topic, message, qos=0):
         """
         Publish a message to the MQTT broker.
         """
-        self.mqtt_client.publish(topic, str(message))
+        self.mqtt_client.publish(topic, str(message), qos=qos)
         logging.info(f"Published to {topic}: {message}")
 
 
@@ -160,7 +160,7 @@ class SunEventService:
         Trigger action to turn off the light after sunrise.
         """
         logging.info("Action Triggered: Turn off the light")
-        self.mqtt_publish(self.command_channel + 'light', {'type': 'opt', 'status': False})
+        self.mqtt_publish(self.command_channel + 'light', {'type': 'opt', 'status': False}, qos=1)
         self.light_on = False  # Update the light state
         logging.info(f"Light state after sunrise action: {self.light_on}")
         logging.info("Published to MQTT: Lights turned off at sunrise.")
@@ -170,16 +170,16 @@ class SunEventService:
         Trigger action to turn on the light after sunset.
         """
         logging.info("Action Triggered: Turn on the light")
-        self.mqtt_publish(self.command_channel + 'light', {'type': 'opt', 'status': True})
+        self.mqtt_publish(self.command_channel + 'light', {'type': 'opt', 'status': True}, qos=1)
         self.light_on = True  # Update the light state
         logging.info(f"Light state after sunset action: {self.light_on}")
         logging.info("Published to MQTT: Lights turned on at sunset.")
 
-    def mqtt_publish(self, topic, message):
+    def mqtt_publish(self, topic, message, qos=0):
         """
         Publish a message to the MQTT broker.
         """
-        self.mqtt_client.publish(topic, str(message))
+        self.mqtt_client.publish(topic, str(message), qos=qos)
         logging.info(f"Published to {topic}: {message}")
 
 
