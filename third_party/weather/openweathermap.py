@@ -22,7 +22,6 @@ class ConfigLoader:
     """
     This class loads configuration from an XML file.
     """
-
     def __init__(self, config_file):
         self.config_file = config_file
         self.config_data = self.load_config()
@@ -46,11 +45,10 @@ class ConfigLoader:
         return config_data
 
 
-class WeatherService:
+class CheckWorker:
     """
-    Fetching weather data from the API and checking rain probability.
+    Worker responsible for fetching weather data and triggering rain alerts.
     """
-
     def __init__(self, api_url, api_key, city, timezone, mqtt_client, command_channel):
         self.api_url = api_url
         self.api_key = api_key
@@ -61,6 +59,12 @@ class WeatherService:
         self.sunrise = None
         self.sunset = None
         self.rain_probability = None
+
+    def run(self):
+        """
+        Main method to fetch and process weather data.
+        """
+        self.fetch_weather_data()
 
     def fetch_weather_data(self):
         """
@@ -77,27 +81,14 @@ class WeatherService:
         if response.status_code == 200:
             data = response.json()
 
-            utc_sunrise = datetime.utcfromtimestamp(data['sys']['sunrise'])
-            utc_sunset = datetime.utcfromtimestamp(data['sys']['sunset'])
-
-            local_tz = pytz.timezone(self.timezone)
-            self.sunrise = utc_sunrise.replace(tzinfo=pytz.utc).astimezone(local_tz)
-            self.sunset = utc_sunset.replace(tzinfo=pytz.utc).astimezone(local_tz)
+            self.sunrise = datetime.utcfromtimestamp(data['sys']['sunrise']).replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.timezone))
+            self.sunset = datetime.utcfromtimestamp(data['sys']['sunset']).replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.timezone))
 
             logging.info(f"Sunrise: {self.sunrise}, Sunset: {self.sunset}")
-
-            current_time = datetime.now(pytz.timezone(self.timezone))
-            if current_time < self.sunrise:
-                logging.info(f"Lights will turn off at sunrise: {self.sunrise}")
-            elif current_time < self.sunset:
-                logging.info(f"Lights will turn on at sunset: {self.sunset}")
-            else:
-                logging.info(f"Lights are already on after sunset.")
 
             self.rain_probability = data.get('rain', {}).get('1h', 0)
             logging.info(f"Rain Probability: {self.rain_probability} mm")
 
-            # Publish rain information if there's rain in the next hour
             if self.rain_probability > 0:
                 self.publish_rain_prediction(data)
         else:
@@ -105,36 +96,48 @@ class WeatherService:
 
     def publish_rain_prediction(self, weather_data):
         """
-        Publish a message to the MQTT broker indicating rain is expected.
+        Publish a message to the MQTT broker indicating rain is expected and take action to stop watering.
         """
         rain_volume = weather_data.get('rain', {}).get('1h', 0)
         message = {
             "Alerts": f"Rain expected in the next hour with a volume of {rain_volume} mm."
         }
         self.mqtt_publish(self.command_channel + 'alerts', message, qos=1)
-
         logging.info(f"Published rain prediction: Rain expected in the next hour with {rain_volume} mm volume.")
 
+        # Stop watering if rain is predicted
+        self.mqtt_publish(self.command_channel + 'irrigator', {'type': 'opt', 'status': False}, qos=1)
+        logging.info("Published to MQTT: Watering stopped due to rain prediction.")
+
     def mqtt_publish(self, topic, message, qos=0):
-        """
-        Publish a message to the MQTT broker.
-        """
         self.mqtt_client.publish(topic, str(message), qos=qos)
         logging.info(f"Published to {topic}: {message}")
 
 
-class SunEventService:
+class FetchWorker:
     """
-    This class is responsible for checking sunrise/sunset times and controlling lights accordingly.
+    Worker responsible for controlling lights based on sunrise/sunset times.
     """
-
-    def __init__(self, sunrise, sunset, timezone, mqtt_client, command_channel):
-        self.sunrise = sunrise
-        self.sunset = sunset
+    def __init__(self, timezone, mqtt_client, command_channel):
         self.timezone = timezone
         self.mqtt_client = mqtt_client
         self.command_channel = command_channel
+        self.sunrise = None
+        self.sunset = None
         self.light_on = False  # Track the state of the light (initially off)
+
+    def run(self):
+        """
+        Main method to check sun events and control the lights.
+        """
+        self.check_sun_times()
+
+    def update_sun_times(self, sunrise, sunset):
+        """
+        Update sunrise and sunset times fetched from the weather service.
+        """
+        self.sunrise = sunrise
+        self.sunset = sunset
 
     def check_sun_times(self):
         """
@@ -143,17 +146,16 @@ class SunEventService:
         current_time = datetime.now(pytz.timezone(self.timezone))
         logging.info(f"Current time: {current_time}")
 
-        # Turn off lights if after sunrise but before sunset
-        if current_time >= self.sunrise and current_time < self.sunset:
-            if self.light_on:  # Only turn off if the light is on
-                logging.info(f"Light state before sunrise action: {self.light_on}")
-                self.trigger_sunrise_action()
+        """
+        Check if it's time to turn off/on lights at sunrise
+        """
+        if self.sunrise and current_time >= self.sunrise and self.light_on:
+            logging.info(f"Triggering sunrise action: Turn off the lights at {self.sunrise}")
+            self.trigger_sunrise_action()
 
-        # Turn on lights if after sunset
-        elif current_time >= self.sunset:
-            if not self.light_on:  # Only turn on if the light is off
-                logging.info(f"Light state before sunset action: {self.light_on}")
-                self.trigger_sunset_action()
+        if self.sunset and current_time >= self.sunset and not self.light_on:
+            logging.info(f"Triggering sunset action: Turn on the lights at {self.sunset}")
+            self.trigger_sunset_action()
 
     def trigger_sunrise_action(self):
         """
@@ -161,9 +163,8 @@ class SunEventService:
         """
         logging.info("Action Triggered: Turn off the light")
         self.mqtt_publish(self.command_channel + 'light', {'type': 'opt', 'status': False}, qos=1)
-        self.light_on = False  # Update the light state
-        logging.info(f"Light state after sunrise action: {self.light_on}")
-        logging.info("Published to MQTT: Lights turned off at sunrise.")
+        self.light_on = False
+        logging.info(f"Published to MQTT: Lights turned off at sunrise.")
 
     def trigger_sunset_action(self):
         """
@@ -172,13 +173,9 @@ class SunEventService:
         logging.info("Action Triggered: Turn on the light")
         self.mqtt_publish(self.command_channel + 'light', {'type': 'opt', 'status': True}, qos=1)
         self.light_on = True  # Update the light state
-        logging.info(f"Light state after sunset action: {self.light_on}")
-        logging.info("Published to MQTT: Lights turned on at sunset.")
+        logging.info(f"Published to MQTT: Lights turned on at sunset.")
 
     def mqtt_publish(self, topic, message, qos=0):
-        """
-        Publish a message to the MQTT broker and wait for it to complete.
-        """
         try:
             result = self.mqtt_client.publish(topic, str(message), qos=qos)
             result.wait_for_publish()
@@ -186,30 +183,30 @@ class SunEventService:
         except Exception as e:
             logging.error(f"Failed to publish to {topic}: {e}")
 
+
 class WeatherMicroservice:
     """
-    This class runs both the WeatherService and SunEventService, handling both weather checks and light control.
+    This class runs both the CheckWorker and FetchWorker, handling weather data fetching and light control.
     """
-
-    def __init__(self, weather_service, sun_event_service):
-        self.weather_service = weather_service
-        self.sun_event_service = sun_event_service
+    def __init__(self, check_worker, fetch_worker):
+        self.check_worker = check_worker
+        self.fetch_worker = fetch_worker
 
     def run(self):
         """
         Main loop that runs both the weather data fetching and sun event handling.
         """
-        next_weather_update = datetime.now(pytz.timezone(self.weather_service.timezone)) + timedelta(minutes=20)
+        next_weather_update = datetime.now(pytz.timezone(self.check_worker.timezone)) + timedelta(minutes=20)
 
         while True:
-            current_time = datetime.now(pytz.timezone(self.weather_service.timezone))
+            current_time = datetime.now(pytz.timezone(self.check_worker.timezone))
 
             # Check sunrise/sunset events
-            self.sun_event_service.check_sun_times()
+            self.fetch_worker.run()
 
             if current_time >= next_weather_update:
-                self.weather_service.fetch_weather_data()
-                next_weather_update = current_time + timedelta(minutes=20)  # Schedule next fetch
+                self.check_worker.run()
+                next_weather_update = current_time + timedelta(minutes=20)
 
             time.sleep(600)
 
@@ -223,7 +220,8 @@ mqtt_client = mqtt.Client()
 mqtt_client.connect(config['mqtt_broker'], config['mqtt_port'])
 mqtt_client.loop_start()
 
-weather_service = WeatherService(
+# Initialize workers
+check_worker = CheckWorker(
     config['api_url'],
     config['api_key'],
     config['city'],
@@ -231,17 +229,12 @@ weather_service = WeatherService(
     mqtt_client,
     config['command_channel']
 )
-weather_service.fetch_weather_data()
 
-sun_event_service = SunEventService(
-    weather_service.sunrise,  # Use the fetched sunrise time
-    weather_service.sunset,  # Use the fetched sunset time
+fetch_worker = FetchWorker(
     config['timezone'],
     mqtt_client,
     config['command_channel']
 )
 
-microservice = WeatherMicroservice(weather_service, sun_event_service)
+microservice = WeatherMicroservice(check_worker, fetch_worker)
 microservice.run()
-
-
