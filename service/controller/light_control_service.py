@@ -13,7 +13,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-
 class ConfigLoader:
     def __init__(self, config_file):
         self.config_file = config_file
@@ -23,23 +22,17 @@ class ConfigLoader:
         """
         Parse the XML config file and return configuration data as a dictionary.
         """
-        try:
-            tree = ET.parse(self.config_file)
-            root = tree.getroot()
+        tree = ET.parse(self.config_file)
+        root = tree.getroot()
 
-            config_data = {
-                "api_url": root.find("./weather/api_url").text,
-                "timezone": root.find("./weather/timezone").text,
-                "mqtt_broker": root.find("./mqtt/broker").text,
-                "mqtt_port": int(root.find("./mqtt/port").text),
-                "mqtt_topic": root.find("./mqtt/topic").text,
-            }
-            logging.info(f"Configuration loaded: {config_data}")
-            return config_data
-        except Exception as e:
-            logging.error(f"Error loading config: {e}")
-            raise
-
+        config_data = {
+            "api_url": root.find("./weather/api_url").text,
+            "timezone": root.find("./weather/timezone").text,
+            "mqtt_broker": root.find("./mqtt/broker").text,
+            "mqtt_port": int(root.find("./mqtt/port").text),
+            "mqtt_topic": root.find("./mqtt/topic").text,
+        }
+        return config_data
 
 class LightControlService:
     def __init__(self, weather_api_url, mqtt_broker, mqtt_port, mqtt_topic, timezone):
@@ -51,13 +44,16 @@ class LightControlService:
 
         self.sunrise = None
         self.sunset = None
-        self.light_on = False  # Track the state of the light
+        self.light_on = False  # Track the state of the light (initially off)
 
+        # State variables to track if actions were triggered today
+        self.sunrise_triggered = False
+        self.sunset_triggered = False
+
+        # Initialize MQTT client
         self.mqtt_client = mqtt.Client()
         self.mqtt_client.connect(self.mqtt_broker, self.mqtt_port)
         self.mqtt_client.loop_start()
-
-        self.fetch_weather_data()
 
     def fetch_weather_data(self):
         """
@@ -66,32 +62,13 @@ class LightControlService:
         try:
             logging.info(f"Fetching weather data from API: {self.weather_api_url}")
             response = requests.get(self.weather_api_url, timeout=10)
-
-            logging.info(f"API Response Status Code: {response.status_code}")
-            logging.info(f"API Response Content: {response.text}")
-
             if response.status_code == 200:
                 data = response.json()
-
-                # Ensure that sunrise and sunset exist in the response
-                if 'sunrise' not in data or 'sunset' not in data:
-                    logging.error(f"Missing 'sunrise' or 'sunset' in the API response: {data}")
-                    return
-
-                logging.info(f"Raw sunrise data: {data['sunrise']}, Raw sunset data: {data['sunset']}")
-
-                # Parse the sunrise and sunset times
-                try:
-                    self.sunrise = datetime.fromisoformat(data['sunrise']).astimezone(pytz.timezone(self.timezone))
-                    self.sunset = datetime.fromisoformat(data['sunset']).astimezone(pytz.timezone(self.timezone))
-                except Exception as e:
-                    logging.error(f"Error parsing sunrise/sunset times: {e}")
-                    return
-
-                logging.info(f"Parsed Sunrise: {self.sunrise}, Parsed Sunset: {self.sunset}")
+                self.sunrise = datetime.fromisoformat(data['sunrise']).astimezone(pytz.timezone(self.timezone))
+                self.sunset = datetime.fromisoformat(data['sunset']).astimezone(pytz.timezone(self.timezone))
+                logging.info(f"Updated sunrise: {self.sunrise}, sunset: {self.sunset}")
             else:
-                logging.error(
-                    f"Failed to fetch weather data. Status code: {response.status_code}, Response: {response.text}")
+                logging.error(f"Failed to fetch weather data. Status code: {response.status_code}")
         except Exception as e:
             logging.error(f"Error fetching weather data: {e}")
 
@@ -112,18 +89,24 @@ class LightControlService:
         current_time = datetime.now(pytz.timezone(self.timezone))
         logging.info(f"Checking current time: {current_time}")
 
-        if self.sunrise and current_time >= self.sunrise and self.light_on:
+        # Check if sunrise has passed and if the sunrise action hasn't been triggered today
+        if self.sunrise and current_time >= self.sunrise and not self.sunrise_triggered:
             logging.info(f"Triggering sunrise action: Turn off the lights at {self.sunrise}")
             self.trigger_sunrise_action()
+            self.sunrise_triggered = True
+            self.sunset_triggered = False  # Reset sunset trigger for the next sunset
 
-        elif self.sunset and current_time >= self.sunset and not self.light_on:
+        # Check if sunset has passed and if the sunset action hasn't been triggered today
+        if self.sunset and current_time >= self.sunset and not self.sunset_triggered:
             logging.info(f"Triggering sunset action: Turn on the lights at {self.sunset}")
             self.trigger_sunset_action()
+            self.sunset_triggered = True
+            self.sunrise_triggered = False  # Reset sunrise trigger for the next sunrise
 
-        else:
-            next_event = "sunset" if not self.light_on else "sunrise"
-            next_event_time = self.sunset if not self.light_on else self.sunrise
-            logging.info(f"Next event: {next_event} at {next_event_time}")
+        # Reset the triggers after midnight
+        if current_time.hour == 0 and current_time.minute == 0:
+            self.sunrise_triggered = False
+            self.sunset_triggered = False
 
     def trigger_sunrise_action(self):
         """
@@ -147,30 +130,29 @@ class LightControlService:
         """
         Main loop that fetches weather data once a day and checks for light control every 10 minutes.
         """
-        next_weather_update = datetime.now(pytz.timezone(self.timezone)).replace(hour=0, minute=0,
-                                                                                 second=0) + timedelta(days=1)
+        self.fetch_weather_data()
+
+        next_weather_update = datetime.now(pytz.timezone(self.timezone)).replace(hour=0, minute=0, second=0) + timedelta(days=1)
 
         while True:
             current_time = datetime.now(pytz.timezone(self.timezone))
 
+            # Fetch weather data once a day -> fetch new sunset/sunrise time
             if current_time >= next_weather_update:
                 self.fetch_weather_data()
                 next_weather_update = current_time.replace(hour=0, minute=0, second=0) + timedelta(days=1)
-                logging.info(f"Next weather update scheduled for: {next_weather_update}")
 
             # Check sunrise/sunset to control lights
             self.check_and_control_lights()
 
-            # Wait minutes before checking again
+            # Wait for  minutes before checking again
             time.sleep(600)
 
-
 if __name__ == '__main__':
-    # Load configuration from XML
+    # Load configuration
     config_loader = ConfigLoader('light_controller_config.xml')
     config = config_loader.config_data
 
-    # Initialize and run the light control service
     light_control_service = LightControlService(
         weather_api_url=config['api_url'],
         mqtt_broker=config['mqtt_broker'],
@@ -179,4 +161,3 @@ if __name__ == '__main__':
         timezone=config['timezone']
     )
     light_control_service.run()
-
