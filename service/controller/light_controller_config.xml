@@ -1,0 +1,12 @@
+<config>
+    <weather>
+        <api_url>http://18.158.59.237:5000/weather</api_url>
+        <timezone>Europe/Rome</timezone>
+    </weather>
+    <mqtt>
+        <broker>43.131.48.203</broker>
+        <port>1883</port>
+        <topic>iot/lwx123321/test/device/command/</topic>
+    </mqtt>
+</config>
+
