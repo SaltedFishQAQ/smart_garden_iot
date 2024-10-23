@@ -1,22 +1,25 @@
 # Smart Garden IoT: Weather Microservice
 
-This is a Weather Microservice for the **Smart Garden IoT** system, which interacts with the OpenWeatherMap API to fetch weather data (such as sunrise, sunset, and rain probability) and uses MQTT to communicate with other components like lights and the irrigation system.
-
-This service helps in automating tasks based on weather data, such as turning lights on or off during sunset/sunrise and managing the irrigation system based on rain predictions.
+This is a Weather Microservice for the **Smart Garden IoT** system, which interacts with the OpenWeatherMap API to fetch weather data (such as temperature, humidity, wind speed, sunrise, sunset, and rain probability). It provides parsed weather data that can be used for automating tasks like turning lights on or off during sunrise/sunset and managing irrigation systems based on rain forecasts.
 
 ## Features
 
-- Fetches weather data (sunrise, sunset, rain probability) from the OpenWeatherMap API.
-- Triggers actions such as turning on/off lights based on sunrise and sunset times.
-- Manages the irrigation system based on rain probability (closes the irrigation system if rain is expected).
-- Publishes MQTT messages to specific channels to trigger actions in other IoT devices.
-- Continuously monitors and updates weather information at configurable intervals.
+- Fetches weather data from the OpenWeatherMap API:
+  - **Temperature**
+  - **Humidity**
+  - **Wind Speed**
+  - **Rain Probability**
+  - **Sunrise and Sunset Times**
+- Modular design to simplify fetching and parsing weather data.
+- Parses and returns weather data in a structured format.
 
 ## File Structure
 
-- **`openweathermap.py`**: Main microservice
-- **`weather_config.py`**: Configuration file storing server API endpoints, API key, and MQTT settings.
-- **`requirements.txt`**: Python dependencies for the project.
+- **`config_loader.py`**: Handles loading configuration from an XML file, including API keys, city, and timezone.
+- **`weather_api_adapter.py`**: Interacts with the OpenWeatherMap API to fetch weather data.
+- **`weather_service.py`**: Parses and processes the weather data fetched from the OpenWeatherMap API.
+- **`weather_config.xml`**: Configuration file that stores API URL, API key, city for weather data, and the timezone for processing sunrise/sunset times.
+- **`requirements.txt`**: Lists the Python dependencies required for the project.
 
 ## Setup
 
