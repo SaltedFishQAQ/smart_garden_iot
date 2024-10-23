@@ -1,0 +1,7 @@
+<config>
+    <weather_api_url>http://18.158.59.237:5000/weather</weather_api_url>
+    <data_keys>
+        <temperature>temperature</temperature>
+        <humidity>humidity</humidity>
+    </data_keys>
+</config>
