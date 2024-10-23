@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-import logging
 
 def load_config(file_path='config.xml', data_key=None):
     config = {}
