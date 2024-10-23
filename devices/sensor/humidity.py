@@ -1,9 +1,9 @@
 import json
 import random
-# import Adafruit_DHT
-
+import requests
 from devices.biz.base_sensor import BaseSensor
-
+from config_loader import load_config
+# import Adafruit_DHT
 
 class HumiditySensor(BaseSensor):
     def __init__(self):
@@ -11,12 +11,36 @@ class HumiditySensor(BaseSensor):
         # self._sensor = Adafruit_DHT.DHT11
         # self.pin = 4
 
-    def monitor(self) -> str:
-        # humidity, _ = Adafruit_DHT.read_retry(self._sensor, self.pin)
-        # if humidity is None:
-        #     print('Failed to get reading. Try again!')
-        humidity = random.uniform(60, 80)
+        self.config = load_config(data_key='humidity')
 
-        return json.dumps({
-            'value': round(humidity, 1)
-        })
+    def monitor(self) -> str:
+        if not self.config or 'api_url' not in self.config or 'data_key' not in self.config:
+            print("API URL or data key not available in config.")
+            return json.dumps({'value': None})
+
+        try:
+
+            response = requests.get(self.config['api_url'])
+
+            weather_data = response.json()
+            humidity = weather_data.get(self.config['data_key'])
+
+            if humidity is None:
+                print(f"Failed to fetch '{self.config['data_key']}' data from API")
+                return json.dumps({
+                    'value': None
+                })
+
+            random_adjustment = random.uniform(1, 5)
+            adjusted_humidity = min(humidity + random_adjustment, 100)
+
+            return json.dumps({
+                'value': adjusted_humidity
+            })
+
+        except Exception as e:
+            print(f"Error fetching weather data: {e}")
+            return json.dumps({
+                'value': None
+            })
+
