@@ -10,6 +10,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
+
 class WeatherAPI:
     def __init__(self):
         # Load configuration
@@ -47,6 +48,7 @@ class WeatherAPI:
             logging.error(f"An error occurred: {str(e)}")
             cherrypy.response.status = 500
             return {"error": "Internal server error"}
+
 
 if __name__ == '__main__':
     cherrypy.config.update({

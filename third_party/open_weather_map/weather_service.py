@@ -10,6 +10,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
+
 class WeatherService:
     def __init__(self, api_url, api_key, city, timezone):
         self.api_url = api_url
