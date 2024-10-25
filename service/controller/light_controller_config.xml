@@ -1,6 +1,6 @@
 <config>
     <weather>
-        <api_url>http://18.158.59.237:5000/weather</api_url>
+        <api_url>http://3.79.189.115:5000/weather</api_url>
         <timezone>Europe/Rome</timezone>
     </weather>
     <mqtt>
