@@ -43,8 +43,3 @@ class TemperatureSensor(BaseSensor):
                 'value': None
             })
 
-
-if __name__ == "__main__":
-    temperature_sensor = TemperatureSensor()
-    result = temperature_sensor.monitor()
-    print("temperature sensor Data:", result)

@@ -45,7 +45,3 @@ class HumiditySensor(BaseSensor):
             })
 
 
-if __name__ == "__main__":
-    temperature_sensor = HumiditySensor()
-    result = temperature_sensor.monitor()
-    print("Humidity sensor Data:", result)
