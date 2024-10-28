@@ -5,17 +5,17 @@ from weather_service import WeatherService
 
 logging.basicConfig(
     filename='/tmp/api.log',
-    level=logging.WARNING,  # Log warnings and errors
+    level=logging.WARNING,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
 class WeatherAPI:
     def __init__(self):
-        # Load configuration
         config_loader = ConfigLoader('weather_config.xml')
         config = config_loader.config_data
 
+        # Initialize weather service
         self.weather_service = WeatherService(
             api_url=config['api_url'],
             api_key=config['api_key'],
@@ -49,10 +49,12 @@ class WeatherAPI:
             return {"error": "Internal server error"}
 
 if __name__ == '__main__':
+    # CherryPy configuration
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
         'server.socket_port': 5000,
     })
+    # Start the API
     weather_api = WeatherAPI()
     cherrypy.quickstart(weather_api, '/')
 
