@@ -32,7 +32,7 @@ class HumiditySensor(BaseSensor):
                 })
 
             random_adjustment = random.uniform(1, 5)
-            adjusted_humidity = min(humidity + random_adjustment, 100)
+            adjusted_humidity = round(min(humidity + random_adjustment, 100), 2)
 
             return json.dumps({
                 'value': adjusted_humidity
@@ -44,3 +44,8 @@ class HumiditySensor(BaseSensor):
                 'value': None
             })
 
+
+if __name__ == "__main__":
+    temperature_sensor = HumiditySensor()
+    result = temperature_sensor.monitor()
+    print("Humidity sensor Data:", result)
