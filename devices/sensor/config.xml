@@ -1,7 +1,12 @@
 <config>
-    <weather_api_url>http://18.158.59.237:5000/weather</weather_api_url>
+    <url>http://ec2-3-79-189-115.eu-central-1.compute.amazonaws.com</url>
+    <ports>
+        <weather>5000</weather>
+        <soil_moisture_sensor>5001</soil_moisture_sensor>
+    </ports>
     <data_keys>
-        <temperature>temperature</temperature>
-        <humidity>humidity</humidity>
+        <temperature>weather/temperature</temperature>
+        <humidity>weather/humidity</humidity>
+        <soil_moisture>soil_moisture</soil_moisture>
     </data_keys>
 </config>
