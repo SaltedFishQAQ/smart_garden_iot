@@ -21,11 +21,9 @@ class SoilMoistureSensor(BaseSensor):
             return json.dumps({'value': None})
 
         try:
-            # Make a request to fetch soil moisture data
             response = requests.get(self.config['api_url'])
-            response.raise_for_status()  # Raises an HTTPError for bad responses
+            response.raise_for_status()
 
-            # Parse the response JSON
             soil_data = response.json()
             soil_moisture = soil_data.get(self.config['data_key'])
 
@@ -35,7 +33,6 @@ class SoilMoistureSensor(BaseSensor):
                     'value': None
                 })
 
-            # Return soil moisture value
             return json.dumps({
                 'value': soil_moisture
             })
