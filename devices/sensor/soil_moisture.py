@@ -15,7 +15,7 @@ class SoilMoistureSensor(BaseSensor):
         # Load the API URL and key
         self.config = load_config(data_key='soil_moisture')
 
-    def monitor(self) -> str:
+    def monitor(self, soil_type: str) -> str:
         if not self.config or 'api_url' not in self.config or 'data_key' not in self.config:
             logging.error("API URL or data key not available in config.")
             return json.dumps({'value': None})
@@ -27,14 +27,16 @@ class SoilMoistureSensor(BaseSensor):
             soil_data = response.json()
             soil_moisture = soil_data.get(self.config['data_key'])
 
-            if soil_moisture is None:
-                logging.error(f"Failed to fetch '{self.config['data_key']}' data from API")
+            # Check if soil moisture data for the given soil type
+            moisture_value = soil_moisture.get(f"{soil_type.capitalize()} Soil")
+            if moisture_value is None:
+                logging.error(f"Failed to fetch moisture data for '{soil_type.capitalize()} Soil'")
                 return json.dumps({
                     'value': None
                 })
 
             return json.dumps({
-                'value': soil_moisture
+                'value': moisture_value
             })
 
         except Exception as e:
@@ -42,3 +44,4 @@ class SoilMoistureSensor(BaseSensor):
             return json.dumps({
                 'value': None
             })
+
