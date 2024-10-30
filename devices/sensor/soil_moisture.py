@@ -7,15 +7,16 @@ from devices.biz.base_sensor import BaseSensor
 
 
 class SoilMoistureSensor(BaseSensor):
-    def __init__(self):
+    def __init__(self, soil_type):
         super().__init__("soil_moisture")
+        self.soil_type = soil_type
         # self._sensor = Adafruit_DHT.DHT11
         # self.pin = 4
 
         # Load the API URL and key
         self.config = load_config(data_key='soil_moisture')
 
-    def monitor(self, soil_type: str) -> str:
+    def monitor(self) -> str:
         if not self.config or 'api_url' not in self.config or 'data_key' not in self.config:
             logging.error("API URL or data key not available in config.")
             return json.dumps({'value': None})
@@ -28,9 +29,9 @@ class SoilMoistureSensor(BaseSensor):
             soil_moisture = soil_data.get(self.config['data_key'])
 
             # Check if soil moisture data for the given soil type
-            moisture_value = soil_moisture.get(f"{soil_type.capitalize()} Soil")
+            moisture_value = soil_moisture.get(f"{self.soil_type.capitalize()} Soil")
             if moisture_value is None:
-                logging.error(f"Failed to fetch moisture data for '{soil_type.capitalize()} Soil'")
+                logging.error(f"Failed to fetch moisture data for '{self.soil_type.capitalize()} Soil'")
                 return json.dumps({
                     'value': None
                 })
