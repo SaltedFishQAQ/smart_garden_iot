@@ -10,14 +10,21 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-class WeatherService:
+
+class DataSource:
     def __init__(self, api_url, api_key, city, timezone):
         self.api_url = api_url
         self.api_key = api_key
         self.city = city
         self.timezone = timezone
 
-    def fetch_weather_data(self):
+    def fetch_weather_data(self, data_type):
+        data = self._get_data()
+        if data_type == '':
+            return data
+        return {data_type: data[data_type]}
+
+    def _get_data(self):
         try:
             url = f"{self.api_url}?q={self.city}&appid={self.api_key}&units=metric"
             response = requests.get(url, timeout=10)
@@ -53,4 +60,3 @@ class WeatherService:
         except requests.exceptions.RequestException as e:
             logging.error(f"Error fetching weather data: {str(e)}")
             return None
-

@@ -72,3 +72,7 @@ USER_REGISTER = USER_BASE_ROUTE + 'user/register'
 # device
 DEVICE_BASE_ROUTE = '/device/'
 DEVICE_STATUS_GET = DEVICE_BASE_ROUTE + 'status'
+# open weather map
+WEATHER_BASE_ROUTE = '/weather/'
+WEATHER_DATA_GET = WEATHER_BASE_ROUTE + 'data'
+
