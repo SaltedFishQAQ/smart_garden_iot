@@ -10,6 +10,11 @@ This is a Weather Microservice for the **Smart Garden IoT** system, which intera
   - **Wind Speed**
   - **Rain Probability**
   - **Sunrise and Sunset Times**
+  - **Description**
+  - **Cloud Cover**
+  - **Air pressure**
+
+
 - Modular design to simplify fetching and parsing weather data.
 - Parses and returns weather data in a structured format.
 

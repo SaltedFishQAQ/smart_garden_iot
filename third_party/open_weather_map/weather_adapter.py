@@ -8,7 +8,7 @@ from http import HTTPMethod
 
 logging.basicConfig(
     filename='/tmp/api.log',
-    level=logging.WARNING,  # Log warnings and errors
+    level=logging.WARNING,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
@@ -17,7 +17,6 @@ logging.basicConfig(
 class WeatherAdapter(BaseService):
     def __init__(self):
         super().__init__(constants.entity.OPEN_WEATHER_MAP)
-        # Load configuration
         config_loader = ConfigLoader('weather_config.xml')
         config = config_loader.config_data
 

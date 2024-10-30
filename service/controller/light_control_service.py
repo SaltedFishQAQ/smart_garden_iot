@@ -44,13 +44,12 @@ class LightControlService:
 
         self.sunrise = None
         self.sunset = None
-        self.light_on = False  # Track the state of the light (initially off)
+        self.light_on = False
 
-        # State variables to track if actions were triggered today
+        # Track actions
         self.sunrise_triggered = False
         self.sunset_triggered = False
 
-        # Initialize MQTT client
         self.mqtt_client = mqtt.Client()
         self.mqtt_client.connect(self.mqtt_broker, self.mqtt_port)
         self.mqtt_client.loop_start()
@@ -84,26 +83,28 @@ class LightControlService:
 
     def check_and_control_lights(self):
         """
+        Logic section --
         Check current time and trigger actions based on sunrise/sunset times.
         """
         current_time = datetime.now(pytz.timezone(self.timezone))
         logging.info(f"Checking current time: {current_time}")
 
+
         # Check if sunrise has passed and if the sunrise action hasn't been triggered today
         if self.sunrise and current_time >= self.sunrise and not self.sunrise_triggered:
             logging.info(f"Triggering sunrise action: Turn off the lights at {self.sunrise}")
             self.trigger_sunrise_action()
-            self.sunrise_triggered = True
+            self.sunrise_triggered = True  # Set sunrise as triggered
             self.sunset_triggered = False  # Reset sunset trigger for the next sunset
 
         # Check if sunset has passed and if the sunset action hasn't been triggered today
-        if self.sunset and current_time >= self.sunset and not self.sunset_triggered:
+        elif self.sunset and current_time >= self.sunset and not self.sunset_triggered:
             logging.info(f"Triggering sunset action: Turn on the lights at {self.sunset}")
             self.trigger_sunset_action()
-            self.sunset_triggered = True
+            self.sunset_triggered = True  # Set sunset as triggered
             self.sunrise_triggered = False  # Reset sunrise trigger for the next sunrise
 
-        # Reset the triggers after midnight
+        # Midnight reset triggers
         if current_time.hour == 0 and current_time.minute == 0:
             self.sunrise_triggered = False
             self.sunset_triggered = False
@@ -137,20 +138,19 @@ class LightControlService:
         while True:
             current_time = datetime.now(pytz.timezone(self.timezone))
 
-            # Fetch weather data once a day -> fetch new sunset/sunrise time
+            #Update sunrise / sunset time daily
             if current_time >= next_weather_update:
                 self.fetch_weather_data()
                 next_weather_update = current_time.replace(hour=0, minute=0, second=0) + timedelta(days=1)
 
-            # Check sunrise/sunset to control lights
             self.check_and_control_lights()
 
-            # Wait for  minutes before checking again
+            # check loop
             time.sleep(600)
 
 if __name__ == '__main__':
     # Load configuration
-    config_loader = ConfigLoader('light_controller_config.xml')
+    config_loader = ConfigLoader('light_controller.xml')
     config = config_loader.config_data
 
     light_control_service = LightControlService(
@@ -161,3 +161,4 @@ if __name__ == '__main__':
         timezone=config['timezone']
     )
     light_control_service.run()
+

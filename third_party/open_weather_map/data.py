@@ -32,12 +32,10 @@ class DataSource:
             if response.status_code == 200:
                 data = response.json()
 
-                # Process the sunrise and sunset data
                 sys_data = data.get('sys', {})
                 sunrise_timestamp = sys_data.get('sunrise')
                 sunset_timestamp = sys_data.get('sunset')
 
-                # Convert to use local timezone
                 sunrise = datetime.utcfromtimestamp(sunrise_timestamp).replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.timezone))
                 sunset = datetime.utcfromtimestamp(sunset_timestamp).replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.timezone))
 
@@ -48,6 +46,10 @@ class DataSource:
                     "wind_speed": data['wind']['speed'],
                     "sunrise": sunrise.isoformat(),
                     "sunset": sunset.isoformat(),
+                    "cloudiness": data.get('clouds', {}).get('all', 0),  # Cloud cover percentage
+                    "description": data['weather'][0]['description'],    # Weather condition description
+                    "pressure": data['main']['pressure'],                # Atmospheric pressure
+                    "visibility": data.get('visibility', 10000)          # Visibility in meters
                 }
 
                 return weather_info

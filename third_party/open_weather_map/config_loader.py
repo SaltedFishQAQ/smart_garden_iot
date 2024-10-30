@@ -20,3 +20,4 @@ class ConfigLoader:
             "command_channel": root.find("./mqtt/topic").text
         }
         return config_data
+

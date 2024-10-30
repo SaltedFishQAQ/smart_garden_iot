@@ -31,7 +31,7 @@ class TemperatureSensor(BaseSensor):
                 })
 
             random_adjustment = random.uniform(-0.5, 0.5)
-            adjusted_temperature = temperature + random_adjustment
+            adjusted_temperature = round(temperature + random_adjustment, 2)
 
             return json.dumps({
                 'value': adjusted_temperature
@@ -42,3 +42,4 @@ class TemperatureSensor(BaseSensor):
             return json.dumps({
                 'value': None
             })
+
