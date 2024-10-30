@@ -112,10 +112,10 @@ services:
     networks:
       - app-network
 
-  weather_service:
+  decision_service:
     build:
       context: .
-      dockerfile: Dockerfile-weather
+      dockerfile: Dockerfile-decision
     ports:
       - "8089:8089"
     depends_on:
@@ -126,6 +126,15 @@ services:
       - INFLUXDB_PORT=8084
       - MYSQL_HOST=mysql_service
       - MYSQL_PORT=8085
+    networks:
+      - app-network
+
+  weather_service:
+    build:
+      context: .
+      dockerfile: Dockerfile-weather
+    ports:
+      - "5000:5000"
     networks:
       - app-network
 

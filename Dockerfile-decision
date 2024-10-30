@@ -4,10 +4,10 @@ WORKDIR /app
 
 COPY . /app
 
-EXPOSE 5000
+EXPOSE 8089
 
 ENV PYTHONPATH="/app"
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "third_party/open_weather_map/__main__.py"]
+CMD ["python", "service/decision/__main__.py"]
