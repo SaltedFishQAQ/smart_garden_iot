@@ -4,7 +4,7 @@ import time
 import paho.mqtt.client as mqtt
 from datetime import datetime, timedelta
 import pytz
-import xml.etree.ElementTree as ET
+from common.config import ConfigLoader
 
 logging.basicConfig(
     filename='/tmp/light_controller.log',
@@ -13,26 +13,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-class ConfigLoader:
-    def __init__(self, config_file):
-        self.config_file = config_file
-        self.config_data = self.load_config()
-
-    def load_config(self):
-        """
-        Parse the XML config file and return configuration data as a dictionary.
-        """
-        tree = ET.parse(self.config_file)
-        root = tree.getroot()
-
-        config_data = {
-            "api_url": root.find("./weather/api_url").text,
-            "timezone": root.find("./weather/timezone").text,
-            "mqtt_broker": root.find("./mqtt/broker").text,
-            "mqtt_port": int(root.find("./mqtt/port").text),
-            "mqtt_topic": root.find("./mqtt/topic").text,
-        }
-        return config_data
 
 class LightControlService:
     def __init__(self, weather_api_url, mqtt_broker, mqtt_port, mqtt_topic, timezone):
@@ -88,7 +68,6 @@ class LightControlService:
         """
         current_time = datetime.now(pytz.timezone(self.timezone))
         logging.info(f"Checking current time: {current_time}")
-
 
         # Check if sunrise has passed and if the sunrise action hasn't been triggered today
         if self.sunrise and current_time >= self.sunrise and not self.sunrise_triggered:
@@ -147,6 +126,7 @@ class LightControlService:
 
             # check loop
             time.sleep(600)
+
 
 if __name__ == '__main__':
     # Load configuration

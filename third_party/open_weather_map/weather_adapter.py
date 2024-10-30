@@ -2,7 +2,7 @@ import logging
 import constants.http
 import constants.entity
 from common.base_service import BaseService
-from config_loader import ConfigLoader
+from common.config import ConfigLoader
 from data import DataSource
 from http import HTTPMethod
 
