@@ -31,4 +31,4 @@ if __name__ == "__main__":
         print(f"  Sunrise: {weather_data['sunrise']}")
         print(f"  Sunset: {weather_data['sunset']}")
         print(f"  Cloudiness: {weather_data['cloudiness']}%")
-        print(f"  Rain Probability: {weather_data['rain_probability']}%")
+        print(f"  Rain Probability: {weather_data['rain_probability']} mm")
