@@ -156,7 +156,7 @@ class SensorDataFetcher:
 # Example usage of direct API access with labeled output
 temperature_sensor = TemperatureSensor()
 humidity_sensor = HumiditySensor()
-soil_moisture_sensor = SoilMoistureSensor(soil_type='clay')
+soil_moisture_sensor = SoilMoistureSensor(soil_type='Sandy')
 
 temperature_data = temperature_sensor.monitor()
 humidity_data = humidity_sensor.monitor()

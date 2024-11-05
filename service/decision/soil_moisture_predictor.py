@@ -1,20 +1,21 @@
+# soil_moisture_predictor.py
+
 from fetch_weather_data import WeatherFetcher
 
 class SoilMoisturePredictor:
 
     def __init__(self, soil_absorption_factor=0.7):
-
         self.soil_absorption_factor = soil_absorption_factor
 
     def fetch_forecast_data(self, weather_fetcher):
         """
-        Fetches weather data from an external weather API using a provided WeatherFetcher instance.
+        Fetches current weather data from an external weather API using a provided WeatherFetcher instance.
         Parameters:
             weather_fetcher (WeatherFetcher): An instance of WeatherFetcher to get forecast data.
         Returns:
             dict: Contains forecast data with key 'rain_amount' in mm.
         """
-        weather_data = weather_fetcher.fetch_weather_data()
+        weather_data = weather_fetcher.fetch_current_weather_data()  # Updated to use fetch_current_weather_data()
 
         rain_amount = weather_data.get("rain_probability", 0)
 
@@ -46,18 +47,19 @@ class SoilMoisturePredictor:
         # Calculate the predicted soil moisture after rain
         predicted_soil_moisture = current_soil_moisture + moisture_increase
 
-        #full saturation is 1
+        # Full saturation is 1
         predicted_soil_moisture = min(predicted_soil_moisture, 1.0)
 
         return predicted_soil_moisture
 
+# Example usage
 if __name__ == "__main__":
     soil_moisture_predictor = SoilMoisturePredictor(soil_absorption_factor=0.7)
 
     current_soil_moisture = 0.4
 
     api_url = "http://ec2-3-79-189-115.eu-central-1.compute.amazonaws.com:5000/weather"
-    weather_fetcher = WeatherFetcher(api_url)
+    weather_fetcher = WeatherFetcher(api_url, api_url)  # Providing current and historical URLs
 
     forecast_data = soil_moisture_predictor.fetch_forecast_data(weather_fetcher)
 
