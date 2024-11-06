@@ -16,6 +16,7 @@ if __name__ == '__main__':
     oxygen_control = OxygenController('oxygen')
     oxygen_control.start()
     soil_device = SoilMoistureDevice('soil moisture')
+    soil_device.start()
 
     try:
         while True:
