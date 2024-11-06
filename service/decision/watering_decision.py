@@ -1,6 +1,5 @@
-# watering_decision.py
-
 import json
+import constants.const as const
 from datetime import datetime, timedelta
 from config_loader import load_sensor_config
 from fetch_weather_data import WeatherFetcher
@@ -11,10 +10,9 @@ from calculate_thresholds import ThresholdCalculator
 
 config = load_sensor_config('sensor_config.xml')
 
-
 class WateringDecisionMaker:
     def __init__(self, weather_fetcher, soil_moisture_sensor, soil_moisture_predictor,
-                 watering_duration_calculator, threshold_calculator, soil_type="Clay"):
+                 watering_duration_calculator, threshold_calculator, soil_type=const.DEFAULT_SOIL_TYPE):
         self.weather_fetcher = weather_fetcher
         self.soil_moisture_sensor = soil_moisture_sensor
         self.soil_moisture_predictor = soil_moisture_predictor
@@ -39,15 +37,15 @@ class WateringDecisionMaker:
 
         print(f"Baseline Soil Moisture Threshold for {self.soil_type} Soil: {baseline_threshold}")
 
-        adjustment_factor = 1.0
+        adjustment_factor = const.DEFAULT_ADJUSTMENT_FACTOR
 
-        if avg_temp_24h > 20:
-            temperature_factor = 1 - ((avg_temp_24h - 20) / 100)
+        if avg_temp_24h > const.BASELINE_TEMP_FOR_ADJUSTMENT:
+            temperature_factor = 1 - ((avg_temp_24h - const.BASELINE_TEMP_FOR_ADJUSTMENT) * const.TEMP_ADJUSTMENT_FACTOR)
             adjustment_factor *= temperature_factor
             print(f"Adjusting threshold for temperature: Factor {temperature_factor:.3f}")
 
-        if avg_humidity_24h < 60:
-            humidity_factor = 1 - ((60 - avg_humidity_24h) / 100)
+        if avg_humidity_24h < const.BASELINE_HUMIDITY_FOR_ADJUSTMENT:
+            humidity_factor = 1 - ((60 - avg_humidity_24h) * const.HUMIDITY_ADJUSTMENT_FACTOR)
             adjustment_factor *= humidity_factor
             print(f"Adjusting threshold for humidity: Factor {humidity_factor:.3f}")
 
@@ -76,7 +74,7 @@ class WateringDecisionMaker:
         print(f"Soil Moisture Threshold for Decision: {soil_moisture_threshold}")
 
         rain_probability = current_weather["rain_probability"]
-        if rain_probability > 0:
+        if rain_probability > const.MIN_RAIN_PROBABILITY:
             forecast_data = self.soil_moisture_predictor.fetch_forecast_data(self.weather_fetcher)
             predicted_soil_moisture = self.soil_moisture_predictor.predict_soil_moisture_after_rain(
                 current_soil_moisture, forecast_data
@@ -102,9 +100,9 @@ class WateringDecisionMaker:
         print(f"Sunrise: {sunrise}, Sunset: {sunset}")
         print(f"Cloudiness: {cloudiness}%")
 
-        if (sunrise - timedelta(hours=1) <= now <= sunrise + timedelta(hours=1)) or \
-                (sunset - timedelta(hours=1) <= now <= sunset + timedelta(hours=1)) or \
-                (cloudiness >= 1):
+        if (sunrise - const.WATERING_TIME_WINDOW <= now <= sunrise + const.WATERING_TIME_WINDOW) or \
+           (sunset - const.WATERING_TIME_WINDOW <= now <= sunset + const.WATERING_TIME_WINDOW) or \
+           (cloudiness >= const.MIN_CLOUDINESS_FOR_WATERING):
             watering_duration = self.watering_duration_calculator.calculate_duration()
             print(f"Calculated Watering Duration: {watering_duration} minutes")
             if watering_duration > 0:
@@ -117,18 +115,17 @@ class WateringDecisionMaker:
             print("Decision: Skip Watering (Not within optimal watering time and conditions)")
             return "Skip Watering"
 
-
 if __name__ == "__main__":
     current_weather_api_url = "http://ec2-3-79-189-115.eu-central-1.compute.amazonaws.com:5000/weather"
     historical_weather_api_url = config['api_url']
     weather_fetcher = WeatherFetcher(current_weather_api_url, historical_weather_api_url)
 
     file_path = 'weather_turin.csv'
-    soil_type = "Clay"
+    soil_type = const.DEFAULT_SOIL_TYPE
 
     threshold_calculator = ThresholdCalculator(file_path, n_estimators=100, window=7)
     soil_moisture_sensor = SoilMoistureSensor(soil_type=soil_type)
-    soil_moisture_predictor = SoilMoisturePredictor(soil_absorption_factor=0.7)
+    soil_moisture_predictor = SoilMoisturePredictor(soil_absorption_factor=const.SOIL_ABSORPTION_FACTOR)
     temperature_sensor = TemperatureSensor()
     humidity_sensor = HumiditySensor()
     watering_duration_calculator = WateringDurationCalculator(
