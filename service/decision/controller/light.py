@@ -56,7 +56,7 @@ class LightController(BaseController):
         Turn off the light after sunrise.
         """
         logging.info("Action: Turning off the light")
-        self.delegate.mqtt_publish(self.delegate.command_channel + 'light', json.dumps({'type': 'opt', 'status': False}))
+        self.delegate.mqtt_publish(self.delegate.command_channel + 'light', json.dumps({"type": "opt", "status": False}))
         self.light_on = False
         logging.info("Published MQTT message to turn off the lights.")
 
@@ -65,6 +65,6 @@ class LightController(BaseController):
         Turn on the light after sunset.
         """
         logging.info("Action: Turning on the light")
-        self.delegate.mqtt_publish(self.delegate.command_channel + 'light', json.dumps({'type': 'opt', 'status': True}))
+        self.delegate.mqtt_publish(self.delegate.command_channel + 'light', json.dumps({"type": "opt", "status": True}))
         self.light_on = True
         logging.info("Published MQTT message to turn on the lights.")
