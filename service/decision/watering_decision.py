@@ -1,3 +1,4 @@
+import sys
 import json
 import constants.const as const
 from datetime import datetime, timedelta
@@ -7,71 +8,65 @@ from fetch_sensor_data import SoilMoistureSensor, TemperatureSensor, HumiditySen
 from soil_moisture_predictor import SoilMoisturePredictor
 from watering_duration import WateringDurationCalculator
 from calculate_thresholds import ThresholdCalculator
+import paho.mqtt.client as mqtt
+import time
 
 config = load_sensor_config('sensor_config.xml')
 
+# MQTT settings
+BROKER_ADDRESS = "43.131.48.203"
+BROKER_PORT = 1883
+BASE_TOPIC = const.MESSAGE_BROKER_BASE_PATH + const.WATERING_TOPIC_BASE_PATH
+
 class WateringDecisionMaker:
     def __init__(self, weather_fetcher, soil_moisture_sensor, soil_moisture_predictor,
-                 watering_duration_calculator, threshold_calculator, soil_type=const.DEFAULT_SOIL_TYPE):
+                 watering_duration_calculator, threshold_calculator, area, soil_type):
         self.weather_fetcher = weather_fetcher
         self.soil_moisture_sensor = soil_moisture_sensor
         self.soil_moisture_predictor = soil_moisture_predictor
         self.watering_duration_calculator = watering_duration_calculator
         self.threshold_calculator = threshold_calculator
+        self.area = area
         self.soil_type = soil_type
         self.historical_data = self.weather_fetcher.fetch_historical_weather_data()
 
     def calculate_dynamic_threshold(self):
-        print("Calculating dynamic soil moisture threshold based on recent historical data...")
-
         recent_data = self.historical_data.tail(15)
         avg_temp_24h = recent_data['avg_temp_24h'].mean()
         avg_humidity_24h = recent_data['avg_humidity_24h'].mean()
 
-        print(f"15-day Average Temperature: {avg_temp_24h}")
-        print(f"15-day Average Humidity: {avg_humidity_24h}")
-
+        # Fetch baseline threshold based on the correct soil type
         baseline_threshold = self.threshold_calculator.get_daily_threshold(
             datetime.now().strftime('%Y-%m-%d'), soil_type=self.soil_type
         )['soil_moisture_threshold']
 
-        print(f"Baseline Soil Moisture Threshold for {self.soil_type} Soil: {baseline_threshold}")
-
         adjustment_factor = const.DEFAULT_ADJUSTMENT_FACTOR
-
         if avg_temp_24h > const.BASELINE_TEMP_FOR_ADJUSTMENT:
-            temperature_factor = 1 - ((avg_temp_24h - const.BASELINE_TEMP_FOR_ADJUSTMENT) * const.TEMP_ADJUSTMENT_FACTOR)
+            temperature_factor = 1 - (
+                        (avg_temp_24h - const.BASELINE_TEMP_FOR_ADJUSTMENT) * const.TEMP_ADJUSTMENT_FACTOR)
             adjustment_factor *= temperature_factor
-            print(f"Adjusting threshold for temperature: Factor {temperature_factor:.3f}")
 
         if avg_humidity_24h < const.BASELINE_HUMIDITY_FOR_ADJUSTMENT:
-            humidity_factor = 1 - ((60 - avg_humidity_24h) * const.HUMIDITY_ADJUSTMENT_FACTOR)
+            humidity_factor = 1 - (
+                        (const.BASELINE_HUMIDITY_FOR_ADJUSTMENT - avg_humidity_24h) * const.HUMIDITY_ADJUSTMENT_FACTOR)
             adjustment_factor *= humidity_factor
-            print(f"Adjusting threshold for humidity: Factor {humidity_factor:.3f}")
 
         adjusted_threshold = baseline_threshold * adjustment_factor
-        print(f"Adjusted Soil Moisture Threshold for {self.soil_type} Soil: {adjusted_threshold}")
+
+        # Print dynamically adjusted messages for the soil type
+        print(f"Predicted Threshold (pre-adjustment): {baseline_threshold}")
+        print(f"Adjusted Threshold based on {self.soil_type} soil: {adjusted_threshold}")
         return adjusted_threshold
 
     def analyze_conditions(self):
-        print("Fetching current weather data...")
         current_weather = self.weather_fetcher.fetch_current_weather_data()
         if not current_weather:
-            print("Failed to fetch current weather data.")
-            return None
-
-        print(
-            f"Current Weather Data:\n  Sunrise: {current_weather['sunrise']}\n  Sunset: {current_weather['sunset']}\n  "
-            f"Cloudiness: {current_weather['cloudiness']}%\n  Rain Probability: {current_weather['rain_probability']} mm")
+            print(f"Failed to fetch current weather data for {self.area}.")
+            return "Skip Watering"
 
         soil_moisture_threshold = self.calculate_dynamic_threshold()
-
-        print("Fetching current soil moisture reading...")
         soil_moisture_data = json.loads(self.soil_moisture_sensor.monitor())
         current_soil_moisture = float(soil_moisture_data.get('soil_moisture', 0))
-
-        print(f"Current Soil Moisture: {current_soil_moisture}")
-        print(f"Soil Moisture Threshold for Decision: {soil_moisture_threshold}")
 
         rain_probability = current_weather["rain_probability"]
         if rain_probability > const.MIN_RAIN_PROBABILITY:
@@ -79,51 +74,52 @@ class WateringDecisionMaker:
             predicted_soil_moisture = self.soil_moisture_predictor.predict_soil_moisture_after_rain(
                 current_soil_moisture, forecast_data
             )
-            print(f"Predicted Soil Moisture after Rain: {predicted_soil_moisture}")
-
             if predicted_soil_moisture >= soil_moisture_threshold:
-                print("Decision: Skip Watering (Predicted soil moisture after rain is above threshold)")
                 return "Skip Watering"
 
         decision = self.make_decision(current_weather, current_soil_moisture, soil_moisture_threshold)
         return decision
 
     def make_decision(self, current_weather, current_soil_moisture, soil_moisture_threshold):
-        print("Making watering decision based on time, cloudiness, and soil moisture...")
-
         cloudiness = current_weather["cloudiness"]
         sunrise = datetime.fromisoformat(current_weather["sunrise"])
         sunset = datetime.fromisoformat(current_weather["sunset"])
         now = datetime.now(sunrise.tzinfo)
 
-        print(f"Current Time: {now}")
-        print(f"Sunrise: {sunrise}, Sunset: {sunset}")
-        print(f"Cloudiness: {cloudiness}%")
-
         if (sunrise - const.WATERING_TIME_WINDOW <= now <= sunrise + const.WATERING_TIME_WINDOW) or \
-           (sunset - const.WATERING_TIME_WINDOW <= now <= sunset + const.WATERING_TIME_WINDOW) or \
-           (cloudiness >= const.MIN_CLOUDINESS_FOR_WATERING):
+                (sunset - const.WATERING_TIME_WINDOW <= now <= sunset + const.WATERING_TIME_WINDOW) or \
+                (cloudiness >= const.MIN_CLOUDINESS_FOR_WATERING):
             watering_duration = self.watering_duration_calculator.calculate_duration()
-            print(f"Calculated Watering Duration: {watering_duration} minutes")
             if watering_duration > 0:
-                print(f"Decision: Watering Required - Duration: {watering_duration} minutes")
                 return f"Watering for {watering_duration} minutes"
             else:
-                print("Decision: No Watering Required (Environmental conditions do not justify watering)")
                 return "No Watering Required"
         else:
-            print("Decision: Skip Watering (Not within optimal watering time and conditions)")
             return "Skip Watering"
 
-if __name__ == "__main__":
-    current_weather_api_url = "http://ec2-3-79-189-115.eu-central-1.compute.amazonaws.com:5000/weather"
-    historical_weather_api_url = config['api_url']
-    weather_fetcher = WeatherFetcher(current_weather_api_url, historical_weather_api_url)
+    def send_mqtt_command(self, status, duration=None):
+        client = mqtt.Client()
+        client.connect(BROKER_ADDRESS, BROKER_PORT, 60)
 
-    file_path = 'weather_turin.csv'
-    soil_type = const.DEFAULT_SOIL_TYPE
+        command = {"type": "opt", "status": status}
+        topic = f"{BASE_TOPIC}{self.area}"
 
-    threshold_calculator = ThresholdCalculator(file_path, n_estimators=100, window=7)
+        client.publish(topic, payload=json.dumps(command), qos=1)
+        print(
+            f"Sent {'start' if status else 'stop'} watering command to {topic} for duration {duration} seconds." if duration else "until stopped.")
+
+        if status:
+            time.sleep(duration)  # Wait for the duration of watering
+            self.send_mqtt_command(False)  # Send stop command after duration
+        client.disconnect()
+
+
+def main(area, soil_type):
+    weather_fetcher = WeatherFetcher(
+        current_api_url="http://ec2-3-79-189-115.eu-central-1.compute.amazonaws.com:5000/weather",
+        historical_api_url=config['api_url']
+    )
+    threshold_calculator = ThresholdCalculator('weather_turin.csv', n_estimators=100, window=7)
     soil_moisture_sensor = SoilMoistureSensor(soil_type=soil_type)
     soil_moisture_predictor = SoilMoisturePredictor(soil_absorption_factor=const.SOIL_ABSORPTION_FACTOR)
     temperature_sensor = TemperatureSensor()
@@ -143,8 +139,24 @@ if __name__ == "__main__":
         soil_moisture_predictor=soil_moisture_predictor,
         watering_duration_calculator=watering_duration_calculator,
         threshold_calculator=threshold_calculator,
+        area=area,
         soil_type=soil_type
     )
 
     decision = decision_maker.analyze_conditions()
-    print(f"Final Decision: {decision}")
+    print(f"Final Decision for {area}: {decision}")
+
+    if decision.startswith("Watering for"):
+        duration = float(decision.split()[2]) * 60  # Convert minutes to seconds
+        decision_maker.send_mqtt_command(True, duration)  # Start watering with specified duration
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python watering_decision.py <area> <soil_type>")
+        sys.exit(1)
+
+    area = sys.argv[1]
+    soil_type = sys.argv[2]
+
+    main(area, soil_type)
