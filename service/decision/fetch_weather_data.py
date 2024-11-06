@@ -1,7 +1,6 @@
 import requests
 import pandas as pd
 import logging
-from datetime import datetime
 
 # Setup logging
 logging.basicConfig(filename='weather_fetcher.log', level=logging.INFO,
