@@ -39,9 +39,9 @@ class ThresholdCalculator:
         try:
             self.model = joblib.load("soil_moisture_model.pkl")
             self.scaler = joblib.load("scaler.pkl")
-            print("Model and scaler loaded from file.")
+            #print("Model and scaler loaded from file.")
         except (FileNotFoundError, IOError):
-            print("Training new model as no saved model found.")
+            #print("Training new model as no saved model found.")
             X = self.weather_data[['day_of_year', 'smoothed_soil_moisture']]
             y = self.weather_data['soil_moisture']
             X_scaled = self.scaler.fit_transform(X)
@@ -49,7 +49,7 @@ class ThresholdCalculator:
             self.model.fit(X_train, y_train)
             y_pred = self.model.predict(X_test)
             mse = mean_squared_error(y_test, y_pred)
-            print(f"Random Forest model trained. Test MSE: {mse:.4f}")
+            #print(f"Random Forest model trained. Test MSE: {mse:.4f}")
             joblib.dump(self.model, "soil_moisture_model.pkl")
             joblib.dump(self.scaler, "scaler.pkl")
 
