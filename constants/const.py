@@ -5,6 +5,7 @@ MESSAGE_BROKER_BASE_PATH = "iot/lwx123321/test/"
 # Watering Decision Making
 DEFAULT_SOIL_TYPE = "Clay"
 WATERING_TOPIC_BASE_PATH = 'device/command/irrigator/'
+CSV_FILE_PATH = 'weather_turin.csv'
 MIN_RAIN_PROBABILITY = 1.0
 MIN_CLOUDINESS_FOR_WATERING = 0
 from datetime import timedelta
@@ -21,5 +22,5 @@ BASELINE_HUMIDITY_FOR_ADJUSTMENT = 60
 
 
 #Watering_coordinator
-CHECK_INTERVAL = 10
+CHECK_INTERVAL = 300
 RUNNING_CHECK_INTERVAL = 2
