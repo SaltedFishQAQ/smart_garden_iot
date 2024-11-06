@@ -83,6 +83,7 @@ class BaseDevice:
 
     def _handle_command(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
+        print(content)
         data_dict = json.loads(content)
         print(f"device: {self.device_name}, receive command: {data_dict}")
 
