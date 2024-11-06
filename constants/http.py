@@ -49,6 +49,8 @@ MYSQL_SCHEDULE_LIST = MYSQL_BASE_ROUTE + entity.SCHEDULE_TABLE  # get schedule l
 MYSQL_SCHEDULE_COUNT = MYSQL_BASE_ROUTE + entity.SCHEDULE_TABLE + '/count'  # get amount of schedules
 MYSQL_SCHEDULE_SAVE = MYSQL_BASE_ROUTE + entity.SCHEDULE_TABLE + '/save'  # save schedule list
 MYSQL_SCHEDULE_RUNNING = MYSQL_BASE_ROUTE + entity.SCHEDULE_TABLE + '/running'  # change schedule running status
+MYSQL_AREA_LIST = MYSQL_BASE_ROUTE + entity.AREA_TABLE
+MYSQL_AREA_SAVE = MYSQL_BASE_ROUTE + entity.AREA_TABLE + '/save'
 # user
 USER_BASE_ROUTE = '/'
 USER_DATA_ENTITY_LIST = USER_BASE_ROUTE + 'data/entities'
@@ -79,6 +81,9 @@ USER_SCHEDULE_COUNT = USER_BASE_ROUTE + 'schedules/count'
 USER_SCHEDULE_RUNNING = USER_BASE_ROUTE + 'schedules/running'
 USER_LOGIN = USER_BASE_ROUTE + 'user/login'
 USER_REGISTER = USER_BASE_ROUTE + 'user/register'
+USER_AREA_LIST = USER_BASE_ROUTE + 'area'
+USER_AREA_CREATE = USER_BASE_ROUTE + 'area'
+USER_AREA_UPDATE = USER_BASE_ROUTE + 'area'
 # device
 DEVICE_BASE_ROUTE = '/device/'
 DEVICE_STATUS_GET = DEVICE_BASE_ROUTE + 'status'
