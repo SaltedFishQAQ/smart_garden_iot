@@ -7,6 +7,7 @@ USER_TABLE = 'user'
 SERVICE_TABLE = 'service'
 RULE_TABLE = "rule"
 SCHEDULE_TABLE = 'schedule'
+AREA_TABLE = 'area'
 # devices
 TEMPERATURE = 'temperature'
 HUMIDITY = 'humidity'
