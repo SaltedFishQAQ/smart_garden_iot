@@ -1,6 +1,5 @@
 import json
 import time
-import logging
 import requests
 import constants.http as const_h
 import message_broker.channels as mb_channel
@@ -83,7 +82,6 @@ class BaseDevice:
 
     def _handle_command(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
-        logging.info(f"_handle_command: {content}")
         data_dict = json.loads(content)
         print(f"device: {self.device_name}, receive command: {data_dict}")
 

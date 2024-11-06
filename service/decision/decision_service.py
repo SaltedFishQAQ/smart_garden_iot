@@ -18,11 +18,6 @@ logging.basicConfig(
 )
 
 
-class BaseController:
-    def handle(self, data):
-        pass
-
-
 class DecisionService(BaseService):
     def __init__(self):
         super().__init__(constants.entity.DECISION_SERVICE)

@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 import pytz
-from service.decision.decision_service import BaseController
+from service.decision.controller.base import BaseController
 
 
 class LightController(BaseController):
