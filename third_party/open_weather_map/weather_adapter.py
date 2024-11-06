@@ -17,14 +17,13 @@ logging.basicConfig(
 class WeatherAdapter(BaseService):
     def __init__(self):
         super().__init__(constants.entity.OPEN_WEATHER_MAP)
-        config_loader = ConfigLoader('weather_config.xml')
-        config = config_loader.config_data
+        config = ConfigLoader('weather_config.xml')
 
         self.data_source = DataSource(
-            api_url=config['api_url'],
-            api_key=config['api_key'],
-            city=config['city'],
-            timezone=config['timezone']
+            api_url=config.get("./weather/api_url"),
+            api_key=config.get("./weather/api_key"),
+            city=config.get("./weather/city"),
+            timezone=config.get("./weather/timezone")
         )
 
     def start(self):

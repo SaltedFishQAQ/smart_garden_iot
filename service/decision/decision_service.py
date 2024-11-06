@@ -27,14 +27,13 @@ class DecisionService(BaseService):
         super().__init__(constants.entity.DECISION_SERVICE)
         self.control_groups = []
         self.command_channel = mb_channel.DEVICE_COMMAND
-        config_loader = ConfigLoader('light_controller.xml')
-        config = config_loader.config_data
+        config = ConfigLoader('light_controller.xml')
 
-        self.weather_api_url = config['api_url'],
-        self.mqtt_broker = config['mqtt_broker']
-        self.mqtt_port = config['mqtt_port']
-        self.mqtt_topic = config['mqtt_topic']
-        self.timezone = config['timezone']
+        self.weather_api_url = config.get("./weather/api_url")
+        self.mqtt_broker = config.get("./mqtt/broker")
+        self.mqtt_port = config.get("./mqtt/port")
+        self.mqtt_topic = config.get("./mqtt/topic")
+        self.timezone = config.get("./weather/timezone")
 
     def start(self):
         super().start()

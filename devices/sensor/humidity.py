@@ -2,8 +2,9 @@ import json
 import random
 import requests
 from devices.biz.base_sensor import BaseSensor
-from config_loader import load_config
+from common.config import ConfigLoader
 # import Adafruit_DHT
+
 
 class HumiditySensor(BaseSensor):
     def __init__(self):
@@ -11,22 +12,22 @@ class HumiditySensor(BaseSensor):
         # self._sensor = Adafruit_DHT.DHT11
         # self.pin = 4
 
-        self.config = load_config(data_key='humidity')
+        self.config = ConfigLoader('config.xml')
 
     def monitor(self) -> str:
-        if not self.config or 'api_url' not in self.config or 'data_key' not in self.config:
+        if self.config.root is None:
             print("API URL or data key not available in config.")
             return json.dumps({'value': None})
 
         try:
-
-            response = requests.get(self.config['api_url'])
+            url = f'{self.config.get("url")}:{self.config.get("ports/weather")}/weather/humidity'
+            response = requests.get(url)
 
             weather_data = response.json()
-            humidity = weather_data.get(self.config['data_key'])
+            humidity = weather_data.get("humidity")
 
             if humidity is None:
-                print(f"Failed to fetch '{self.config['data_key']}' data from API")
+                print(f"Failed to fetch 'humidity' data from API")
                 return json.dumps({
                     'value': None
                 })
