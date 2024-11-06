@@ -4,7 +4,7 @@ import constants.entity
 import constants.http
 import message_broker.channels as mb_channel
 import pytz
-from common.time import str_to_time, time_convert_timezone
+from common.time import str_to_time, time_to_str, time_convert_timezone
 from common.base_service import BaseService
 from database.influxdb.connector import Connector
 from http import HTTPMethod
@@ -131,7 +131,8 @@ class InfluxdbAdapter(BaseService):
                                               page=params['page'], size=params['size'])
 
         for i in range(len(result)):
-            result[i]['created_at'] = time_convert_timezone(result[i]['created_at'], pytz.utc, 'Europe/Rome')
+            created_at = str_to_time(result[i]['created_at'])
+            result[i]['created_at'] = time_to_str(time_convert_timezone(created_at, pytz.utc, 'Europe/Rome'))
 
         return {
             'list': result

@@ -15,7 +15,6 @@ def time_add(time_obj, seconds: int):
 
 
 def time_convert_timezone(time_obj, from_tz, to_tz):
-    print(time_obj)
     from_time = time_obj.replace(tzinfo=from_tz)
     to_timezone = pytz.timezone(to_tz)
 
