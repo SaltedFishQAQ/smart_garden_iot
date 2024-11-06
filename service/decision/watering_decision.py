@@ -1,8 +1,8 @@
 import sys
 import json
 import constants.const as const
+import constants.http as chttp
 from datetime import datetime, timedelta
-from config_loader import load_sensor_config
 from fetch_weather_data import WeatherFetcher
 from fetch_sensor_data import SoilMoistureSensor, TemperatureSensor, HumiditySensor
 from soil_moisture_predictor import SoilMoisturePredictor
@@ -11,11 +11,10 @@ from calculate_thresholds import ThresholdCalculator
 import paho.mqtt.client as mqtt
 import time
 
-config = load_sensor_config('sensor_config.xml')
 
 # MQTT settings
-BROKER_ADDRESS = "43.131.48.203"
-BROKER_PORT = 1883
+BROKER_ADDRESS = chttp.BROKER_ADDRESS
+BROKER_PORT = chttp.BROKER_PORT
 BASE_TOPIC = const.MESSAGE_BROKER_BASE_PATH + const.WATERING_TOPIC_BASE_PATH
 
 class WateringDecisionMaker:
@@ -115,11 +114,11 @@ class WateringDecisionMaker:
 
 
 def main(area, soil_type):
-    weather_fetcher = WeatherFetcher(
-        current_api_url="http://ec2-3-79-189-115.eu-central-1.compute.amazonaws.com:5000/weather",
-        historical_api_url=config['api_url']
-    )
-    threshold_calculator = ThresholdCalculator('weather_turin.csv', n_estimators=100, window=7)
+    weather_fetcher = WeatherFetcher(current_api_url=f"{chttp.WEATHER_ADAPTER}:{chttp.SERVICE_PORT_WEATHER}{chttp.WEATHER_BASE_ROUTE}",
+        historical_api_url=f"{chttp.WEATHER_ADAPTER}:{chttp.SERVICE_PORT_WEATHER}{chttp.HISTORICAL_WEATHER_BASE_ROUTE}")
+
+
+    threshold_calculator = ThresholdCalculator(const.CSV_FILE_PATH, n_estimators=100, window=7)
     soil_moisture_sensor = SoilMoistureSensor(soil_type=soil_type)
     soil_moisture_predictor = SoilMoisturePredictor(soil_absorption_factor=const.SOIL_ABSORPTION_FACTOR)
     temperature_sensor = TemperatureSensor()
@@ -147,7 +146,7 @@ def main(area, soil_type):
     print(f"Final Decision for {area}: {decision}")
 
     if decision.startswith("Watering for"):
-        duration = float(decision.split()[2]) * 60  # Convert minutes to seconds
+        duration = float(decision.split()[2]) * 60
         decision_maker.send_mqtt_command(True, duration)  # Start watering with specified duration
 
 
