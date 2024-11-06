@@ -1,3 +1,4 @@
+import os
 import xml.etree.ElementTree as ET
 
 
@@ -8,7 +9,8 @@ class ConfigLoader:
         self.load()
 
     def load(self):
-        tree = ET.parse(self.config_file)
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.config_file)
+        tree = ET.parse(config_path)
         self.root = tree.getroot()
 
     def get(self, path):
