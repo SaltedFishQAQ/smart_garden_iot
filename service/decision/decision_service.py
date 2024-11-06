@@ -1,3 +1,4 @@
+import os
 import requests
 import logging
 import time
@@ -27,7 +28,8 @@ class DecisionService(BaseService):
         super().__init__(constants.entity.DECISION_SERVICE)
         self.control_groups = []
         self.command_channel = mb_channel.DEVICE_COMMAND
-        config = ConfigLoader('light_controller.xml')
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'light_controller.xml')
+        config = ConfigLoader(config_path)
 
         self.weather_api_url = config.get("./weather/api_url")
         self.mqtt_broker = config.get("./mqtt/broker")

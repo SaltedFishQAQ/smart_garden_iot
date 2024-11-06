@@ -1,3 +1,4 @@
+import os
 import logging
 import constants.http
 import constants.entity
@@ -17,7 +18,8 @@ logging.basicConfig(
 class WeatherAdapter(BaseService):
     def __init__(self):
         super().__init__(constants.entity.OPEN_WEATHER_MAP)
-        config = ConfigLoader('weather_config.xml')
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weather_config.json')
+        config = ConfigLoader(config_path)
 
         self.data_source = DataSource(
             api_url=config.get("./weather/api_url"),

@@ -1,3 +1,4 @@
+import os
 import json
 import requests
 import logging
@@ -14,7 +15,8 @@ class SoilMoistureSensor(BaseSensor):
         # self.pin = 4
 
         # Load the API URL and key
-        self.config = ConfigLoader('config.xml')
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.xml')
+        self.config = ConfigLoader(config_path)
 
     def monitor(self) -> str:
         if self.config.root is None:

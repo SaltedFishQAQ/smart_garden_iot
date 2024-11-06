@@ -1,3 +1,4 @@
+import os
 import json
 import random
 import requests
@@ -12,7 +13,8 @@ class HumiditySensor(BaseSensor):
         # self._sensor = Adafruit_DHT.DHT11
         # self.pin = 4
 
-        self.config = ConfigLoader('config.xml')
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.xml')
+        self.config = ConfigLoader(config_path)
 
     def monitor(self) -> str:
         if self.config.root is None:
