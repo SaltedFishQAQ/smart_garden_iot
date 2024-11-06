@@ -72,19 +72,7 @@ class ThresholdCalculator:
         adjustment_factor = soil_info["adjustment_factor"]
         adjusted_threshold = baseline_threshold * adjustment_factor
 
-        print(f"Predicted Threshold (pre-adjustment): {baseline_threshold}")
-        print(f"Adjusted Threshold based on {soil_type} soil: {adjusted_threshold}")
 
         return {
             'soil_moisture_threshold': adjusted_threshold
         }
-
-
-# Testing
-if __name__ == "__main__":
-    file_path = './weather_turin.csv'
-    threshold_calculator = ThresholdCalculator(file_path, window=7, n_estimators=100)
-    date_input = '2024-11-05'
-    thresholds = threshold_calculator.get_daily_threshold(date_input, soil_type="Sandy")
-    print(f"Predicted Soil Moisture Threshold on {date_input}: {thresholds['soil_moisture_threshold']:.3f}")
-
