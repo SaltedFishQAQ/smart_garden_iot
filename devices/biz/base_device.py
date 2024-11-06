@@ -1,5 +1,6 @@
 import json
 import time
+import logging
 import requests
 import constants.http as const_h
 import message_broker.channels as mb_channel
@@ -82,9 +83,12 @@ class BaseDevice:
 
     def _handle_command(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
-        print("test: content")
-        data_dict = json.loads(content)
-        print(f"device: {self.device_name}, receive command: {data_dict}")
+        try:
+            data_dict = json.loads(content)
+            print(f"device: {self.device_name}, receive command: {data_dict}")
+        except Exception as e:
+            logging.error(f"_handle_command error: {e}")
+            return
 
         if 'type' not in data_dict:
             print(f"data missing type value, data: {content}")
