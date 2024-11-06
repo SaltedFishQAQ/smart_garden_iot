@@ -11,6 +11,7 @@ import message_broker.channels as mb_channel
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO)
 
+
 class ScheduleService(BaseService):
     def __init__(self):
         super().__init__(constants.entity.SCHEDULE_SERVICE)
