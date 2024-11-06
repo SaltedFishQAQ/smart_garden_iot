@@ -2,7 +2,7 @@ import json
 import random
 import requests
 import logging
-from config_loader import load_config
+from common.config import ConfigLoader
 from devices.biz.base_sensor import BaseSensor
 # import Adafruit_DHT
 
@@ -14,18 +14,19 @@ class TemperatureSensor(BaseSensor):
         # self.pin = 4
 
         # Load the API URL and key
-        self.config = load_config(data_key='temperature')
+        self.config = ConfigLoader('config.xml')
 
     def monitor(self) -> str:
-        if not self.config or 'api_url' not in self.config or 'data_key' not in self.config:
+        if self.config.root is None:
             return json.dumps({'value': None})
 
         try:
-            response = requests.get(self.config['api_url'])
+            url = f'{self.config.get("url")}:{self.config.get("ports/weather")}/weather/temperature'
+            response = requests.get(url)
             weather_data = response.json()
-            temperature = weather_data.get(self.config['data_key'])
+            temperature = weather_data.get('temperature')
             if temperature is None:
-                logging.error(f"Failed to fetch '{self.config['data_key']}' data from API")
+                logging.error(f"Failed to fetch 'temperature' data from API")
                 return json.dumps({
                     'value': None
                 })

@@ -1,7 +1,7 @@
 import json
 import requests
 import logging
-from config_loader import load_config
+from common.config import ConfigLoader
 from devices.biz.base_sensor import BaseSensor
 # import Adafruit_DHT
 
@@ -14,19 +14,20 @@ class SoilMoistureSensor(BaseSensor):
         # self.pin = 4
 
         # Load the API URL and key
-        self.config = load_config(data_key='soil_moisture')
+        self.config = ConfigLoader('config.xml')
 
     def monitor(self) -> str:
-        if not self.config or 'api_url' not in self.config or 'data_key' not in self.config:
+        if self.config.root is None:
             logging.error("API URL or data key not available in config.")
             return json.dumps({'value': None})
 
         try:
-            response = requests.get(self.config['api_url'])
+            url = f'{self.config.get("url")}:{self.config.get("ports/weather")}/weather/soil_moisture'
+            response = requests.get(url)
             response.raise_for_status()
 
             soil_data = response.json()
-            soil_moisture = soil_data.get(self.config['data_key'])
+            soil_moisture = soil_data.get('soil_moisture')
 
             # Check if soil moisture data for the given soil type
             moisture_value = soil_moisture.get(f"{self.soil_type.capitalize()} Soil")
