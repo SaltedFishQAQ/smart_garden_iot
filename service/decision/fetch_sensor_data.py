@@ -121,8 +121,8 @@ class SoilMoistureSensor(BaseSensor):
             logging.error(f"Error fetching soil moisture data: {e}")
             return json.dumps({'soil_moisture': None})
 
-# Commented out Database Query Logic
-"""
+## DATABASE ##
+'''
 class SensorDataFetcher:
     def __init__(self, influx_url, default_hours=1):
         self.influx_url = influx_url
@@ -151,9 +151,9 @@ class SensorDataFetcher:
         else:
             print(f"Failed to fetch {measurement} data:", response.status_code, response.text)
             return None
-"""
+'''
 
-# Example usage of direct API access with labeled output
+
 temperature_sensor = TemperatureSensor()
 humidity_sensor = HumiditySensor()
 soil_moisture_sensor = SoilMoistureSensor(soil_type='Sandy')
@@ -166,8 +166,9 @@ print(temperature_data)
 print(humidity_data)
 print(soil_moisture_data)
 
-# Example usage for InfluxDB data fetching (commented out)
 '''
+# Example usage for InfluxDB data fetching (commented out)
+
 fetcher = SensorDataFetcher("http://43.131.48.203:8084/influx/data")
 
 # Fetch data for each type
@@ -176,4 +177,5 @@ temperature_data = fetcher.fetch_data("temperature")
 soil_moisture_data = fetcher.fetch_data("soil_moisture")
 
 print(humidity_data, temperature_data, soil_moisture_data)
+
 '''
