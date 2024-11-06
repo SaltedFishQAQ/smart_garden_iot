@@ -87,6 +87,7 @@ class BaseDevice:
             data_dict = json.loads(content)
             print(f"device: {self.device_name}, receive command: {data_dict}")
         except Exception as e:
+            logging.info(content)
             logging.error(f"_handle_command error: {e}")
             return
 
