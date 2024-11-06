@@ -5,12 +5,22 @@ SERVICE_HOST = "0.0.0.0"
 INNER_SERVICE_HOST = "http://127.0.0.1"
 MYSQL_HOST = "http://" + os.getenv('MYSQL_HOST', 'localhost')
 INFLUX_HOST = "http://" + os.getenv('INFLUXDB_HOST', 'localhost')
+
+#added for decision service
+WEATHER_ADAPTER = "http://3.79.189.115"
+BROKER_ADDRESS = "43.131.48.203"
+
 # service port
 SERVICE_PORT_AUTH = 8081
 SERVICE_PORT_RULE = 8082
 SERVICE_PORT_USER = 8083
 SERVICE_PORT_INFLUX = 8084
 SERVICE_PORT_MYSQL = 8085
+
+# added for decision service
+SERVICE_PORT_WEATHER = 5000
+BROKER_PORT = 1883
+
 
 # influx
 INFLUX_BASE_ROUTE = '/influx/'
@@ -75,4 +85,6 @@ DEVICE_STATUS_GET = DEVICE_BASE_ROUTE + 'status'
 # open weather map
 WEATHER_BASE_ROUTE = '/weather/'
 WEATHER_DATA_GET = WEATHER_BASE_ROUTE + 'data'
+# Open Meteo
+HISTORICAL_WEATHER_BASE_ROUTE = '/historical_weather/'
 

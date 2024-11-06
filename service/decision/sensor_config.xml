@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sensorConfig>
+    <api>
+        <url>https://api.open-meteo.com/v1/forecast</url>
+    </api>
+    <model>
+        <path>soil_moisture_model.pkl</path>
+    </model>
+    <csv>
+        <path>cleaned_weather_data_5_years.csv</path>
+    </csv>
+    <location>
+        <timezone>Europe/Rome</timezone>
+        <latitude>45.0705</latitude>
+        <longitude>7.6868</longitude>
+    </location>
+    <simulation>
+        <sleepTime>300</sleepTime>
+    </simulation>
+    <cherrypy>
+        <host>0.0.0.0</host>
+        <port>5001</port>
+    </cherrypy>
+</sensorConfig>
+
