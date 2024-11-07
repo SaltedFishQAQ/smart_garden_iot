@@ -4,7 +4,7 @@ from fetch_weather_data import WeatherFetcher
 
 class SoilMoisturePredictor:
 
-    def __init__(self, soil_absorption_factor=0.7):
+    def __init__(self, soil_absorption_factor):
         self.soil_absorption_factor = soil_absorption_factor
 
     def fetch_forecast_data(self, weather_fetcher):
