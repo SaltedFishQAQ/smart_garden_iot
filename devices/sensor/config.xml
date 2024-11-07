@@ -1,5 +1,5 @@
 <config>
-    <url>http://ec2-3-79-189-115.eu-central-1.compute.amazonaws.com</url>
+    <url>http://3.79.189.115</url>
     <ports>
         <weather>5000</weather>
         <soil_moisture_sensor>5001</soil_moisture_sensor>

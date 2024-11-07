@@ -24,7 +24,7 @@ class SoilMoistureSensor(BaseSensor):
             return json.dumps({'value': None})
 
         try:
-            url = f'{self.config.get("url")}:{self.config.get("ports/weather")}/weather/soil_moisture'
+            url = f'{self.config.get("url")}:{self.config.get("ports/soil_moisture_sensor")}/soil_moisture'
             response = requests.get(url)
             response.raise_for_status()
 
