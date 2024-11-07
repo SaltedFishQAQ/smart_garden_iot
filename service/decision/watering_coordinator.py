@@ -2,7 +2,7 @@ import time
 import subprocess
 import constants.const as const
 #from service.user.logic.area import Logic, Delegate  # Import Logic class and its dependencies
-from mysqptest import Logic, Delegate  # Import Logic class and its dependencies
+from mysqptest import Logic, Delegate
 
 
 #MYSQL
