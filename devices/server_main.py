@@ -15,7 +15,7 @@ if __name__ == '__main__':
     light_control.start()
     oxygen_control = OxygenController('oxygen')
     oxygen_control.start()
-    soil_device = SoilMoistureDevice('soil moisture')
+    soil_device = SoilMoistureDevice('soil_moisture')
     soil_device.start()
 
     try:
