@@ -15,6 +15,7 @@ LIGHT = 'light'
 GATE = 'gate'
 IRRIGATOR = 'irrigator'
 OXYGEN = "oxygen"
+SOIL_MOISTURE = "soil_moisture"
 # third party
 TELEBOT = 'telebot'
 THING_SPEAK = 'thing_speak'
