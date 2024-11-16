@@ -14,7 +14,7 @@ class Area:
                 'area_name': self.name,
                 'soil_type': self.soil_type,
                 'device_name': device_name,
-                'items': params[device_name]
+                'items': params['devices'][device_name]
             })
             d.start()
             self.device_list.append(d)
