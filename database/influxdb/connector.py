@@ -26,11 +26,6 @@ class Connector:
         if time_range is None:
             time_range = "start: -120m"
 
-        if cond is not None:
-            cond = f" and {cond}"
-        else:
-            cond = ""
-
         offset = (page-1)*size
 
         sql = f"""from(bucket: "{self.bucket}")
@@ -44,9 +39,13 @@ class Connector:
         result = []
         for table in tables:
             for record in table.records:
+                area_name = ""
+                if 'area' in record:
+                    area_name = record['area']
+
                 line = {
                     'measurement': record.get_measurement(),
-                    'area': record['area'],
+                    'area': area_name,
                     record.get_field(): record.get_value(),
                     'created_at': time_to_str(record.get_time()),
                     'start_at': time_to_str(record.values['_start']),
