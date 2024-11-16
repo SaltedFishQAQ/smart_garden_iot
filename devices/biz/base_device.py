@@ -9,7 +9,7 @@ from common.mqtt import MQTTClient
 
 
 class BaseDevice:
-    def __init__(self, area_name, name, broker="10.9.0.10", port=1883):
+    def __init__(self, area_name, name, broker="43.131.48.203", port=1883):
         # meta
         self.area_name = area_name
         self.device_name = name

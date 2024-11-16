@@ -22,7 +22,7 @@ class BaseService:
     def start(self):
         threading.Thread(target=self._heart_beat).start()
 
-    def init_mqtt_client(self, broker="10.9.0.10", port=1883):
+    def init_mqtt_client(self, broker="43.131.48.203", port=1883):
         if self.mqtt_client is not None:
             return
 
