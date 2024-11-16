@@ -12,13 +12,13 @@ class Device(BaseDevice):
         if 'sensor' in items:
             self.sensor = get_sensor({
                 'sensor': items['sensor'],
-                'soil_type': items['soil_type'],
+                'soil_type': params['soil_type'],
             })
             self.sensor.receiver = self.handle_data
         if 'actuator' in items:
             self.actuator = get_actuator({
                 'actuator': items['actuator'],
-                'soil_type': items['soil_type'],
+                'soil_type': params['soil_type'],
             })
 
     def start(self):
