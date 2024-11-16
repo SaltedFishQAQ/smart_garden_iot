@@ -40,7 +40,7 @@ class Connector:
         for table in tables:
             for record in table.records:
                 area_name = ""
-                if 'area' in record:
+                if 'area' in record.values:
                     area_name = record['area']
 
                 line = {
