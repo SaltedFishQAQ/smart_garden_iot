@@ -1,0 +1,32 @@
+<config>
+    <area>
+        <area1>
+            <soil_type>clay</soil_type>
+        </area1>
+        <area2>
+            <soil_type>sandy</soil_type>
+        </area2>
+        <area3>
+            <soil_type>peaty</soil_type>
+        </area3>
+    </area>
+    <area1>
+        <device1-1>
+            <sensor>temperature</sensor>
+        </device1-1>
+        <device1-2>
+            <sensor>humidity</sensor>
+        </device1-2>
+        <device1-3>
+            <sensor>light</sensor>
+            <actuator>light</actuator>
+        </device1-3>
+        <device1-4>
+            <sensor>gas</sensor>
+            <actuator>oxygen</actuator>
+        </device1-4>
+        <device1-5>
+            <sensor>soil_moisture</sensor>
+        </device1-5>
+    </area1>
+</config>

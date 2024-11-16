@@ -3,6 +3,9 @@ import random
 from devices.biz.base_sensor import BaseSensor
 
 
+TAG = 'gas'
+
+
 class GasDetector(BaseSensor):
     def __init__(self):
         super().__init__("gas")
@@ -11,3 +14,6 @@ class GasDetector(BaseSensor):
         return json.dumps({
             'value': round(random.uniform(20, 22), 1)
         })
+
+    def measurement(self) -> str:
+        return 'gas'

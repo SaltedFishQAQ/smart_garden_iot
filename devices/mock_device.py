@@ -9,9 +9,7 @@ from devices.biz.base_device import BaseDevice
 
 class MockDevice(BaseDevice):
     def __init__(self):
-        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configuration.json')
-        self.conf = json.load(open(config_path))
-        super().__init__("mock_device", self.conf['broker'], self.conf['port'])
+        super().__init__('', "mock_device")
         self.publish_topic = mb_channel.STORAGE_DATA
         self.init_mqtt_client()
 

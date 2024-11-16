@@ -5,7 +5,7 @@ from devices.sensor.humidity import HumiditySensor
 
 class Hygrometer(BaseDevice):
     def __init__(self, name):
-        super().__init__(name)
+        super().__init__('', name)
         self.sensor = HumiditySensor()
         self.sensor.receiver = self.handle_data
 

@@ -8,6 +8,9 @@ from devices.biz.base_sensor import BaseSensor
 # import Adafruit_DHT
 
 
+TAG = "temperature"
+
+
 class TemperatureSensor(BaseSensor):
     def __init__(self):
         super().__init__("temperature")
@@ -46,3 +49,5 @@ class TemperatureSensor(BaseSensor):
                 'value': None
             })
 
+    def measurement(self) -> str:
+        return 'temperature'

@@ -7,6 +7,9 @@ from devices.biz.base_sensor import BaseSensor
 # import Adafruit_DHT
 
 
+TAG = "soil_moisture"
+
+
 class SoilMoistureSensor(BaseSensor):
     def __init__(self, soil_type):
         super().__init__("soil_moisture")
@@ -48,4 +51,7 @@ class SoilMoistureSensor(BaseSensor):
             return json.dumps({
                 'value': None
             })
+
+    def measurement(self) -> str:
+        return 'soil'
 

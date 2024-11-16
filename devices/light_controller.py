@@ -6,7 +6,7 @@ from devices.sensor.light import LightSensor
 
 class LightController(BaseDevice):
     def __init__(self, name):
-        super().__init__(name)
+        super().__init__('', name)
         self.sensor = LightSensor()
         self.sensor.receiver = self.handle_data
         self.actuator = LightSwitch()

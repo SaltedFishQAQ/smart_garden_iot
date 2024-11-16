@@ -6,7 +6,7 @@ from devices.sensor.gas import GasDetector
 
 class OxygenController(BaseDevice):
     def __init__(self, name):
-        super().__init__(name)
+        super().__init__('', name)
         self.sensor = GasDetector()
         self.sensor.receiver = self.handle_data
         self.actuator = OxygenValve()

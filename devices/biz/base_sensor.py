@@ -23,6 +23,9 @@ class BaseSensor(object):
     def monitor(self) -> str:
         pass
 
+    def measurement(self) -> str:
+        pass
+
     @final
     def _thread_main(self):
         if self.lock:

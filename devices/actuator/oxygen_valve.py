@@ -1,6 +1,9 @@
 from devices.biz.base_actuator import BaseActuator
 
 
+TAG = 'oxygen'
+
+
 class OxygenValve(BaseActuator):
     def __init__(self):
         super().__init__("oxygen valve")

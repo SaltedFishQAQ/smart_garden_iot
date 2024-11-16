@@ -7,6 +7,9 @@ from common.config import ConfigLoader
 # import Adafruit_DHT
 
 
+TAG = "humidity"
+
+
 class HumiditySensor(BaseSensor):
     def __init__(self):
         super().__init__("humidity")
@@ -47,4 +50,5 @@ class HumiditySensor(BaseSensor):
                 'value': None
             })
 
-
+    def measurement(self) -> str:
+        return 'humidity'

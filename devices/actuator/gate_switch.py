@@ -1,6 +1,9 @@
 from devices.biz.base_actuator import BaseActuator
 
 
+TAG = 'gate'
+
+
 class GateSwitch(BaseActuator):
     def __init__(self):
         super().__init__("gate switch")

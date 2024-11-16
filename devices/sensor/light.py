@@ -3,6 +3,9 @@ from datetime import datetime, time
 from devices.biz.base_sensor import BaseSensor
 
 
+TAG = "light"
+
+
 class LightSensor(BaseSensor):
     def __init__(self):
         super().__init__("light")
@@ -20,3 +23,6 @@ class LightSensor(BaseSensor):
         return json.dumps({
             'value': value
         })
+
+    def measurement(self) -> str:
+        return 'light'

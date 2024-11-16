@@ -9,8 +9,9 @@ from common.mqtt import MQTTClient
 
 
 class BaseDevice:
-    def __init__(self, name, broker="10.9.0.10", port=1883):
+    def __init__(self, area_name, name, broker="10.9.0.10", port=1883):
         # meta
+        self.area_name = area_name
         self.device_name = name
         self.working = False
         self.broker = broker
@@ -18,7 +19,7 @@ class BaseDevice:
         # communication
         self.mqtt_client = None
         self.register_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}{const_h.MYSQL_DEVICE_REGISTER}'
-        self.data_topic = mb_channel.DEVICE_DATA + name
+        self.data_topic = mb_channel.DEVICE_DATA
         self.command_topic = mb_channel.DEVICE_COMMAND + name
         self.operation_topic = mb_channel.DEVICE_OPERATION
         # func
@@ -63,18 +64,20 @@ class BaseDevice:
         self.mqtt_client.publish(topic, message)
         return True, ""
 
-    def record_data(self, data):
+    def record_data(self, measurement, data):
         mqtt_data = {
             'tags': {
+                'area': self.area_name,
                 'device': self.device_name,
             },
             'fields': data,
         }
-        self.mqtt_publish(self.data_topic, json.dumps(mqtt_data))
+        self.mqtt_publish(self.data_topic + measurement, json.dumps(mqtt_data))
 
     def record_operation(self, message):
         mqtt_data = {
             'tags': {
+                'area': self.area_name,
                 'device': self.device_name,
             },
             'fields': message,

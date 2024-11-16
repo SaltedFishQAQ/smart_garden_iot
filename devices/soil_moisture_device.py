@@ -5,7 +5,7 @@ from devices.sensor.soil_moisture import SoilMoistureSensor
 
 class SoilMoistureDevice(BaseDevice):
     def __init__(self, name):
-        super().__init__(name)
+        super().__init__('', name)
         self.sensor = SoilMoistureSensor("clay")
         self.sensor.receiver = self.handle_data
 

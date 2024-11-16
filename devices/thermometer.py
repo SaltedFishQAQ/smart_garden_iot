@@ -5,7 +5,7 @@ from devices.sensor.temperature import TemperatureSensor
 
 class Thermometer(BaseDevice):
     def __init__(self, name):
-        super().__init__(name)
+        super().__init__('', name)
         self.sensor = TemperatureSensor()
         self.sensor.receiver = self.handle_data
 
