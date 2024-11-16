@@ -119,6 +119,7 @@ class BaseDevice:
 
         data = {
             'name': self.device_name,
+            'area': self.area_name,
             'status': 0
         }
         if self.working:
