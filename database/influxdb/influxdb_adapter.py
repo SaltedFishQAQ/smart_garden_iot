@@ -101,10 +101,17 @@ class InfluxdbAdapter(BaseService):
 
         measurement = params['measurement']
         time_cond = []
-        filter_cond = None
+        filter_cond = ""
 
         if 'name' in params:
-            filter_cond = f'r.device == "{params["name"]}"'
+            filter_cond += f' r.device == "{params["name"]}"'
+
+        if 'area_list' in params:
+            area_list = []
+            for area in params['area_list']:
+                area_list.append(f'r.area == "{area}"')
+            if len(area_list) > 0:
+                filter_cond += f' ({" or ".join(area_list)})'
 
         if 'start_at' in params:
             start_time = str_to_time(params["start_at"])

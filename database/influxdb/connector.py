@@ -46,6 +46,7 @@ class Connector:
             for record in table.records:
                 line = {
                     'measurement': record.get_measurement(),
+                    'area': record['area'],
                     record.get_field(): record.get_value(),
                     'created_at': time_to_str(record.get_time()),
                     'start_at': time_to_str(record.values['_start']),

@@ -64,14 +64,3 @@ class Logic:
             'message': "success",
             'list': result
         }
-
-    # @staticmethod
-    # def mock_data(params):
-    #     d = MockDevice()
-    #     d.init_mock_data(params['number'])
-    #
-    #     return {
-    #         'code': 0,
-    #         'message': "success",
-    #     }
-
