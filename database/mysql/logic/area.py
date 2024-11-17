@@ -11,7 +11,11 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_AREA_SAVE, HTTPMethod.POST, self.save)
 
     def list(self, params):
-        records = self.delegate.db_connect.query("select * from area")
+        sql = "select * from area"
+        if 'user_id' in params:
+            sql += f' where user_id = {params["user_id"]}'
+
+        records = self.delegate.db_connect.query(sql)
         result = []
         for record in records:
             result.append({

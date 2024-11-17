@@ -13,7 +13,11 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_USER_REGISTER, HTTPMethod.POST, self.register)
 
     def list(self, params):
-        records = self.delegate.db_connect.query("select * from user")
+        sql = "select * from user"
+        if 'user_id' in params:
+            sql += f' where user_id = {params["user_id"]}'
+
+        records = self.delegate.db_connect.query(sql)
         result = []
         for record in records:
             result.append({

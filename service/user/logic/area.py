@@ -14,6 +14,11 @@ class Logic:
         self.delegate.http_client.add_route(const_h.USER_AREA_UPDATE, HTTPMethod.PUT, self.update)
 
     def list(self, params):
+        if 'user_id' not in params:
+            return {
+                'code': 500,
+                'message': 'params not found: user_id'
+            }
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_AREA_LIST, params)
 
         return {
@@ -23,6 +28,25 @@ class Logic:
         }
 
     def create(self, params):
+        if 'user_id' not in params:
+            return {
+                'code': 500,
+                'message': 'params not found: user_id'
+            }
+
+        user = self.get_user(params['user_id'])
+        if user is None:
+            return {
+                'code': 500,
+                'message': 'user not found'
+            }
+
+        if user['role'] != 1:
+            return {
+                'code': 500,
+                'message': 'no operation permission'
+            }
+
         resp = requests.post(self.mysql_base_url + const_h.MYSQL_AREA_SAVE, json=params)
         if resp.status_code != 200:
             return {
@@ -45,11 +69,30 @@ class Logic:
         }
 
     def update(self, params):
+        if 'user_id' not in params:
+            return {
+                'code': 500,
+                'message': 'params not found: user_id'
+            }
         if 'id' not in params:
             return {
                 'code': 500,
                 'message': 'missing params: id'
             }
+
+        user = self.get_user(params['user_id'])
+        if user is None:
+            return {
+                'code': 500,
+                'message': 'user not found'
+            }
+
+        if user['role'] != 1:
+            return {
+                'code': 500,
+                'message': 'no operation permission'
+            }
+
         resp = requests.post(self.mysql_base_url + const_h.MYSQL_AREA_SAVE, json=params)
         if resp.status_code != 200:
             return {
@@ -61,3 +104,13 @@ class Logic:
             'code': 0,
             'message': "success",
         }
+
+    def get_user(self, user_id):
+        resp = requests.post(self.mysql_base_url + const_h.MYSQL_USER_LIST, {
+            'user_id': user_id
+        })
+        user_list = resp.json()['list']
+        if len(user_list) == 0:
+            return None
+
+        return user_list[0]

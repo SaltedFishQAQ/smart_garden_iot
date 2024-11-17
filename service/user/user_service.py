@@ -3,7 +3,7 @@ import constants.http
 import json
 import message_broker.channels as mb_channel
 from common.base_service import BaseService
-from service.user.logic import data, device, catalog, rule, user, schedule, operation
+from service.user.logic import data, device, catalog, rule, user, schedule, operation, area
 
 
 class UserService(BaseService):
@@ -25,6 +25,7 @@ class UserService(BaseService):
         self.remove_mqtt_client()
 
     def register_http_service(self):
+        area.Logic(self).register_handler()
         data.Logic(self).register_handler()
         device.Logic(self).register_handler()
         catalog.Logic(self).register_handler()
