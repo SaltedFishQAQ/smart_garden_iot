@@ -35,12 +35,12 @@ class Logic:
         if 'id' not in params:
             sql = ('INSERT INTO area (name, user_id, soil_type, `desc`)'
                    'VALUES (%s, %s, %s, %s)')
-            args = (params['name'], params['user_id'], params['soil_type'], params['desc'])
+            args = (params['name'], params['bind_id'], params['soil_type'], params['desc'])
             is_create = True
         else:
             sql = ('update area set name=%s, user_id=%s, soil_type=%s, `desc`=%s'
                    ' where id=%s')
-            args = (params['name'], params['user_id'], params['soil_type'], params['desc'], params['id'])
+            args = (params['name'], params['bind_id'], params['soil_type'], params['desc'], params['id'])
         n = self.delegate.db_connect.insert(sql, args, is_create=is_create)
         return {
             "row": n
