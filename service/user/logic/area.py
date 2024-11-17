@@ -106,8 +106,8 @@ class Logic:
         }
 
     def get_user(self, user_id):
-        resp = requests.post(self.mysql_base_url + const_h.MYSQL_USER_LIST, {
-            'user_id': user_id
+        resp = requests.get(self.mysql_base_url + const_h.MYSQL_USER_LIST, {
+            'id': user_id
         })
         user_list = resp.json()['list']
         if len(user_list) == 0:

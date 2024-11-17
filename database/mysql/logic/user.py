@@ -14,8 +14,8 @@ class Logic:
 
     def list(self, params):
         sql = "select * from user"
-        if 'user_id' in params:
-            sql += f' where user_id = {params["user_id"]}'
+        if 'id' in params:
+            sql += f' where id = {params["id"]}'
 
         records = self.delegate.db_connect.query(sql)
         result = []
