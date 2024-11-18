@@ -15,7 +15,11 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_APPROVE, HTTPMethod.POST, self.approve)
 
     def count(self, params):
-        records = self.delegate.db_connect.query("select count(*) as total from device")
+        sql = 'select count(*) as total from device'
+        if 'area_list' in params:
+            sql += f' where area_id in ({",".join(params["area_list"])})'
+
+        records = self.delegate.db_connect.query(sql)
         count = 0
         for record in records:
             count += record['total']
@@ -25,7 +29,12 @@ class Logic:
         }
 
     def list(self, params):
-        records = self.delegate.db_connect.query("select * from device")
+        sql = 'select * from device'
+
+        if 'area_list' in params:
+            sql += f' where area_id in ({",".join(params["area_list"])})'
+
+        records = self.delegate.db_connect.query(sql)
         result = []
         for record in records:
             result.append({
@@ -33,6 +42,7 @@ class Logic:
                 'name': record['name'],
                 'running_status': record['running_status'],
                 'auth_status': record['auth_status'],
+                'area_id': record['area_id'],
                 'created_at': time_to_str(record['created_at']),
                 'updated_at': time_to_str(record['updated_at'])
             })
