@@ -23,7 +23,10 @@ class Logic(Common):
         }
 
     def device_list(self, params):
-        params['area_list'] = self.get_area_ids(params)
+        area_list = self.get_area_ids(params)
+        if len(area_list) == 0:
+            return []
+        params['area_list'] = area_list
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_DEVICE_LIST, params)
 
         return {
@@ -33,7 +36,10 @@ class Logic(Common):
         }
 
     def device_count(self, params):
-        params['area_list'] = self.get_area_ids(params)
+        area_list = self.get_area_ids(params)
+        if len(area_list) == 0:
+            return []
+        params['area_list'] = area_list
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_DEVICE_COUNT, params)
 
         return {
