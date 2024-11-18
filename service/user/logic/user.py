@@ -14,6 +14,7 @@ class Logic:
 
     def login(self, params):
         resp = requests.post(self.mysql_base_url + const_h.MYSQL_USER_LOGIN, json=params)
+        self.delegate.http_client.set_user(resp.json())
 
         return {
             'code': 0,

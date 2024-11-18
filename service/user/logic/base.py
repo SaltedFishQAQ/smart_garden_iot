@@ -17,17 +17,8 @@ class Common:
                 }
         return None
 
-    def get_user(self, params):
-        if 'user_id' not in params:
-            return None
-        resp = requests.get(self.mysql_base_url + const_h.MYSQL_USER_LIST, {
-            'id': params['user_id']
-        })
-        user_list = resp.json()['list']
-        if len(user_list) == 0:
-            return None
-
-        return user_list[0]
+    def get_user(self):
+        return self.delegate.http_client.get_user()
 
     def get_area_list(self, params):
         if 'user_id' not in params:

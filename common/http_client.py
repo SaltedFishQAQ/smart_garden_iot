@@ -1,6 +1,5 @@
-import json
-import time
-
+import datetime
+import jwt
 import cherrypy
 from typing import final
 from http import HTTPMethod
@@ -19,6 +18,7 @@ class HTTPClient(object):
         self.host = host
         self.port = port
         self.routes = {}
+        self.secret_key = "smart_garden"
         if conf is None:
             self.conf = {
                 '/': {
@@ -42,6 +42,33 @@ class HTTPClient(object):
 
     def stop(self):
         self.client.stop()
+
+    def set_user(self, user_info):
+        payload = {
+            "user_info": user_info,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
+            "iat": datetime.datetime.utcnow()
+        }
+        token = jwt.encode(payload, self.secret_key, algorithm="HS256")
+        cherrypy.response.headers['Authorization'] = f"Bearer {token}"
+
+    def get_user(self):
+        auth_header = cherrypy.request.headers.get('Authorization')
+        if not auth_header:
+            return None
+        parts = auth_header.split()
+        if len(parts) != 2 or parts[0] != "Bearer":
+            return None
+        token = parts[1]
+        try:
+            decoded = jwt.decode(token, self.secret_key, algorithms=["HS256"])
+            return decoded["user_info"]
+        except jwt.ExpiredSignatureError:
+            # return {"error": "Token has expired"}
+            return None
+        except jwt.InvalidTokenError:
+            # return {"error": "Invalid token"}
+            return None
 
     def add_route(self, path, method, handler):
         if path not in self.routes:
