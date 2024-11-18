@@ -23,7 +23,7 @@ class Common:
     def get_area_list(self, params):
         user = self.get_user()
         if user is None:
-            return []
+            return [0]
         if user['role'] != 1:
             params['user_id'] = user['id']
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_AREA_LIST, params)
