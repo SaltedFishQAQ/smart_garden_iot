@@ -23,9 +23,6 @@ class Logic(Common):
         }
 
     def device_list(self, params):
-        if err := self.check_params(params, ['user_id']):
-            return err
-
         area_ids = self.get_area_ids(params)
         if len(area_ids) == 0:
             return {

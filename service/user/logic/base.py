@@ -21,8 +21,11 @@ class Common:
         return self.delegate.http_client.get_user()
 
     def get_area_list(self, params):
-        if 'user_id' not in params:
+        user = self.get_user()
+        if user is None:
             return []
+        if user['role'] != 1:
+            params['user_id'] = user['id']
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_AREA_LIST, params)
         return resp.json()['list']
 

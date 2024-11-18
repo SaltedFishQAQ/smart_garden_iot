@@ -14,14 +14,6 @@ class Logic(Common):
         self.delegate.http_client.add_route(const_h.USER_AREA_UPDATE, HTTPMethod.PUT, self.update)
 
     def list(self, params):
-        user = self.get_user()
-        if user is None:
-            return {
-                'code': 500,
-                'message': 'user not found'
-            }
-        params['user_id'] = user['id']
-
         return {
             'code': 0,
             'message': "success",
