@@ -107,7 +107,7 @@ class IoTMonitoringWebApp:
         with open("plain_text.html", "r") as file:
             html_template = file.read()
 
-containers_html = ""
+        containers_html = ""
         for container in self.data.get("containers", []):
             name = container["name"]
             state = container.get("state", "Unknown")
@@ -163,7 +163,7 @@ containers_html = ""
         self.mqtt_client.loop_stop()
 
 
-if name == "__main__":
+if __name__ == "__main__":
     app = IoTMonitoringWebApp()
     try:
         cherrypy.quickstart(app, "/", {
