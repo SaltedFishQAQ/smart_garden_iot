@@ -17,7 +17,7 @@ def get_container_stats(server_ip, container_id):
 def calculate_usage(stats):
     """Calculate CPU and memory usage from container stats."""
     # CPU Calculation
-    total_usage = stats["cpu_stats"]["cpu_usage"]["total_usage"]
+    total_usage = stats["cpu_stats"]["cpu_usage"]["total_usage"] #Total_usage status
     prev_total_usage = stats["precpu_stats"]["cpu_usage"]["total_usage"]
     system_cpu_usage = stats["cpu_stats"]["system_cpu_usage"]
     prev_system_cpu_usage = stats["precpu_stats"]["system_cpu_usage"]
