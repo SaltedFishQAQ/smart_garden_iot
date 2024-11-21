@@ -107,7 +107,6 @@ class IoTMonitoringWebApp:
         with open("plain_text.html", "r") as file:
             html_template = file.read()
 
-Davood Shaterzadeh, [11/21/2024 7:32 PM]
 containers_html = ""
         for container in self.data.get("containers", []):
             name = container["name"]
