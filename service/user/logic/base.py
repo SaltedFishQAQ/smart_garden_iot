@@ -29,8 +29,19 @@ class Common:
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_AREA_LIST, params)
         return resp.json()['list']
 
-    def get_area_ids(self, params):
-        area_list = self.get_area_list(params)
-        if len(area_list) == 0:
+    def match_area_ids(self, params):
+        params['area_list'] = [item['id'] for item in self.get_area_list(params)]
+
+    def match_area_names(self, params):
+        params['area_list'] = [item['name'] for item in self.get_area_list(params)]
+
+    def get_device_list(self, params):
+        self.match_area_ids(params)
+        resp = requests.get(self.mysql_base_url + const_h.MYSQL_DEVICE_LIST, params)
+        return resp.json()['list']
+
+    def get_device_ids(self, params):
+        device_list = self.get_device_list(params)
+        if len(device_list) == 0:
             return []
-        return [item['id'] for item in area_list]
+        return [item['id'] for item in device_list]
