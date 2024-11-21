@@ -19,7 +19,7 @@ class Logic(Common):
             return {
                 'code': 0,
                 'message': "success",
-                'data': []
+                'list': []
             }
         if user['role'] != 1:
             params['id'] = user['id']
@@ -28,7 +28,7 @@ class Logic(Common):
         return {
             'code': 0,
             'message': "success",
-            'data': resp.json()['list']
+            'list': resp.json()['list']
         }
 
     def login(self, params):
