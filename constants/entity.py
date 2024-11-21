@@ -18,7 +18,6 @@ OXYGEN = "oxygen"
 SOIL_MOISTURE = "soil_moisture"
 # third party
 TELEBOT = 'telebot'
-THING_SPEAK = 'thing_speak'
 OPEN_WEATHER_MAP = 'open_weather_map'
 # service
 AUTH_SERVICE = 'auth'
