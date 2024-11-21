@@ -123,7 +123,7 @@ class DatabaseHealthMonitor:
             return False
 
     @staticmethod
-    def check_influxdb(host, port):
+    def check_influxdb(host, port): //
         url = f"http://{host}:{port}/health"
         try:
             response = requests.get(url)
