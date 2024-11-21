@@ -75,5 +75,5 @@ class Logic:
 
         sql = ('INSERT INTO user (name, password, role)'
                'VALUES (%s, %s, %s)')
-        args = (params['name'], params['password'], 1)
+        args = (params['name'], params['password'], 2)
         self.delegate.db_connect.insert(sql, args)
