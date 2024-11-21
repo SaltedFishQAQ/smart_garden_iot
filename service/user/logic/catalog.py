@@ -1,12 +1,12 @@
 import requests
 import constants.http as const_h
 from http import HTTPMethod
+from service.user.logic.base import Common
 
 
-class Logic:
+class Logic(Common):
     def __init__(self, delegate):
-        self.delegate = delegate
-        self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
+        super().__init__(delegate)
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.USER_CATALOG_SERVICE, HTTPMethod.GET, self.service_list)
@@ -23,6 +23,10 @@ class Logic:
         }
 
     def device_list(self, params):
+        area_list = self.get_area_ids(params)
+        if len(area_list) == 0:
+            return []
+        params['area_list'] = area_list
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_DEVICE_LIST, params)
 
         return {
@@ -32,6 +36,10 @@ class Logic:
         }
 
     def device_count(self, params):
+        area_list = self.get_area_ids(params)
+        if len(area_list) == 0:
+            return []
+        params['area_list'] = area_list
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_DEVICE_COUNT, params)
 
         return {
