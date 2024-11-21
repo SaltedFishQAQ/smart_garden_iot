@@ -9,6 +9,7 @@ def cors():
     cherrypy.response.headers['Access-Control-Allow-Origin'] = '*'
     cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     cherrypy.response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    cherrypy.response.headers["Access-Control-Expose-Headers"] = "Authorization"
 
 
 class HTTPClient(object):
