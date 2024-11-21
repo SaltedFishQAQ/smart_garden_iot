@@ -4,20 +4,20 @@ def get_containers(server_ip):
     """Fetch the list of all containers."""
     url = f"http://{server_ip}:2375/containers/json"
     response = requests.get(url)
-    response.raise_for_status()  # Raise an error for bad HTTP responses
+    response.raise_for_status() 
     return response.json()
 
 def get_container_stats(server_ip, container_id):
     """Fetch CPU and memory stats for a specific container."""
     url = f"http://{server_ip}:2375/containers/{container_id}/stats?stream=false"
     response = requests.get(url)
-    response.raise_for_status()  # Raise an error for bad HTTP responses
+    response.raise_for_status()  
     return response.json()
 
 def calculate_usage(stats):
     """Calculate CPU and memory usage from container stats."""
     # CPU Calculation
-    total_usage = stats["cpu_stats"]["cpu_usage"]["total_usage"] #Total_usage status
+    total_usage = stats["cpu_stats"]["cpu_usage"]["total_usage"]
     prev_total_usage = stats["precpu_stats"]["cpu_usage"]["total_usage"]
     system_cpu_usage = stats["cpu_stats"]["system_cpu_usage"]
     prev_system_cpu_usage = stats["precpu_stats"]["system_cpu_usage"]
@@ -63,6 +63,38 @@ def monitor_containers(server_ip):
 
         print("-" * 40)
 
-# Replace with your server IP
-server_ip = "3.79.189.115"
+def check_openweathermap(api_key):
+    url = "https://api.openweathermap.org/data/2.5/weather"
+    params = {"q": "London", "appid": api_key}
+    try:
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            print("OpenWeatherMap API is up and reachable.")
+        else:
+            print(f"OpenWeatherMap API returned status code: {response.status_code}")
+    except Exception as e:
+        print(f"Error connecting to OpenWeatherMap API: {e}")
+
+def check_open_meteo():
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {"latitude": 51.5074, "longitude": -0.1278, "current_weather": "true"}
+    try:
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            print("Open-Meteo API is up and reachable.")
+        else:
+            print(f"Open-Meteo API returned status code: {response.status_code}")
+    except Exception as e:
+        print(f"Error connecting to Open-Meteo API: {e}")
+
+def monitor_apis(api_key):
+    """Monitor API health."""
+    print("Checking API health...")
+    check_openweathermap(api_key)
+    check_open_meteo()
+    print("-" * 40)
+
+server_ip = "43.131.48.203"
+openweathermap_api_key = "5dc8ece6e02d649d870e2e3a67ffc128"
 monitor_containers(server_ip)
+monitor_apis(openweathermap_api_key)
