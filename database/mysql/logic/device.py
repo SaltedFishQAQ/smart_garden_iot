@@ -15,10 +15,12 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_APPROVE, HTTPMethod.POST, self.approve)
 
     def count(self, params):
-        sql = 'select count(*) as total from device'
-        if 'area_list' in params:
-            sql += f' where area_id in ({",".join(params["area_list"])})'
+        if 'area_list' not in params or len(params['area_list']) == 0:
+            return {
+                'count': 0
+            }
 
+        sql = f'select count(*) as total from device where area_id in ({",".join(params["area_list"])})'
         records = self.delegate.db_connect.query(sql)
         count = 0
         for record in records:
@@ -29,11 +31,12 @@ class Logic:
         }
 
     def list(self, params):
-        sql = 'select * from device'
+        if 'area_list' not in params or len(params['area_list']) == 0:
+            return {
+                'list': []
+            }
 
-        if 'area_list' in params:
-            sql += f' where area_id in ({",".join(params["area_list"])})'
-
+        sql = f'select * from device where area_id in ({",".join(params["area_list"])})'
         records = self.delegate.db_connect.query(sql)
         result = []
         for record in records:
@@ -91,10 +94,16 @@ class Logic:
         self.delegate.db_connect.insert(sql, args, is_create=is_create)
 
     def approve(self, params):
+        if 'area_list' not in params or len(params['area_list']) == 0:
+            return {
+                'code': 0,
+                'message': 'device not found'
+            }
+
         name = params['name']
         status = params['status']
 
-        select = 'select id from device where name = %s limit 1'
+        select = f'select id from device where name = %s and area_id in ({",".join(params["area_list"])}) limit 1'
         records = self.delegate.db_connect.query(select, name)
 
         if len(records) == 0:
@@ -103,7 +112,7 @@ class Logic:
                 'message': 'record not found'
             }
 
-        sql = 'update device set auth_status = %s where name = %s'
+        sql = f'update device set auth_status = %s where name = %s and area_id in ({",".join(params["area_list"])})'
         args = (status, name)
         self.delegate.db_connect.insert(sql, args)
 

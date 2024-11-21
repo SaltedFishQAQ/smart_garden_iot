@@ -1,21 +1,18 @@
 import requests
 import constants.http as const_h
-import constants.entity as const_e
-from devices.mock_device import MockDevice
 from http import HTTPMethod
+from service.user.logic.base import Common
 
 
-class Logic:
+class Logic(Common):
     def __init__(self, delegate):
-        self.delegate = delegate
-        self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
+        super().__init__(delegate)
         self.influx_base_url = f'{const_h.INFLUX_HOST}:{const_h.SERVICE_PORT_INFLUX}'
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.USER_DATA_GET, HTTPMethod.GET, self.data_get)
         self.delegate.http_client.add_route(const_h.USER_DATA_COUNT, HTTPMethod.GET, self.data_count)
         self.delegate.http_client.add_route(const_h.USER_MEASUREMENT_LIST, HTTPMethod.GET, self.measurement_list)
-        # self.delegate.http_client.add_route(const_h.USER_DATA_MOCK, HTTPMethod.POST, self.mock_data)
 
     def measurement_list(self, params):
         resp = requests.get(self.influx_base_url + const_h.INFLUX_MEASUREMENT_LIST, params)
@@ -31,6 +28,7 @@ class Logic:
         }
 
     def data_count(self, params):
+        self.match_area_names(params)
         resp = requests.get(self.influx_base_url + const_h.INFLUX_DATA_COUNT, params)
 
         return {
@@ -40,6 +38,7 @@ class Logic:
         }
 
     def data_get(self, params):
+        self.match_area_names(params)
         resp = requests.get(self.influx_base_url + const_h.INFLUX_DATA_GET, params)
 
         result = []
@@ -53,6 +52,7 @@ class Logic:
         }
 
     def operation_get(self, params):
+        self.match_area_names(params)
         resp = requests.get(self.influx_base_url + const_h.INFLUX_OPERATION_GET, params)
 
         result = []

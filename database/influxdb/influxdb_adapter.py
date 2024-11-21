@@ -99,6 +99,11 @@ class InfluxdbAdapter(BaseService):
                 'list': []
             }
 
+        if 'area_list' not in params or len(params['area_list']) == 0:
+            return {
+                'list': []
+            }
+
         measurement = params['measurement']
         time_cond = []
         filter_cond = ""
@@ -106,12 +111,10 @@ class InfluxdbAdapter(BaseService):
         if 'name' in params:
             filter_cond += f' and r.device == "{params["name"]}"'
 
-        if 'area_list' in params:
-            area_list = []
-            for area in params['area_list']:
-                area_list.append(f'r.area == "{area}"')
-            if len(area_list) > 0:
-                filter_cond += f' and ({" or ".join(area_list)})'
+        area_list = []
+        for area in params['area_list']:
+            area_list.append(f'r.area == "{area}"')
+        filter_cond += f' and ({" or ".join(area_list)})'
 
         if 'start_at' in params:
             start_time = str_to_time(params["start_at"])
@@ -147,11 +150,21 @@ class InfluxdbAdapter(BaseService):
         }
 
     def http_operation_get(self, params):
+        if 'area_list' not in params or len(params['area_list']) == 0:
+            return {
+                'list': []
+            }
+
         time_cond = []
-        filter_cond = None
+        filter_cond = ""
 
         if 'name' in params:
-            filter_cond = f'r.device == "{params["name"]}"'
+            filter_cond += f' and r.device == "{params["name"]}"'
+
+        area_list = []
+        for area in params['area_list']:
+            area_list.append(f'r.area == "{area}"')
+        filter_cond += f' and ({" or ".join(area_list)})'
 
         if 'start_at' in params:
             start_time = str_to_time(params["start_at"])
