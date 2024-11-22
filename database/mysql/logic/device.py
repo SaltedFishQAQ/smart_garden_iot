@@ -20,7 +20,8 @@ class Logic:
                 'count': 0
             }
 
-        sql = f'select count(*) as total from device where area_id in ({",".join(params["area_list"])})'
+        area_ids_str = ",".join(map(str, params["area_list"]))
+        sql = f'select count(*) as total from device where area_id in ({area_ids_str})'
         records = self.delegate.db_connect.query(sql)
         count = 0
         for record in records:
@@ -36,8 +37,9 @@ class Logic:
                 'list': []
             }
 
+        area_ids_str = ",".join(map(str, params["area_list"]))
         sql = (f'select d.*, a.name as area_name from device d left join area a on a.id = d.area_id'
-               f' where d.area_id in ({",".join(params["area_list"])})')
+               f' where d.area_id in ({area_ids_str})')
         records = self.delegate.db_connect.query(sql)
         result = []
         for record in records:
@@ -105,7 +107,8 @@ class Logic:
         name = params['name']
         status = params['status']
 
-        select = f'select id from device where name = %s and area_id in ({",".join(params["area_list"])}) limit 1'
+        area_ids_str = ",".join(map(str, params["area_list"]))
+        select = f'select id from device where name = %s and area_id in ({area_ids_str}) limit 1'
         records = self.delegate.db_connect.query(select, name)
 
         if len(records) == 0:
@@ -114,7 +117,7 @@ class Logic:
                 'message': 'record not found'
             }
 
-        sql = f'update device set auth_status = %s where name = %s and area_id in ({",".join(params["area_list"])})'
+        sql = f'update device set auth_status = %s where name = %s and area_id in ({area_ids_str})'
         args = (status, name)
         self.delegate.db_connect.insert(sql, args)
 
