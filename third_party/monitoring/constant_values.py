@@ -1,5 +1,5 @@
 # General
-REFRESH_TIME = 300
+REFRESH_TIME = 60
 
 # MQTT Configuration
 MQTT_BROKER = "43.131.48.203"
@@ -23,7 +23,7 @@ MYSQL_CONFIG = {
     "database": "iot_test",
 }
 INFLUXDB_HOST = "43.131.48.203"
-INFLUXDB_PORT = 18085
+INFLUXDB_PORT = 18086
 
 # Thresholds (percentage)
 CPU_THRESHOLD = 80
@@ -32,3 +32,6 @@ RAM_THRESHOLD = 90
 # Web Server Configuration
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 8080
+
+# Docker server configuration
+IP_SERVER = "43.131.48.203"
