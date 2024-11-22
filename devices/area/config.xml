@@ -29,4 +29,28 @@
             <sensor>soil_moisture</sensor>
         </device1-5>
     </area1>
+    <area2>
+        <device2-1>
+            <sensor>temperature</sensor>
+        </device2-1>
+        <device2-2>
+            <sensor>light</sensor>
+            <actuator>light</actuator>
+        </device2-2>
+        <device2-3>
+            <sensor>soil_moisture</sensor>
+        </device2-3>
+    </area2>
+    <area3>
+        <device3-1>
+            <sensor>humidity</sensor>
+        </device3-1>
+        <device3-2>
+            <sensor>gas</sensor>
+            <actuator>oxygen</actuator>
+        </device3-2>
+        <device3-3>
+            <sensor>soil_moisture</sensor>
+        </device3-3>
+    </area3>
 </config>
