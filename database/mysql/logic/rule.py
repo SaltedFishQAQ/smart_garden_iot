@@ -19,7 +19,7 @@ class Logic:
                 'count': 0
             }
 
-        device_names_str = ", ".join(params['device_list'])
+        device_names_str = ", ".join([f"'{name}'" for name in params['device_list']])
         sql = f'select count(*) as total from rule where src in ({device_names_str}) and dst in ({device_names_str})'
         records = self.delegate.db_connect.query(sql)
         count = 0
@@ -36,7 +36,7 @@ class Logic:
                 'list': []
             }
 
-        device_names_str = ", ".join(params['device_list'])
+        device_names_str = ", ".join([f"'{name}'" for name in params['device_list']])
         sql = f'select * from rule where src in ({device_names_str}) and dst in ({device_names_str})'
 
         if 'is_deleted' in params:
