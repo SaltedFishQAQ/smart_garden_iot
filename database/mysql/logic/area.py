@@ -11,7 +11,7 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_AREA_SAVE, HTTPMethod.POST, self.save)
 
     def list(self, params):
-        sql = "select * from area"
+        sql = "select a.*, u.name as user_name from area a left join user u on u.id = a.user_id"
         if 'user_id' in params:
             sql += f' where user_id = {params["user_id"]}'
 
@@ -22,6 +22,7 @@ class Logic:
                 'id': record['id'],
                 'name': record['name'],
                 'user_id': record['user_id'],
+                'user_name': record['user_name'],
                 'soil_type': record['soil_type'],
                 'desc': record['desc'],
             })
