@@ -46,6 +46,9 @@ class Common:
             return []
         return [item['id'] for item in device_list]
 
+    def match_device_names(self, params):
+        params['device_list'] = [item['name'] for item in self.get_device_list(params)]
+
     def check_device(self, params):
         device_list = self.get_device_list(params)
         device_name = params['name']

@@ -1,12 +1,12 @@
 import requests
 import constants.http as const_h
 from http import HTTPMethod
+from service.user.logic.base import Common
 
 
-class Logic:
+class Logic(Common):
     def __init__(self, delegate):
-        self.delegate = delegate
-        self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
+        super().__init__(delegate)
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.USER_SCHEDULE_LIST, HTTPMethod.GET, self.list)
@@ -16,6 +16,7 @@ class Logic:
         self.delegate.http_client.add_route(const_h.USER_SCHEDULE_RUNNING, HTTPMethod.POST, self.running)
 
     def list(self, params):
+        self.match_device_names(params)
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_SCHEDULE_LIST, params)
 
         return {
@@ -25,6 +26,7 @@ class Logic:
         }
 
     def count(self, params):
+        self.match_device_names(params)
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_SCHEDULE_COUNT, params)
 
         return {

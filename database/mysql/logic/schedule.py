@@ -14,7 +14,14 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_SCHEDULE_RUNNING, HTTPMethod.POST, self.running)
 
     def count(self, params):
-        records = self.delegate.db_connect.query("select count(*) as total from schedule")
+        if 'device_list' not in params or len(params['device_list']) == 0:
+            return {
+                'count': 0
+            }
+
+        device_names_str = ", ".join(params['device_list'])
+        sql = f'select count(*) as total from schedule where target in ({device_names_str})'
+        records = self.delegate.db_connect.query(sql)
         count = 0
         for record in records:
             count += record['total']
@@ -24,7 +31,13 @@ class Logic:
         }
 
     def list(self, params):
-        sql = "select * from schedule where 1=1"
+        if 'device_list' not in params or len(params['device_list']) == 0:
+            return {
+                'count': 0
+            }
+
+        device_names_str = ", ".join(params['device_list'])
+        sql = f'select * from schedule where target in ({device_names_str})'
 
         if 'page' in params and 'size' in params:
             page = int(params['page'])
