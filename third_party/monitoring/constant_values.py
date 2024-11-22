@@ -22,7 +22,7 @@ MYSQL_CONFIG = {
     "password": "Test1234.",
     "database": "iot_test",
 }
-INFLUXDB_HOST = "43.131.48.203" //
+INFLUXDB_HOST = "43.131.48.203"
 INFLUXDB_PORT = 18086
 
 # Thresholds (percentage)
