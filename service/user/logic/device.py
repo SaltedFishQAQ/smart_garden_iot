@@ -2,16 +2,15 @@ import json
 import requests
 import constants.http as const_h
 import message_broker.channels as mb_channel
-
 from http import HTTPMethod
 from service.rule.converter import convert_message
+from service.user.logic.base import Common
 
 
-class Logic:
+class Logic(Common):
     def __init__(self, delegate):
-        self.delegate = delegate
+        super().__init__(delegate)
         self.command_channel = mb_channel.DEVICE_COMMAND
-        self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
 
     def register_handler(self):
         self.delegate.http_client.add_route(const_h.USER_DEVICE_RUNNING, HTTPMethod.POST, self.running)
@@ -20,6 +19,11 @@ class Logic:
         self.delegate.http_client.add_route(const_h.USER_DEVICE_STATUS, HTTPMethod.GET, self.status)
 
     def running(self, params):
+        if self.check_device(params) is False:
+            return {
+                "code": 500,
+                "message": "no operation permission"
+            }
         if 'name' not in params or 'status' not in params:
             return {
                 "code": 500,
@@ -42,11 +46,22 @@ class Logic:
         }
 
     def approve(self, params):
+        if self.check_device(params) is False:
+            return {
+                "code": 500,
+                "message": "no operation permission"
+            }
+        self.match_area_ids(params)
         resp = requests.post(self.mysql_base_url + const_h.MYSQL_DEVICE_APPROVE, json=params)
 
         return resp.json()
 
     def command(self, params):
+        if self.check_device(params) is False:
+            return {
+                "code": 500,
+                "message": "no operation permission"
+            }
         if 'name' not in params or 'opt' not in params:
             return {
                 "code": 500,
@@ -67,6 +82,11 @@ class Logic:
         }
 
     def status(self, params):
+        if self.check_device(params) is False:
+            return {
+                "code": 500,
+                "message": "no operation permission"
+            }
         if 'name' not in params:
             return {
                 "code": 500,

@@ -45,3 +45,11 @@ class Common:
         if len(device_list) == 0:
             return []
         return [item['id'] for item in device_list]
+
+    def check_device(self, params):
+        device_list = self.get_device_list(params)
+        device_name = params['name']
+        for item in device_list:
+            if item['name'] == device_name:
+                return True
+        return False
