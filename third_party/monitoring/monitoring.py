@@ -1,16 +1,25 @@
 import requests
 import mysql.connector
 from mysql.connector import Error
-from constant_values import (OPENWEATHERMAP_API,
-    OPENMETEO_API, SAMPLE_LONG, SAMPLE_LAT, SAMPLE_CITY)
+from constant_values import (
+    OPENWEATHERMAP_API,
+    OPENMETEO_API,
+    SAMPLE_LONG,
+    SAMPLE_LAT,
+    SAMPLE_CITY,
+)
+import json
+
 
 class DockerMonitor:
     def __init__(self, server_ip):
         self.server_ip = server_ip
+        self.persistent_containers = {}  # Persistent tracking of all containers
+        self.alerted_containers = set()  # Track alerted container IDs
 
     def get_containers(self):
         """Fetch the list of all containers."""
-        url = f"http://{self.server_ip}:2375/containers/json"
+        url = f"http://{self.server_ip}:2375/containers/json?all=true"  # Include stopped containers
         response = requests.get(url)
         response.raise_for_status()
         return response.json()
@@ -46,9 +55,15 @@ class DockerMonitor:
         }
 
     def monitor(self):
-        """Monitor all containers and return stats."""
-        containers = self.get_containers()
-        container_stats = []
+        """Monitor all containers and update persistent list."""
+        try:
+            containers = self.get_containers()
+        except Exception as e:
+            print(f"Error fetching container list: {e}")
+            return [], []
+
+        current_containers = {}
+        events = []  # List to store detected events
 
         for container in containers:
             container_id = container["Id"]
@@ -57,21 +72,69 @@ class DockerMonitor:
             container_status = container["Status"]
 
             stats_data = {
+                "id": container_id,
                 "name": container_name,
                 "state": container_state,
                 "status": container_status,
             }
 
-            try:
-                stats = self.get_container_stats(container_id)
-                usage = self.calculate_usage(stats)
-                stats_data.update(usage)
-            except Exception as e:
-                stats_data["error"] = f"Failed to fetch stats: {e}"
+            if container_state == "running":
+                try:
+                    stats = self.get_container_stats(container_id)
+                    usage = self.calculate_usage(stats)
+                    stats_data.update(usage)
+                except Exception as e:
+                    stats_data.update({
+                        "cpu_percentage": "N/A",
+                        "memory_percentage": "N/A",
+                        "memory_usage_mb": "N/A",
+                        "error": f"Failed to fetch stats: {e}",
+                    })
+            else:
+                stats_data.update({
+                    "cpu_percentage": "N/A",
+                    "memory_percentage": "N/A",
+                    "memory_usage_mb": "N/A",
+                })
 
-            container_stats.append(stats_data)
+            current_containers[container_id] = stats_data
 
-        return container_stats
+        # Detect stopped or exited containers and prepare events
+        for container_id, container_data in self.persistent_containers.items():
+            if container_id not in current_containers:  # Stopped container
+                if container_data["state"] != "stopped":
+                    container_data.update({
+                        "state": "stopped",
+                        "status": "Stopped",
+                        "cpu_percentage": "N/A",
+                        "memory_percentage": "N/A",
+                        "memory_usage_mb": "N/A",
+                    })
+                    if container_id not in self.alerted_containers:
+                        events.append(f"Container {container_data['name']} has stopped.")
+                        self.alerted_containers.add(container_id)
+            elif current_containers[container_id]["state"] == "exited":  # Exited container
+                if container_data["state"] != "exited":
+                    container_data.update({
+                        "state": "exited",
+                        "status": current_containers[container_id]["status"],
+                        "cpu_percentage": "N/A",
+                        "memory_percentage": "N/A",
+                        "memory_usage_mb": "N/A",
+                    })
+                    if container_id not in self.alerted_containers:
+                        events.append(f"Container {container_data['name']} has Stopped.")
+                        self.alerted_containers.add(container_id)
+
+        # Remove entries for containers that restart
+        for container_id in current_containers.keys():
+            if container_id in self.alerted_containers:
+                self.alerted_containers.remove(container_id)
+
+        # Update persistent containers with current data
+        self.persistent_containers.update(current_containers)
+
+        return list(self.persistent_containers.values()), events
 
 
 class APIHealthMonitor:
@@ -140,3 +203,4 @@ class DatabaseHealthMonitor:
             "mysql": self.check_mysql(mysql_config),
             "influxdb": self.check_influxdb(influxdb_host, influxdb_port),
         }
+
