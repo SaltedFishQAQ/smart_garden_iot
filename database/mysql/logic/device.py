@@ -36,7 +36,8 @@ class Logic:
                 'list': []
             }
 
-        sql = f'select * from device where area_id in ({",".join(params["area_list"])})'
+        sql = (f'select d.*, a.name as area_name from device d left join area a on a.id = d.area_id'
+               f' where d.area_id in ({",".join(params["area_list"])})')
         records = self.delegate.db_connect.query(sql)
         result = []
         for record in records:
@@ -46,6 +47,7 @@ class Logic:
                 'running_status': record['running_status'],
                 'auth_status': record['auth_status'],
                 'area_id': record['area_id'],
+                'area_name': record['area_name'],
                 'created_at': time_to_str(record['created_at']),
                 'updated_at': time_to_str(record['updated_at'])
             })
