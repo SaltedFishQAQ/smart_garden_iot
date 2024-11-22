@@ -33,7 +33,7 @@ class Logic:
     def list(self, params):
         if 'device_list' not in params or len(params['device_list']) == 0:
             return {
-                'count': 0
+                'list': []
             }
 
         device_names_str = ", ".join(params['device_list'])
