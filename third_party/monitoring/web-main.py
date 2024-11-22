@@ -6,6 +6,7 @@ from monitoring import DockerMonitor, APIHealthMonitor, DatabaseHealthMonitor
 import paho.mqtt.client as mqtt
 import json
 from constant_values import (
+    IP_SERVER,
     REFRESH_TIME,
     MQTT_BROKER,
     MQTT_PORT,
@@ -23,7 +24,7 @@ from constant_values import (
 
 class IoTMonitoringWebApp:
     def __init__(self):
-        self.server_ip = MQTT_BROKER
+        self.server_ip = IP_SERVER
         self.openweathermap_api_key = OPENWEATHERMAP_API_KEY
         self.mysql_config = MYSQL_CONFIG
         self.influxdb_host = INFLUXDB_HOST
@@ -46,7 +47,7 @@ class IoTMonitoringWebApp:
         self.db_monitor = DatabaseHealthMonitor()
 
         self.last_checked = None
-        self.data = {}
+        self.data = {"containers": [], "apis": {}, "databases": {}}
         self.stop_event = Event()
 
         self.monitoring_thread = Thread(target=self.background_monitoring, daemon=True)
@@ -63,38 +64,24 @@ class IoTMonitoringWebApp:
     def monitor_all(self):
         self.last_checked = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        containers = self.docker_monitor.monitor()
-        container_alerts = []
-        for container in containers:
-            container["status_emoji"] = "✅" if container.get("cpu_percentage", 0) <= CPU_THRESHOLD and container.get(
-                "memory_percentage", 0
-            ) <= RAM_THRESHOLD else "❌"
+        # Monitor containers
+        containers, events = self.docker_monitor.monitor()
+        for event in events:
+            self.publish_alerts([event])
 
-            if container["status_emoji"] == "❌":
-                container_alerts.append(
-                    f"Container {container['name']} has high resource usage: CPU {container.get('cpu_percentage', 'N/A')}%, Memory {container.get('memory_percentage', 'N/A')}%."
-                )
-
+        # Monitor APIs
         apis = self.api_monitor.monitor(self.openweathermap_api_key)
-        api_alerts = []
-        for api_name, status in apis.items():
-            if not status:
-                api_alerts.append(f"API {api_name} is unreachable.")
+        self.data["apis"] = apis
 
-        databases = self.db_monitor.monitor(
-            self.mysql_config, self.influxdb_host, self.influxdb_port
-        )
-        db_alerts = []
-        for db_name, status in databases.items():
-            if not status:
-                db_alerts.append(f"Database {db_name} is unreachable.")
+        # Monitor databases
+        databases = self.db_monitor.monitor(self.mysql_config, self.influxdb_host, self.influxdb_port)
+        self.data["databases"] = databases
 
-        self.data = {"containers": containers, "apis": apis, "databases": databases}
-        all_alerts = container_alerts + api_alerts + db_alerts
-        if all_alerts:
-            self.publish_alerts(all_alerts)
+        # Update data
+        self.data["containers"] = containers
 
     def publish_alerts(self, alerts):
+        """Send alerts to the MQTT broker."""
         message = {"Alerts": alerts}
         try:
             self.mqtt_client.publish(self.mqtt_topic, json.dumps(message))
@@ -103,18 +90,19 @@ class IoTMonitoringWebApp:
             print(f"Error publishing MQTT alerts: {e}")
 
     def render_html(self):
-        """Render HTML using a template file."""
+        """Render HTML dashboard with current data."""
         with open("plain_text.html", "r") as file:
             html_template = file.read()
 
         containers_html = ""
-        for container in self.data.get("containers", []):
+        for container in self.data["containers"]:
             name = container["name"]
             state = container.get("state", "Unknown")
             status = container.get("status", "Unknown")
             cpu_usage = container.get("cpu_percentage", "N/A")
             memory_usage = container.get("memory_percentage", "N/A")
-            health = container.get("status_emoji", "❌")
+            health = "✅" if cpu_usage != "N/A" and memory_usage != "N/A" and \
+                           cpu_usage <= CPU_THRESHOLD and memory_usage <= RAM_THRESHOLD else "❌"
 
             containers_html += f"""
                 <tr>
@@ -123,29 +111,30 @@ class IoTMonitoringWebApp:
                     <td>{status}</td>
                     <td>{cpu_usage}</td>
                     <td>{memory_usage}</td>
-                    <td class="{ 'healthy' if health == '✅' else 'unhealthy' }">{health}</td>
+                    <td>{health}</td>
                 </tr>"""
 
+        # Render APIs
         apis_html = "".join(
             f"""
                 <tr>
                     <td>{api_name}</td>
-                    <td class="{ 'healthy' if health == '✅' else 'unhealthy' }">{health}</td>
+                    <td>{'✅' if health else '❌'}</td>
                 </tr>"""
             for api_name, health in self.data.get("apis", {}).items()
         )
 
+        # Render Databases
         databases_html = "".join(
             f"""
                 <tr>
                     <td>{db_name}</td>
-                    <td class="{ 'healthy' if health == '✅' else 'unhealthy' }">{health}</td>
+                    <td>{'✅' if health else '❌'}</td>
                 </tr>"""
             for db_name, health in self.data.get("databases", {}).items()
         )
 
-        #Placeholders for HTML
-        html_output = html_template.replace("{{ last_checked }}", self.last_checked)
+        html_output = html_template.replace("{{ last_checked }}", self.last_checked or "N/A")
         html_output = html_output.replace("{{ containers }}", containers_html)
         html_output = html_output.replace("{{ apis }}", apis_html)
         html_output = html_output.replace("{{ databases }}", databases_html)
@@ -154,11 +143,11 @@ class IoTMonitoringWebApp:
 
     @cherrypy.expose
     def index(self):
-        """Render the monitoring page."""
+        """Serve the monitoring dashboard."""
         return self.render_html()
 
     def stop(self):
-        """Stop the background thread."""
+        """Stop the monitoring thread and MQTT client."""
         self.stop_event.set()
         self.mqtt_client.loop_stop()
 
@@ -174,3 +163,4 @@ if __name__ == "__main__":
         })
     finally:
         app.stop()
+
