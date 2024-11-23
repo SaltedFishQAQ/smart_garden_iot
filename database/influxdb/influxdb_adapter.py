@@ -64,15 +64,17 @@ class InfluxdbAdapter(BaseService):
     def mqtt_data(self, client, userdata, msg):
         measurement = msg.topic.removeprefix(self.data_channel)
         if measurement not in self.enable_measurement:
-            print(f'mqtt topic invalid: {msg.topic}')
+            self.logger.warning(f'mqtt topic invalid: {msg.topic}')
             return
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
+        self.logger.info(f'record data: {data_dict}')
         self.data_db_connector.insert(measurement, data_dict['tags'], data_dict['fields'])
 
     def mqtt_operation(self, client, userdata, msg):
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
+        self.logger.info(f'record operation: {data_dict}')
         self.operation_db_connector.insert("default", data_dict['tags'], data_dict['fields'])
 
     def http_measurement_list(self, param):
