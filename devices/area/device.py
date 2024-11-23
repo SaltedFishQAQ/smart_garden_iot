@@ -45,7 +45,7 @@ class Device(BaseDevice):
         if opt == 'action' and self.actuator is not None:
             if self.actuator.status != status:
                 logs = self.actuator.switch(status)
-                print(f"device: {self.device_name}, operation: {logs}")
+                self.logger.info(f'actuator switch {"on" if status else "off"}.')
                 self.record_operation({
                     'value': logs
                 })
@@ -54,13 +54,14 @@ class Device(BaseDevice):
                 self.sensor.start()
             else:
                 self.sensor.stop()
+            self.logger.info(f'sensor {"start" if status else "stop"}.')
 
     def handle_data(self, data_str):
         data = json.loads(data_str)
         if 'value' not in data:
-            print("data missing humidity value, data: {}".format(data))
+            self.logger.warning(f'data missing value, data: {data}')
             return
-        print(f"record data: {self.device_name}, {data}")
+        self.logger.info(f'collect data: {data}')
         self.record_data(self.sensor.measurement(), data)
 
     def status(self):

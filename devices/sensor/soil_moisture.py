@@ -4,7 +4,6 @@ import requests
 import logging
 from common.config import ConfigLoader
 from devices.biz.base_sensor import BaseSensor
-# import Adafruit_DHT
 
 
 TAG = "soil_moisture"
@@ -14,8 +13,6 @@ class SoilMoistureSensor(BaseSensor):
     def __init__(self, soil_type):
         super().__init__("soil_moisture")
         self.soil_type = soil_type
-        # self._sensor = Adafruit_DHT.DHT11
-        # self.pin = 4
 
         # Load the API URL and key
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.xml')

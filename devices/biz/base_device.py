@@ -5,6 +5,7 @@ import requests
 import constants.http as const_h
 import message_broker.channels as mb_channel
 import threading
+from common.log import Logger
 from common.mqtt import MQTTClient
 
 
@@ -25,15 +26,18 @@ class BaseDevice:
         # func
         self.sensor = None
         self.actuator = None
+        self.logger = Logger(prefix=f'{area_name}/{name}:')
 
     def start(self):
         self.init_mqtt_client()
         threading.Thread(target=self.notify_status).start()
         self._set_working(True)
+        self.logger.info("device start")
 
     def stop(self):
         self.remove_mqtt_client()
         self._set_working(False)
+        self.logger.info("device stop")
 
     def init_mqtt_client(self):
         if self.mqtt_client is not None:
@@ -88,25 +92,19 @@ class BaseDevice:
         content = msg.payload.decode('utf-8')
         try:
             data_dict = json.loads(content)
-            print(f"device: {self.device_name}, receive command: {data_dict}")
         except Exception as e:
-            logging.info(content)
-            logging.error(f"_handle_command error: {e}")
+            self.logger.error(f'_handle_command json convert error: {e}, content:{content}')
             return
 
-        if 'type' not in data_dict:
-            print(f"data missing type value, data: {content}")
+        if 'type' not in data_dict or 'status' not in data_dict:
+            self.logger.warning(f"_handle_command data missing fields, data: {content}")
             return
         types = data_dict['type']
-
-        if 'status' not in data_dict:
-            print(f"data missing status value, data: {content}")
-            return
         status = bool(data_dict['status'])
 
         if types == 'running':
             self._set_working(status)
-            print(f"device: {self.device_name}, set running status: {status}")
+            self.logger.info(f"set running status: {status}")
         else:
             if self.working:
                 self.handle_opt(types, status)

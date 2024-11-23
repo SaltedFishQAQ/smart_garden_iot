@@ -4,7 +4,6 @@ import random
 import requests
 from devices.biz.base_sensor import BaseSensor
 from common.config import ConfigLoader
-# import Adafruit_DHT
 
 
 TAG = "humidity"
@@ -13,8 +12,6 @@ TAG = "humidity"
 class HumiditySensor(BaseSensor):
     def __init__(self):
         super().__init__("humidity")
-        # self._sensor = Adafruit_DHT.DHT11
-        # self.pin = 4
 
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.xml')
         self.config = ConfigLoader(config_path)

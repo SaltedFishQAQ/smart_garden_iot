@@ -1,4 +1,5 @@
 import json
+import random
 from datetime import datetime, time
 from devices.biz.base_sensor import BaseSensor
 
@@ -17,6 +18,8 @@ class LightSensor(BaseSensor):
 
         if sunrise <= now < sunset:
             value = 25
+            random_adjustment = random.uniform(-5, 5)
+            value = round(value + random_adjustment, 2)
         else:
             value = 0
 

@@ -5,7 +5,6 @@ import requests
 import logging
 from common.config import ConfigLoader
 from devices.biz.base_sensor import BaseSensor
-# import Adafruit_DHT
 
 
 TAG = "temperature"
@@ -14,8 +13,6 @@ TAG = "temperature"
 class TemperatureSensor(BaseSensor):
     def __init__(self):
         super().__init__("temperature")
-        # self._sensor = Adafruit_DHT.DHT11
-        # self.pin = 4
 
         # Load the API URL and key
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.xml')
