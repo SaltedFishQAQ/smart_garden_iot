@@ -52,31 +52,27 @@ class AuthService(BaseService):
         return False
 
     def mqtt_data(self, client, userdata, msg):
-        content = msg.payload.decode('utf-8')
-        data_dict = json.loads(content)
-        if 'tags' not in data_dict or 'device' not in data_dict['tags']:
-            print(f"topic {msg.topic} message without device")
-            return
-
-        name = data_dict['tags']['device']
-        if self.is_certified(name) is False:
-            print(f"device: {name}, is not certified")
+        if self.do_verify(msg) is False:
             return
 
         entity = msg.topic.removeprefix(self.data_channel)
         self.mqtt_publish(self.data_storage_channel + entity, msg.payload)
 
     def mqtt_operation(self, client, userdata, msg):
-        content = msg.payload.decode('utf-8')
-        data_dict = json.loads(content)
-        print(data_dict)
-        if 'tags' not in data_dict or 'device' not in data_dict['tags']:
-            print(f"topic {msg.topic} message without device")
-            return
-
-        name = data_dict['tags']['device']
-        if self.is_certified(name) is False:
-            print(f"device: {name}, is not certified")
+        if self.do_verify(msg) is False:
             return
 
         self.mqtt_publish(self.operation_storage_channel, msg.payload)
+
+    def do_verify(self, msg):
+        content = msg.payload.decode('utf-8')
+        data_dict = json.loads(content)
+        if 'tags' not in data_dict or 'device' not in data_dict['tags']:
+            self.logger.warning(f'topic {msg.topic} message without device, content: {content}')
+            return False
+
+        name = data_dict['tags']['device']
+        if self.is_certified(name) is False:
+            self.logger.warning(f'device: {name}, is not certified')
+            return False
+        return True

@@ -3,6 +3,7 @@ import requests
 import threading
 import constants.entity
 import constants.http as const_h
+from common.log import Logger
 from common.mqtt import MQTTClient
 from common.http_client import HTTPClient
 
@@ -18,6 +19,7 @@ class BaseService:
         self.mqtt_client = None
         self.http_client = None
         self.register_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}{const_h.MYSQL_SERVICE_REGISTER}'
+        self.logger = Logger()
 
     def start(self):
         threading.Thread(target=self._heart_beat).start()
