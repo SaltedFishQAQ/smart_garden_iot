@@ -19,7 +19,7 @@ class LightSensor(BaseSensor):
         if sunrise <= now < sunset:
             value = 25
             random_adjustment = random.uniform(-5, 5)
-            value = round(value + random_adjustment, 2)
+            value = int(round(value + random_adjustment))
         else:
             value = 0
 
