@@ -67,7 +67,7 @@ class DataSource:
             logging.error(f"Error fetching weather data: {str(e)}")
             return None
 
-    def fetch_historical_weather_data(self):
+    def fetch_historical_weather_data(self, params):
         if not (self.historical_api_url and self.latitude and self.longitude):
             logging.error("Historical weather data configuration missing.")
             return None
