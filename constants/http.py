@@ -5,6 +5,7 @@ SERVICE_HOST = "0.0.0.0"
 INNER_SERVICE_HOST = "http://127.0.0.1"
 MYSQL_HOST = "http://" + os.getenv('MYSQL_HOST', 'localhost')
 INFLUX_HOST = "http://" + os.getenv('INFLUXDB_HOST', 'localhost')
+WEATHER_HOST = "http://" + os.getenv('WEATHER_HOST', 'localhost')
 
 #added for decision service
 WEATHER_ADAPTER = "http://3.79.189.115"
@@ -92,5 +93,5 @@ DEVICE_STATUS_GET = DEVICE_BASE_ROUTE + 'status'
 WEATHER_BASE_ROUTE = '/weather/'
 WEATHER_DATA_GET = WEATHER_BASE_ROUTE + 'data'
 # Open Meteo
-HISTORICAL_WEATHER_BASE_ROUTE = WEATHER_BASE_ROUTE + 'historical_weather'
+HISTORICAL_WEATHER_GET = WEATHER_BASE_ROUTE + 'historical_weather'
 

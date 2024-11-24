@@ -40,7 +40,7 @@ class WeatherAdapter(BaseService):
 
     def register_http_handler(self):
         self.http_client.add_route(constants.http.WEATHER_DATA_GET, HTTPMethod.GET, self.handle_data)
-        self.http_client.add_route(constants.http.HISTORICAL_WEATHER_BASE_ROUTE, HTTPMethod.GET,
+        self.http_client.add_route(constants.http.HISTORICAL_WEATHER_GET, HTTPMethod.GET,
                                    self.data_source.fetch_historical_weather_data)
 
     def handle_data(self, params):

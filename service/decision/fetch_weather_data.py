@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import logging
+import constants.http as chttp
 
 # Setup logging
 logging.basicConfig(filename='weather_fetcher.log', level=logging.INFO,
@@ -8,9 +9,9 @@ logging.basicConfig(filename='weather_fetcher.log', level=logging.INFO,
 
 
 class WeatherFetcher:
-    def __init__(self, current_api_url, historical_api_url):
+    def __init__(self, current_api_url):
         self.current_api_url = current_api_url
-        self.historical_api_url = historical_api_url
+        self.historical_api_url = current_api_url + chttp.HISTORICAL_WEATHER_GET
 
     def fetch_current_weather_data(self):
         try:

@@ -114,8 +114,8 @@ class WateringDecisionMaker:
 
 
 def main(area, soil_type):
-    weather_fetcher = WeatherFetcher(current_api_url=f"{chttp.WEATHER_ADAPTER}:{chttp.SERVICE_PORT_WEATHER}{chttp.WEATHER_BASE_ROUTE}",
-        historical_api_url=f"{chttp.WEATHER_ADAPTER}:{chttp.SERVICE_PORT_WEATHER}{chttp.HISTORICAL_WEATHER_BASE_ROUTE}")
+    weather_fetcher = WeatherFetcher(
+        current_api_url=f"{chttp.WEATHER_HOST}:{chttp.SERVICE_PORT_WEATHER}{chttp.WEATHER_BASE_ROUTE}")
 
 
     threshold_calculator = ThresholdCalculator(const.CSV_FILE_PATH, n_estimators=100, window=7)
