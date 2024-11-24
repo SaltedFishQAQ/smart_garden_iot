@@ -32,12 +32,12 @@ class BaseSensor(object):
         self.lock = True
 
         while self.running:
-            self.receiver(self.monitor())
             for _ in range(30):
                 time.sleep(10)
                 if self.running is False:
                     self.lock = False
                     return
+            self.receiver(self.monitor())
 
     @property
     def receiver(self):
