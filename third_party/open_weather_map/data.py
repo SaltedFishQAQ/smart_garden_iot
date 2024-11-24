@@ -73,7 +73,7 @@ class DataSource:
             return None
 
         end_time = datetime.now(pytz.timezone(self.timezone))
-        start_time = time_add(end_time, seconds=15*24*60*60)
+        start_time = time_add(end_time, seconds=-15*24*60*60)
 
         last_date = time_to_str(end_time, '%Y-%m-%d')
         if last_date == self.history_date and self.history_data is not None:
