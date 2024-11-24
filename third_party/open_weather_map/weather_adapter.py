@@ -18,7 +18,7 @@ logging.basicConfig(
 class WeatherAdapter(BaseService):
     def __init__(self):
         super().__init__(constants.entity.OPEN_WEATHER_MAP)
-        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weather_config.json')
+        config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weather_config.xml')
         config = ConfigLoader(config_path)
 
         self.data_source = DataSource(
