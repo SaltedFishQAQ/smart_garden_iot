@@ -24,6 +24,7 @@ class HTTPClient(object):
             self.conf = {
                 '/': {
                     'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+                    'log.access_file': None,
                     'tools.sessions.on': True,
                     'tools.cors.on': True
                 }

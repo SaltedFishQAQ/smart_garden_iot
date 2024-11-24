@@ -49,12 +49,10 @@ class RuleService(BaseService):
         # when [entity] do ([entity.field] <compare> [value]) if true then {opt}
         for r in self.rule_list:
             if entity != r['entity']:  # rule not match
-                print("rule not match")
                 continue
             if ("tags" not in data_dict or
                     "device" not in data_dict['tags'] or
                     r['src'] != data_dict["tags"]["device"]):  # device not match
-                print("device not match")
                 continue
 
             compare = r['compare']  # comparison symbol
@@ -66,11 +64,16 @@ class RuleService(BaseService):
             checker = convert_checker(compare, compare_val)  # compare function
             match, ok = checker(data_val)  # compare result
             if ok is False:
-                print(f"invalid rule: {r}, data value: {data_val}, compare value: {compare_val}")
+                self.logger.error(f'invalid rule: {r}, data value: {data_val}, compare value: {compare_val}')
+                continue
             if match:
                 target, msg, ok = convert_message(r['dst'], opt)
                 if ok is False:
-                    print(f"convert message false, rule: {r}")
+                    self.logger.error(f'convert message false, rule: {r},'
+                                      f'data value: {data_val}, compare value: {compare_val}')
+                    continue
+                self.logger.info(f'device: "{r["src"]}", match rule: {r},'
+                                 f'data value: {data_val}, compare value: {compare_val}')
                 self.mqtt_publish(self.command_channel+target, msg)
 
 
