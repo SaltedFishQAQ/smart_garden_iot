@@ -1,7 +1,8 @@
 import requests
 import logging
-from datetime import datetime
 import pytz
+from common.time import time_add, time_to_str
+from datetime import datetime
 
 logging.basicConfig(
     filename='/tmp/api.log',
@@ -12,11 +13,16 @@ logging.basicConfig(
 
 
 class DataSource:
-    def __init__(self, api_url, api_key, city, timezone):
+    def __init__(self, api_url, api_key, city, timezone, historical_api_url, lat, lon):
         self.api_url = api_url
         self.api_key = api_key
         self.city = city
         self.timezone = timezone
+        self.historical_api_url = historical_api_url
+        self.latitude = lat
+        self.longitude = lon
+        self.history_date = '2024-11-01'
+        self.history_data = None
 
     def fetch_weather_data(self, data_type):
         data = self._get_data()
@@ -60,3 +66,38 @@ class DataSource:
         except requests.exceptions.RequestException as e:
             logging.error(f"Error fetching weather data: {str(e)}")
             return None
+
+    def fetch_historical_weather_data(self):
+        if not (self.historical_api_url and self.latitude and self.longitude):
+            logging.error("Historical weather data configuration missing.")
+            return None
+
+        end_time = datetime.now(pytz.timezone(self.timezone))
+        start_time = time_add(end_time, seconds=15*24*60*60)
+
+        last_date = time_to_str(end_time, '%Y-%m-%d')
+        if last_date == self.history_date and self.history_data is not None:
+            return self.history_data
+        self.history_date = last_date
+
+        params = {
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "start_date": start_time.strftime('%Y-%m-%d'),
+            "end_date": end_time.strftime('%Y-%m-%d'),
+            "hourly": ["temperature_2m", "relative_humidity_2m", "precipitation"],
+            "timezone": self.timezone
+        }
+
+        response = requests.get(self.historical_api_url, params=params, timeout=10)
+        response.raise_for_status()
+        json_data = response.json()
+
+        hourly_data = json_data.get("hourly", {})
+        if not hourly_data:
+            logging.warning("No hourly data found in historical weather response.")
+            return None
+
+        self.history_data = hourly_data
+
+        return hourly_data

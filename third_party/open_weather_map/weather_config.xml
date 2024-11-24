@@ -5,6 +5,11 @@
         <timezone>Europe/Rome</timezone>
         <city>Turin,it</city>
     </weather>
+    <history>
+        <historical_api_url>https://api.open-meteo.com/v1/forecast</historical_api_url>
+        <latitude>45.0705</latitude>
+        <longitude>7.6868</longitude>
+    </history>
     <mqtt>
         <broker>43.131.48.203</broker>
         <port>1883</port>

@@ -25,7 +25,10 @@ class WeatherAdapter(BaseService):
             api_url=config.get("./weather/api_url"),
             api_key=config.get("./weather/api_key"),
             city=config.get("./weather/city"),
-            timezone=config.get("./weather/timezone")
+            timezone=config.get("./weather/timezone"),
+            historical_api_url=config.get("./history/historical_api_url"),
+            lat=config.get("./history/latitude"),
+            lon=config.get("./history/longitude")
         )
 
     def start(self):
@@ -37,6 +40,8 @@ class WeatherAdapter(BaseService):
 
     def register_http_handler(self):
         self.http_client.add_route(constants.http.WEATHER_DATA_GET, HTTPMethod.GET, self.handle_data)
+        self.http_client.add_route(constants.http.HISTORICAL_WEATHER_BASE_ROUTE, HTTPMethod.GET,
+                                   self.data_source.fetch_historical_weather_data)
 
     def handle_data(self, params):
         try:
