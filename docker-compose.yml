@@ -135,6 +135,8 @@ services:
       dockerfile: Dockerfile-weather
     ports:
       - "5000:5000"
+    depends_on:
+      - mysql_service
     networks:
       - app-network
 
