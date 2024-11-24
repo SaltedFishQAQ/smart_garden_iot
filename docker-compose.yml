@@ -137,6 +137,9 @@ services:
       - "5000:5000"
     depends_on:
       - mysql_service
+    environment:
+      - MYSQL_HOST=mysql_service
+      - MYSQL_PORT=8085
     networks:
       - app-network
 
