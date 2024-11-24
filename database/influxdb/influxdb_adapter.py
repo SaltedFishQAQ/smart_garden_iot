@@ -33,8 +33,8 @@ class InfluxdbAdapter(BaseService):
             constants.entity.LIGHT: True,
             constants.entity.GATE: True,
             constants.entity.IRRIGATOR: True,
-            constants.entity.OXYGEN: True,
-            constants.entity.SOIL_MOISTURE: True,
+            constants.entity.GAS: True,
+            constants.entity.SOIL: True,
         }
 
     def start(self):

@@ -8,14 +8,14 @@ SERVICE_TABLE = 'service'
 RULE_TABLE = "rule"
 SCHEDULE_TABLE = 'schedule'
 AREA_TABLE = 'area'
-# devices
+# measurement
 TEMPERATURE = 'temperature'
 HUMIDITY = 'humidity'
 LIGHT = 'light'
 GATE = 'gate'
 IRRIGATOR = 'irrigator'
-OXYGEN = "oxygen"
-SOIL_MOISTURE = "soil_moisture"
+GAS = "gas"
+SOIL = "soil"
 # third party
 TELEBOT = 'telebot'
 OPEN_WEATHER_MAP = 'open_weather_map'
