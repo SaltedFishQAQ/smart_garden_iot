@@ -10,6 +10,7 @@ from authenticator import Authenticator
 from notification import NotificationManager
 from plant import PlantIDClient
 from io import BytesIO
+import importlib.resources
 import time
 
 logging.basicConfig(
@@ -39,6 +40,31 @@ class Config:
         self.data_endpoint = root.find('api/data').text
         self.plant_api_url = root.find('plantid/api_url').text
         self.plant_api_key = root.find('plantid/api_key').text
+
+
+def parse_device_config():
+    """Parse the device configuration XML and organize devices by area."""
+    # Access the config.xml file from the devices.area package
+    with importlib.resources.open_text("devices.area", "config.xml") as config_file:
+        tree = ET.parse(config_file)
+        root = tree.getroot()
+
+    area_devices = {}
+    for area_tag in root.findall("./*"):
+        # Ignore the `<area>` tag with `<area1>`, `<area2>`, and `<area3>` for soil types
+        if area_tag.tag == "area":
+            continue
+
+        # Process `<area1>`, `<area2>`, `<area3>` (and any future areas like `<area4>`)
+        area_name = area_tag.tag
+        area_devices[area_name] = []
+        for device in area_tag:
+            device_name = device.tag
+            device_info = {child.tag: child.text for child in device}
+            device_info['name'] = device_name
+            area_devices[area_name].append(device_info)
+
+    return area_devices
 
 
 def process_identification_result(result: dict) -> str:
@@ -118,18 +144,20 @@ class APIClient:
         """Fetch status from the server for a specific device."""
         user_token = self.authenticator.get_user_token(user_id)
         if not user_token:
-            return []
-        url = f"{self.base_url}/device/status"
-        params = {
-            "name": device_name
-        }
-        headers = {"Authorization": user_token}
-        response = requests.get(url, params=params, headers=headers)
+            return {}
 
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("code") == 0:
-                return data.get("data", {})
+        url = f"{self.base_url}/device/status"
+        params = {"name": device_name}
+        headers = {"Authorization": user_token}
+
+        try:
+            response = requests.get(url, params=params, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("code") == 0:
+                    return data.get("data", {})
+        except Exception as e:
+            logger.error(f"Error fetching status for {device_name}: {e}")
         return {}
 
     def identify_plant(self, image_bytes: BytesIO) -> dict:
@@ -144,7 +172,6 @@ class IoTBot:
         self.api_client = api_client
         self.notification_manager = notification_manager
 
-        # Create the MQTT client
         self.mqtt_client = MQTTClient(config, notification_manager)
         self.mqtt_client.connect()
 
@@ -210,9 +237,6 @@ class IoTBot:
         # If authenticated, process commands
         await self.process_commands(update, text)
 
-        # If authenticated, process commands
-        await self.process_commands(update, text)
-
     def register_user_for_notifications(self, update):
         """Subscribe user to notifications after successful login."""
         user_id = update.message.from_user.id
@@ -237,24 +261,27 @@ class IoTBot:
             await self.watering_menu(update)
         elif text == "Status":
             await self.system_status(update)
-        #elif text in ["Watering", "Light", "Turn On Light", "Turn Off Light", "Open Up Valves", "Close Valves"]:
-        #    if role != 1:  # Not an admin
-        #        await update.message.reply_text("You are not allowed to perform this operation.")
-        elif text == "Open Up Valves":
-            self.mqtt_client.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
-            await update.message.reply_text("Watering system turned on.")
-        elif text == "Close Valves":
-            self.mqtt_client.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': False})
-            await update.message.reply_text("Watering system turned off.")
-        elif text == "Turn On Light":
-            self.mqtt_client.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': True})
-            await update.message.reply_text("Light turned on.")
-        elif text == "Turn Off Light":
-            self.mqtt_client.mqtt_publish(self.config.command_channel + 'light', {"type": "opt", 'status': False})
-            await update.message.reply_text("Light turned off.")
+        elif text in ["Open Up Valves", "Close Valves", "Turn On Light", "Turn Off Light"]:
+            actions = {
+                "Open Up Valves": lambda: self.mqtt_client.mqtt_publish(
+                    self.config.command_channel + 'irrigator', {"type": "opt", 'status': True}),
+                "Close Valves": lambda: self.mqtt_client.mqtt_publish(
+                    self.config.command_channel + 'irrigator', {"type": "opt", 'status': False}),
+                "Turn On Light": lambda: self.mqtt_client.mqtt_publish(
+                    self.config.command_channel + 'light', {"type": "opt", 'status': True}),
+                "Turn Off Light": lambda: self.mqtt_client.mqtt_publish(
+                    self.config.command_channel + 'light', {"type": "opt", 'status': False}),
+            }
+
+            # Check if user is admin
+            if role != 1:
+                await update.message.reply_text("You are not allowed to perform this operation.")
+            else:
+                actions[text]()
+                await update.message.reply_text(f"{text} operation executed successfully.")
         elif text == "Back to Main Menu":
             await self.show_main_menu(update)
-        elif text == "Identify plant":  # Handle the new "Identify plant" command
+        elif text == "Identify plant":
             await update.message.reply_text("Please send a photo of the plant.")
         else:
             await update.message.reply_text("Invalid command.")
@@ -263,7 +290,6 @@ class IoTBot:
         user_id = update.message.from_user.id
         role = self.authenticator.get_user_role(user_id)  # Get the user's role
 
-        # Define common buttons
         keyboard = [
             [KeyboardButton("Temperature"), KeyboardButton("Humidity")],
             [KeyboardButton("Soil Moisture"), KeyboardButton("Status")],
@@ -282,7 +308,6 @@ class IoTBot:
         data = self.api_client.fetch_data("temperature", user_id)
 
         if data:
-            # Group data by area and find the latest data point for each area
             latest_by_area = {}
             for item in data:
                 area = item.get("area", "Unknown")
@@ -290,7 +315,6 @@ class IoTBot:
                 if area not in latest_by_area or created_at > latest_by_area[area]["created_at"]:
                     latest_by_area[area] = item
 
-            # Format the output
             message = "\n".join([
                 f"Area {area}: {details['created_at']}: {details['value']}°C"
                 for area, details in latest_by_area.items()
@@ -311,7 +335,6 @@ class IoTBot:
                 if area not in latest_by_area or created_at > latest_by_area[area]["created_at"]:
                     latest_by_area[area] = item
 
-            # Format the output
             message = "\n".join([
                 f"Area {area}: {details['created_at']}: {details['value']}%"
                 for area, details in latest_by_area.items()
@@ -325,7 +348,6 @@ class IoTBot:
         data = self.api_client.fetch_data("soil", user_id)
 
         if data:
-            # Group data by area and find the latest data point for each area
             latest_by_area = {}
             for item in data:
                 area = item.get("area", "Unknown")
@@ -397,32 +419,56 @@ class IoTBot:
         await update.message.reply_text("Control the watering system:", reply_markup=reply_markup)
 
     async def system_status(self, update: Update):
-        """Fetch and display status for the devices: temperature, humidity, light, oxygen."""
-        devices = ["temperature", "humidity", "light", "oxygen"]
+        """Fetch and display status for the devices based on areas."""
+        user_id = update.message.from_user.id
+
+        area_devices = parse_device_config()
+
         status_message = ""
 
-        for device in devices:
-            status = self.api_client.fetch_status(device)
+        for area, devices in area_devices.items():
+            status_message += f"{area.capitalize()}:\n"
+            for device in devices:
+                device_name = device['name']
+                sensor_type = device.get('sensor', 'Unknown')
+                actuator_type = device.get('actuator', None)
 
-            if status:
-                device_status = status.get('device', False)
-                sensor_status = status.get('sensor', False)
+                # Fetch the status of the device
+                status = self.api_client.fetch_status(user_id, device_name)
+                if status:
+                    device_status = status.get('device', False)
+                    sensor_status = status.get('sensor', False)
+                    device_emoji = "✅" if device_status else "❌"
+                    sensor_emoji = "✅" if sensor_status else "❌"
 
-                device_emoji = "✅" if device_status else "❌"
-                sensor_emoji = "✅" if sensor_status else "❌"
-
-                if device in ["oxygen", "light"]:
-                    actuator_status = status.get('actuator', False)
-                    actuator_emoji = "✅" if actuator_status else "❌"
-                    status_message += f"{device.capitalize()}:\n"
-                    status_message += f"  Device: {device_emoji}  Sensor: {sensor_emoji}  Actuator: {actuator_emoji}\n\n"
+                    if actuator_type:
+                        actuator_status = status.get('actuator', False)
+                        actuator_emoji = "✅" if actuator_status else "❌"
+                        status_message += (
+                            f"  Device {device_name} ({sensor_type}):\n"
+                            f"    Device: {device_emoji}  Sensor: {sensor_emoji}  Actuator: {actuator_emoji}\n"
+                        )
+                    else:
+                        status_message += (
+                            f"  Device {device_name} ({sensor_type}):\n"
+                            f"    Device: {device_emoji}  Sensor: {sensor_emoji}\n"
+                        )
                 else:
-                    status_message += f"{device.capitalize()}:\n"
-                    status_message += f"  Device: {device_emoji}  Sensor: {sensor_emoji}\n\n"
-            else:
-                status_message += f"{device.capitalize()}:\n"
-                status_message += f"  Device: ❌  Sensor: ❌\n\n"
+                    # Default when status is unavailable
+                    if actuator_type:
+                        status_message += (
+                            f"  Device {device_name} ({sensor_type}):\n"
+                            f"    Device: ❌  Sensor: ❌  Actuator: ❌\n"
+                        )
+                    else:
+                        status_message += (
+                            f"  Device {device_name} ({sensor_type}):\n"
+                            f"    Device: ❌  Sensor: ❌\n"
+                        )
 
+            status_message += "\n"  # Add spacing between areas
+
+        # Send the status message
         await update.message.reply_text(status_message)
 
     async def handle_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
