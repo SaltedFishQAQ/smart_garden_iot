@@ -44,18 +44,14 @@ class Config:
 
 def parse_device_config():
     """Parse the device configuration XML and organize devices by area."""
-    # Access the config.xml file from the devices.area package
     with importlib.resources.open_text("devices.area", "config.xml") as config_file:
         tree = ET.parse(config_file)
         root = tree.getroot()
 
     area_devices = {}
     for area_tag in root.findall("./*"):
-        # Ignore the `<area>` tag with `<area1>`, `<area2>`, and `<area3>` for soil types
         if area_tag.tag == "area":
             continue
-
-        # Process `<area1>`, `<area2>`, `<area3>` (and any future areas like `<area4>`)
         area_name = area_tag.tag
         area_devices[area_name] = []
         for device in area_tag:
