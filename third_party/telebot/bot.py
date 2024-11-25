@@ -158,33 +158,59 @@ class IoTBot:
 
         await self.show_main_menu(update)
 
+    async def stop(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        user_id = update.message.from_user.id
+
+        # Clear user authentication and context data
+        if self.authenticator.is_authenticated(user_id):
+            self.authenticator.clear_user(user_id)
+            context.user_data.clear()
+            logger.info(f"User {user_id} logged out using /stop.")
+            await update.message.reply_text("You have been logged out. Please enter your username to log in again.")
+        else:
+            await update.message.reply_text("You are not logged in.")
+
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text = update.message.text
         user_id = update.message.from_user.id
 
+        # Check if user is authenticated
         if not self.authenticator.is_authenticated(user_id):
             if 'password_prompt' not in context.user_data:
+                # Step 1: Receive username
+                context.user_data.clear()  # Clear any leftover data
                 context.user_data['username'] = text
                 await update.message.reply_text("Please enter your password:")
                 context.user_data['password_prompt'] = True
             else:
-                username = context.user_data['username']
+                # Step 2: Authenticate user
+                username = context.user_data.get('username')
                 password = text
-                success, message, token, role = self.authenticator.authenticate(username, password)
-                if success:
-                    await update.message.reply_text(f"Welcome, {message}!")
-                    self.authenticator.add_authenticated_user(user_id, token, role)
 
-                    # Register user for notifications after successful login
-                    self.register_user_for_notifications(update)
-
-                    await self.show_main_menu(update)
-                else:
-                    await update.message.reply_text(message)
+                # Ensure both username and password are set
+                if not username:
                     await update.message.reply_text("Please enter your username:")
                     context.user_data.clear()
+                    return
+
+                success, message, token, role = self.authenticator.authenticate(username, password)
+                if success:
+                    # Login successful
+                    self.authenticator.add_authenticated_user(user_id, token, role)
+                    await update.message.reply_text(f"Welcome, {message}!")
+                    self.register_user_for_notifications(update)
+                    await self.show_main_menu(update)
+                else:
+                    # Login failed, restart the flow
+                    await update.message.reply_text(message)
+                    await update.message.reply_text("Please enter your username:")
+                    context.user_data.clear()  # Restart the flow
             return
 
+        # If authenticated, process commands
+        await self.process_commands(update, text)
+
+        # If authenticated, process commands
         await self.process_commands(update, text)
 
     def register_user_for_notifications(self, update):
@@ -211,9 +237,9 @@ class IoTBot:
             await self.watering_menu(update)
         elif text == "Status":
             await self.system_status(update)
-        elif text in ["Watering", "Light", "Turn On Light", "Turn Off Light", "Open Up Valves", "Close Valves"]:
-            if role != 1:  # Not an admin
-                await update.message.reply_text("You are not allowed to perform this operation.")
+        #elif text in ["Watering", "Light", "Turn On Light", "Turn Off Light", "Open Up Valves", "Close Valves"]:
+        #    if role != 1:  # Not an admin
+        #        await update.message.reply_text("You are not allowed to perform this operation.")
         elif text == "Open Up Valves":
             self.mqtt_client.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
             await update.message.reply_text("Watering system turned on.")
@@ -278,7 +304,6 @@ class IoTBot:
         data = self.api_client.fetch_data("humidity", user_id)
 
         if data:
-            # Group data by area and find the latest data point for each area
             latest_by_area = {}
             for item in data:
                 area = item.get("area", "Unknown")
@@ -439,6 +464,7 @@ def main():
     bot = IoTBot(config, authenticator, api_client, notification_manager)
 
     application.add_handler(CommandHandler("start", bot.start))
+    application.add_handler(CommandHandler("stop", bot.stop))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, bot.handle_message))
     application.add_handler(MessageHandler(filters.PHOTO, bot.handle_photo))  # Handle plant photos
 

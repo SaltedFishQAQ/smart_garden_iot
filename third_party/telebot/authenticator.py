@@ -21,7 +21,7 @@ class Authenticator:
 
     def clear_user(self, user_id):
         """Remove a user from authenticated users."""
-        self.authenticated_users.discard(user_id)
+        self.authenticated_users.pop(user_id, None)
 
     def get_user_token(self, user_id):
         """Retrieve the stored token for a user."""
@@ -41,21 +41,28 @@ class Authenticator:
             response = requests.post(f"{self.base_url}/user/login", json=auth_data)
 
             if response.status_code == 200:
-                result = response.json()
+                try:
+                    result = response.json()
+                except ValueError:
+                    logger.error(f"Invalid JSON response for user {username}: {response.text}")
+                    return False, "Invalid server response. Please try again.", None, None
+
                 if result.get("code") == 0:
                     token = response.headers.get("Authorization")  # Extract token from the header
                     role = result["data"]["role"]
                     logger.info(f"User {username} authenticated successfully.")
                     return True, result['data']['name'], token, role
                 else:
-                    logger.warning(f"Authentication failed for user {username}.")
-                    return False, "Username/Password is wrong, try again."
+                    logger.warning(f"Authentication failed for user {username}. Response: {result}")
+                    return False, "Username/Password is wrong, try again.", None, None
             else:
-                logger.error(f"Server error during authentication for user {username}.")
-                return False, "Error connecting to server."
+                logger.error(f"Server error during authentication for user {username}. Status: {response.status_code}")
+                return False, "Error connecting to server. Please try again.", None, None
         except Exception as e:
             logger.error(f"Error during authentication: {e}")
-            return False, "An error occurred. Please try again."
+            return False, "An error occurred. Please try again.", None, None
+
+
 
 
 
