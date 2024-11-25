@@ -73,22 +73,27 @@ def process_identification_result(result: dict) -> str:
 
 # API Client class for fetching data and rules
 class APIClient:
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, authenticator: Authenticator):
         self.base_url = config.base_url
         self.data_endpoint = config.data_endpoint
         self.rules_endpoint = "/rules"
         self.status_endpoint = "/status"
         self.plant_client = PlantIDClient(config.plant_api_url, config.plant_api_key)
+        self.authenticator = authenticator  # Add authenticator as a dependency
 
-    def fetch_data(self, measurement, page=1, size=10):
+    def fetch_data(self, measurement, user_id, page=1, size=5):
         """Fetch data from the server for a specific measurement."""
+        user_token = self.authenticator.get_user_token(user_id)
+        if not user_token:
+            return []
         url = f"{self.base_url}{self.data_endpoint}"
         params = {
             "measurement": measurement,
             "page": page,
-            "size": size
+            "size": size,
         }
-        response = requests.get(url, params=params)
+        headers = {"Authorization": user_token}
+        response = requests.get(url, params=params, headers=headers)
         if response.status_code == 200:
             data = response.json()
             if data.get("code") == 0:
@@ -109,13 +114,17 @@ class APIClient:
                 return data.get("list", [])
         return []
 
-    def fetch_status(self, device_name):
+    def fetch_status(self, user_id, device_name):
         """Fetch status from the server for a specific device."""
+        user_token = self.authenticator.get_user_token(user_id)
+        if not user_token:
+            return []
         url = f"{self.base_url}/device/status"
         params = {
             "name": device_name
         }
-        response = requests.get(url, params=params)
+        headers = {"Authorization": user_token}
+        response = requests.get(url, params=params, headers=headers)
 
         if response.status_code == 200:
             data = response.json()
@@ -161,10 +170,10 @@ class IoTBot:
             else:
                 username = context.user_data['username']
                 password = text
-                success, message = self.authenticator.authenticate(username, password)
+                success, message, token, role = self.authenticator.authenticate(username, password)
                 if success:
                     await update.message.reply_text(f"Welcome, {message}!")
-                    self.authenticator.add_authenticated_user(user_id)
+                    self.authenticator.add_authenticated_user(user_id, token, role)
 
                     # Register user for notifications after successful login
                     self.register_user_for_notifications(update)
@@ -189,6 +198,8 @@ class IoTBot:
             await self.get_temperature(update)
         elif text == "Humidity":
             await self.get_humidity(update)
+        elif text == "Soil Moisture":
+            await self.get_humidity(update)
         elif text == "Light":
             await self.light_menu(update)
         elif text == "View Rules":
@@ -198,6 +209,7 @@ class IoTBot:
         elif text == "Status":
             await self.system_status(update)
         elif text == "Turn On Watering":
+
             self.mqtt_client.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
             await update.message.reply_text("Watering system turned on.")
         elif text == "Turn Off Watering":
@@ -219,25 +231,53 @@ class IoTBot:
     async def show_main_menu(self, update: Update):
         keyboard = [
             [KeyboardButton("Temperature"), KeyboardButton("Humidity")],
-            [KeyboardButton("Light"), KeyboardButton("View Rules")],
-            [KeyboardButton("Watering"), KeyboardButton("Status")],
-            [KeyboardButton("Identify plant")]  # Added the new button
+            [KeyboardButton("Soil Moisture"), KeyboardButton("Status")],
+            [KeyboardButton("Watering"), KeyboardButton("Light")],
+            [KeyboardButton("Identify plant"), KeyboardButton("View Rules")]  # Added the new button
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
         await update.message.reply_text("Please choose an option:", reply_markup=reply_markup)
 
     async def get_temperature(self, update: Update):
-        data = self.api_client.fetch_data("temperature")
+        user_id = update.message.from_user.id
+        data = self.api_client.fetch_data("temperature", user_id)
+
         if data:
-            message = '\n'.join([f"{item.get('created_at', 'N/A')}: {item.get('value', 'N/A')}°C" for item in data])
+            # Group data by area and find the latest data point for each area
+            latest_by_area = {}
+            for item in data:
+                area = item.get("area", "Unknown")
+                created_at = item.get("created_at")
+                if area not in latest_by_area or created_at > latest_by_area[area]["created_at"]:
+                    latest_by_area[area] = item
+
+            # Format the output
+            message = "\n".join([
+                f"Area {area}: {details['created_at']}: {details['value']}°C"
+                for area, details in latest_by_area.items()
+            ])
             await update.message.reply_text(f"Temperature data:\n{message}")
         else:
             await update.message.reply_text("No temperature data available.")
 
     async def get_humidity(self, update: Update):
-        data = self.api_client.fetch_data("humidity")
+        user_id = update.message.from_user.id
+        data = self.api_client.fetch_data("humidity", user_id)
+
         if data:
-            message = '\n'.join([f"{item.get('created_at', 'N/A')}: {item.get('value', 'N/A')}%" for item in data])
+            # Group data by area and find the latest data point for each area
+            latest_by_area = {}
+            for item in data:
+                area = item.get("area", "Unknown")
+                created_at = item.get("created_at")
+                if area not in latest_by_area or created_at > latest_by_area[area]["created_at"]:
+                    latest_by_area[area] = item
+
+            # Format the output
+            message = "\n".join([
+                f"Area {area}: {details['created_at']}: {details['value']}%"
+                for area, details in latest_by_area.items()
+            ])
             await update.message.reply_text(f"Humidity data:\n{message}")
         else:
             await update.message.reply_text("No humidity data available.")
@@ -290,7 +330,7 @@ class IoTBot:
 
     async def watering_menu(self, update: Update):
         keyboard = [
-            [KeyboardButton("Turn On Watering"), KeyboardButton("Turn Off Watering")],
+            [KeyboardButton("Open Up valves"), KeyboardButton("Close Valves")],
             [KeyboardButton("Back to Main Menu")]
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
@@ -358,7 +398,7 @@ class IoTBot:
 def main():
     config = Config('config.xml')
     authenticator = Authenticator(config.base_url)
-    api_client = APIClient(config)
+    api_client = APIClient(config, authenticator)
     job_queue = JobQueue()
     application = Application.builder().token(config.token).job_queue(job_queue).build()
 
@@ -384,4 +424,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
