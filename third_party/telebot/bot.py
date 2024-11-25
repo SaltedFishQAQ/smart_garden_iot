@@ -193,13 +193,16 @@ class IoTBot:
         self.mqtt_client.register_user(user_id)
 
     async def process_commands(self, update: Update, text: str):
+        user_id = update.message.from_user.id
+        role = self.authenticator.get_user_role(user_id)
+
         logger.info(f"Received message: {text}")
         if text == "Temperature":
             await self.get_temperature(update)
         elif text == "Humidity":
             await self.get_humidity(update)
         elif text == "Soil Moisture":
-            await self.get_humidity(update)
+            await self.get_soil_moisture(update)
         elif text == "Light":
             await self.light_menu(update)
         elif text == "View Rules":
@@ -208,11 +211,13 @@ class IoTBot:
             await self.watering_menu(update)
         elif text == "Status":
             await self.system_status(update)
-        elif text == "Turn On Watering":
-
+        elif text in ["Watering", "Light", "Turn On Light", "Turn Off Light", "Open Up Valves", "Close Valves"]:
+            if role != 1:  # Not an admin
+                await update.message.reply_text("You are not allowed to perform this operation.")
+        elif text == "Open Up Valves":
             self.mqtt_client.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': True})
             await update.message.reply_text("Watering system turned on.")
-        elif text == "Turn Off Watering":
+        elif text == "Close Valves":
             self.mqtt_client.mqtt_publish(self.config.command_channel + 'irrigator', {"type": "opt", 'status': False})
             await update.message.reply_text("Watering system turned off.")
         elif text == "Turn On Light":
@@ -229,12 +234,20 @@ class IoTBot:
             await update.message.reply_text("Invalid command.")
 
     async def show_main_menu(self, update: Update):
+        user_id = update.message.from_user.id
+        role = self.authenticator.get_user_role(user_id)  # Get the user's role
+
+        # Define common buttons
         keyboard = [
             [KeyboardButton("Temperature"), KeyboardButton("Humidity")],
             [KeyboardButton("Soil Moisture"), KeyboardButton("Status")],
-            [KeyboardButton("Watering"), KeyboardButton("Light")],
-            [KeyboardButton("Identify plant"), KeyboardButton("View Rules")]  # Added the new button
+            [KeyboardButton("Identify plant"), KeyboardButton("View Rules")]
         ]
+
+        # Add admin-only buttons
+        if role == 1:  # Administrator
+            keyboard.append([KeyboardButton("Watering"), KeyboardButton("Light")])
+
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
         await update.message.reply_text("Please choose an option:", reply_markup=reply_markup)
 
@@ -281,6 +294,28 @@ class IoTBot:
             await update.message.reply_text(f"Humidity data:\n{message}")
         else:
             await update.message.reply_text("No humidity data available.")
+
+    async def get_soil_moisture(self, update: Update):
+        user_id = update.message.from_user.id
+        data = self.api_client.fetch_data("soil", user_id)
+
+        if data:
+            # Group data by area and find the latest data point for each area
+            latest_by_area = {}
+            for item in data:
+                area = item.get("area", "Unknown")
+                created_at = item.get("created_at")
+                if area not in latest_by_area or created_at > latest_by_area[area]["created_at"]:
+                    latest_by_area[area] = item
+
+            # Format the output
+            message = "\n".join([
+                f"Area {area}: {details['created_at']}: {details['value']}%"
+                for area, details in latest_by_area.items()
+            ])
+            await update.message.reply_text(f"Soil Moisture data:\n{message}")
+        else:
+            await update.message.reply_text("No soil moisture data available.")
 
     async def light_menu(self, update: Update):
         keyboard = [
@@ -330,7 +365,7 @@ class IoTBot:
 
     async def watering_menu(self, update: Update):
         keyboard = [
-            [KeyboardButton("Open Up valves"), KeyboardButton("Close Valves")],
+            [KeyboardButton("Open Up Valves"), KeyboardButton("Close Valves")],
             [KeyboardButton("Back to Main Menu")]
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
@@ -373,14 +408,12 @@ class IoTBot:
 
         logger.info(f"Photo received from user {user_id}")
 
-        # Get the photo from the user's message
         photo_file = await update.message.photo[-1].get_file()  # Get the highest resolution photo
         photo_bytes = BytesIO()
         await photo_file.download_to_memory(photo_bytes)
 
         logger.info("Photo file downloaded to memory")
 
-        # Call the PlantID API
         plant_result = self.api_client.identify_plant(photo_bytes)
 
         if plant_result is not None:
@@ -414,13 +447,13 @@ def main():
             application.run_polling()
         except NetworkError as e:
             logger.error(f"NetworkError occurred: {e}")
-            time.sleep(5)  # Retry after 5 seconds
+            time.sleep(5)
         except TelegramError as e:
             logger.error(f"TelegramError occurred: {e}")
-            time.sleep(5)  # Retry after 5 seconds
+            time.sleep(5)
         except Exception as e:
             logger.error(f"An unexpected error occurred: {e}")
-            time.sleep(10)  # Retry after 10 seconds
+            time.sleep(10)
 
 if __name__ == "__main__":
     main()
