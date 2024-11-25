@@ -101,7 +101,7 @@ class APIClient:
         self.rules_endpoint = "/rules"
         self.status_endpoint = "/status"
         self.plant_client = PlantIDClient(config.plant_api_url, config.plant_api_key)
-        self.authenticator = authenticator  # Add authenticator as a dependency
+        self.authenticator = authenticator
 
     def fetch_data(self, measurement, user_id, page=1, size=5):
         """Fetch data from the server for a specific measurement."""
