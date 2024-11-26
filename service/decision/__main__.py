@@ -5,6 +5,7 @@ if __name__ == '__main__':
     s = DecisionService()
     s.start()
     s.register_controller()
+    s.run()
 
     try:
         while True:

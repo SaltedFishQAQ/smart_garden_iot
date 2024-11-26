@@ -3,6 +3,7 @@ import requests
 import logging
 import time
 import pytz
+import threading
 import constants.entity
 import message_broker.channels as mb_channel
 from datetime import datetime, timedelta
@@ -35,6 +36,8 @@ class DecisionService(BaseService):
     def start(self):
         super().start()
         self.init_mqtt_client()
+        self.register_controller()
+        threading.Thread(target=self.run).start()
 
     def stop(self):
         self.remove_mqtt_client()
