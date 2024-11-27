@@ -10,6 +10,22 @@ from watering_duration import WateringDurationCalculator
 from calculate_thresholds import ThresholdCalculator
 import paho.mqtt.client as mqtt
 import time
+import logging
+from logging.handlers import SysLogHandler
+
+# Configure syslog
+import logging
+from concurrent_log_handler import ConcurrentRotatingFileHandler
+
+# Configure logging
+log_file = '/tmp/decision_service.log'
+handler = ConcurrentRotatingFileHandler(log_file, maxBytes= const.MAX_BYTES)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - [%(process)d] %(message)s')
+handler.setFormatter(formatter)
+
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 
 # MQTT settings
@@ -55,21 +71,21 @@ class WateringDecisionMaker:
 
         adjusted_threshold = baseline_threshold * adjustment_factor
 
-        print(f"Predicted Threshold (pre-adjustment): {baseline_threshold}")
-        print(f"Adjusted Threshold for {self.soil_type} soil: {adjusted_threshold}")
+        logger.info(f"Predicted Threshold (pre-adjustment): {baseline_threshold}")
+        logger.info(f"Adjusted Threshold for {self.soil_type} soil: {adjusted_threshold}")
         return adjusted_threshold
 
     def analyze_conditions(self):
         current_weather = self.weather_fetcher.fetch_current_weather_data()
         if not current_weather:
-            print(f"Failed to fetch current weather data for {self.area}.")
+            logger.error(f"Failed to fetch current weather data for {self.area}.")
             return "Skip Watering"
 
         # Fetch sensor data
         humidity, temperature, current_soil_moisture = self.sensor_fetcher.get_sensor_data(self.area)
-        print(f"Humidity: {humidity}%, Temperature: {temperature}, Soil Moisture: {current_soil_moisture}")
+        logger.info(f"Humidity: {humidity}%, Temperature: {temperature}, Soil Moisture: {current_soil_moisture}")
         if humidity is None and temperature is None and current_soil_moisture is None:
-            print(f"Failed to fetch sensor data for {self.area}.")
+            logger.error(f"Failed to fetch sensor data for {self.area}.")
             return "Skip Watering"
 
         soil_moisture_threshold = self.calculate_dynamic_threshold()
@@ -93,13 +109,11 @@ class WateringDecisionMaker:
         sunset = datetime.fromisoformat(current_weather["sunset"])
         now = datetime.now(sunrise.tzinfo)
 
-        if (sunrise - const.WATERING_TIME_WINDOW <= now <= sunrise + const.WATERING_TIME_WINDOW) or \
-           (sunset - const.WATERING_TIME_WINDOW <= now <= sunset + const.WATERING_TIME_WINDOW) or \
-           (cloudiness >= const.MIN_CLOUDINESS_FOR_WATERING):
-            # Pass data to the watering duration calculator
-
-            watering_duration = self.watering_duration_calculator.calculate_duration(current_soil_moisture,
-                                                                                     self.calculate_dynamic_threshold())
+        if (now <= sunrise + timedelta(hours=1) or now >= sunset - timedelta(hours=1)) or \
+                (cloudiness >= const.MIN_CLOUDINESS_FOR_WATERING):
+            watering_duration = self.watering_duration_calculator.calculate_duration(
+                current_soil_moisture, self.calculate_dynamic_threshold()
+            )
             if watering_duration > 0:
                 return f"Watering for {watering_duration} minutes"
             else:
@@ -115,7 +129,7 @@ class WateringDecisionMaker:
         topic = f"{BASE_TOPIC}{self.area}"
 
         client.publish(topic, payload=json.dumps(command), qos=1)
-        print(
+        logger.info(
             f"Sent {'start' if status else 'stop'} watering command to {topic} for duration {duration} seconds." if duration else "until stopped."
         )
 
@@ -149,17 +163,16 @@ def main(area, soil_type):
     )
 
     decision = decision_maker.analyze_conditions()
-    print(f"Final Decision for {area}: {decision}")
+    logger.info(f"Final Decision for {area}: {decision}")
 
     if decision.startswith("Watering for"):
         duration = float(decision.split()[2]) * 60
         decision_maker.send_mqtt_command(True, duration)  # Start watering with specified duration
 
 
-
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python watering_decision.py <area> <soil_type>")
+        logger.info("Usage: python watering_decision.py <area> <soil_type>")
         sys.exit(1)
 
     area = sys.argv[1]

@@ -1,5 +1,8 @@
 import time
 import subprocess
+
+from anyio import sleep
+
 import constants.const as const
 from mysqptest import Logic, Delegate
 
@@ -43,6 +46,7 @@ while True:
 
         # New process starts as the last one is done
         process = subprocess.Popen(['python', 'watering_decision.py', area, soil_type])
+        time.sleep(10)
         processes[area] = process
 
     time.sleep(CHECK_INTERVAL)
