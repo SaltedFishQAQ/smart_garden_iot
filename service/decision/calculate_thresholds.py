@@ -1,4 +1,4 @@
-
+import constants.const as const
 import pandas as pd
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
@@ -8,18 +8,12 @@ from sklearn.metrics import mean_squared_error
 import joblib
 
 # Soil types with characteristics
-soil_types = {
-    "Sandy": {"field_capacity": 10, "wilting_point": 4, "adjustment_factor": 0.7},
-    "Clay": {"field_capacity": 50, "wilting_point": 15, "adjustment_factor": 1.0},  # Default base
-    "Loamy": {"field_capacity": 25, "wilting_point": 10, "adjustment_factor": 0.85},
-    "Silty": {"field_capacity": 35, "wilting_point": 12, "adjustment_factor": 0.9},
-    "Peaty": {"field_capacity": 40, "wilting_point": 10, "adjustment_factor": 0.88},
-}
+soil_types = const.SOIL_TYPE
 
 
 class ThresholdCalculator:
-    def __init__(self, file_path, window=7, n_estimators=100, random_state=42):
-        self.file_path = file_path
+    def __init__(self, window=7, n_estimators=100, random_state=42):
+        self.file_path = const.CSV_FILE_PATH
         self.window = window
         self.model = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state)
         self.scaler = StandardScaler()

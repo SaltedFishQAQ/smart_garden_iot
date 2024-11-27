@@ -1,48 +1,33 @@
-# soil_moisture_predictor.py
-
+import constants.const as cconst
 from fetch_weather_data import WeatherFetcher
+from service.decision.mysqptest import const_h
+
 
 class SoilMoisturePredictor:
-
-    def __init__(self, soil_absorption_factor):
-        self.soil_absorption_factor = soil_absorption_factor
+    def __init__(self):
+        self.soil_absorption_factors = cconst.SOIL_ABSORPTION_FACTOR
 
     def fetch_forecast_data(self, weather_fetcher):
         """
-        Fetches current weather data from an external weather API using a provided WeatherFetcher instance.
-        Parameters:
-            weather_fetcher (WeatherFetcher): An instance of WeatherFetcher to get forecast data.
-        Returns:
-            dict: Contains forecast data with key 'rain_amount' in mm.
+        Fetches current weather data
         """
-        weather_data = weather_fetcher.fetch_current_weather_data()  # Updated to use fetch_current_weather_data()
-
+        weather_data = weather_fetcher.fetch_current_weather_data()
         rain_amount = weather_data.get("rain_probability", 0)
-
         return {
             "rain_amount": rain_amount
         }
 
-    def predict_soil_moisture_after_rain(self, current_soil_moisture, forecast_data):
+    def predict_soil_moisture_after_rain(self, current_soil_moisture, forecast_data, soil_type):
         """
         Predicts soil moisture after a rain event based on current conditions and forecast data.
-
-        Parameters:
-            current_soil_moisture (float): The current soil moisture level.
-            forecast_data (dict): Contains 'rain_amount' in mm.
-
-        Returns:
-            float: Predicted soil moisture level after rain.
         """
         rain_amount = forecast_data.get("rain_amount", 0)
 
-        # Check if there is a significant rain amount
-        if rain_amount <= 0:
-            print("No significant rain amount; soil moisture remains unchanged.")
-            return current_soil_moisture
+        # Get soil absorption factor based on soil type
+        soil_absorption_factor = self.soil_absorption_factors.get(soil_type, cconst.DEFAULT_SOIL_ABSORPTION_FACTOR) #default value for unknown soil type
 
         # Calculate increase in soil moisture due to rain
-        moisture_increase = rain_amount * self.soil_absorption_factor
+        moisture_increase = rain_amount * soil_absorption_factor
 
         # Calculate the predicted soil moisture after rain
         predicted_soil_moisture = current_soil_moisture + moisture_increase
@@ -51,20 +36,3 @@ class SoilMoisturePredictor:
         predicted_soil_moisture = min(predicted_soil_moisture, 1.0)
 
         return predicted_soil_moisture
-
-# Example usage
-if __name__ == "__main__":
-    soil_moisture_predictor = SoilMoisturePredictor(soil_absorption_factor=0.7)
-
-    current_soil_moisture = 0.4
-
-    api_url = "http://ec2-3-79-189-115.eu-central-1.compute.amazonaws.com:5000/weather"
-    weather_fetcher = WeatherFetcher(api_url, api_url)  # Providing current and historical URLs
-
-    forecast_data = soil_moisture_predictor.fetch_forecast_data(weather_fetcher)
-
-    predicted_soil_moisture = soil_moisture_predictor.predict_soil_moisture_after_rain(
-        current_soil_moisture, forecast_data
-    )
-
-    print(f"Predicted Soil Moisture After Rain: {predicted_soil_moisture:.3f}")

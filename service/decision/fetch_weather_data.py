@@ -1,17 +1,15 @@
 import requests
 import pandas as pd
 import logging
-import constants.http as chttp
 
-# Setup logging
 logging.basicConfig(filename='weather_fetcher.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class WeatherFetcher:
-    def __init__(self, current_api_url):
-        self.current_api_url = current_api_url
-        self.historical_api_url = current_api_url + chttp.HISTORICAL_WEATHER_GET
+    def __init__(self):
+        self.current_api_url = "http://3.79.189.115:5000/weather/"
+        self.historical_api_url = "http://3.79.189.115:5000/historical_weather"
 
     def fetch_current_weather_data(self):
         try:
@@ -35,7 +33,6 @@ class WeatherFetcher:
             logging.info("Fetching historical weather data from custom API.")
             response = requests.get(self.historical_api_url)
 
-            # Check for a valid response
             if response.status_code != 200 or not response.content:
                 logging.error("Invalid or empty response from historical weather API.")
                 return pd.DataFrame()
@@ -44,12 +41,10 @@ class WeatherFetcher:
             json_data = response.json()
             weather_df = pd.DataFrame(json_data)
 
-            # Check for required columns
             if 'time' not in weather_df or 'temperature_2m' not in weather_df or 'relative_humidity_2m' not in weather_df:
                 logging.error("Missing required columns in the data.")
                 return pd.DataFrame()
 
-            # Convert time to datetime and process rolling calculations
             weather_df['time'] = pd.to_datetime(weather_df['time'])
             weather_df['cumulative_rain'] = weather_df['precipitation'].cumsum()
 

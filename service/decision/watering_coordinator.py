@@ -1,7 +1,6 @@
 import time
 import subprocess
 import constants.const as const
-#from service.user.logic.area import Logic, Delegate  # Import Logic class and its dependencies
 from mysqptest import Logic, Delegate
 
 
@@ -20,7 +19,6 @@ def fetch_area_soil_map():
     response = logic.list(params={})
 
     if response['code'] == 0:
-        # Create a dictionary mapping area name to its soil type
         area_soil_map = {area['name']: area['soil_type'].capitalize() for area in response['list']}
         return area_soil_map
     else:
