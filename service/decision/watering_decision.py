@@ -99,11 +99,10 @@ class WateringDecisionMaker:
             if predicted_soil_moisture >= soil_moisture_threshold:
                 return "Skip Watering"
 
-        decision = self.make_decision(current_weather, current_soil_moisture,
-                                      humidity, temperature)
+        decision = self.make_decision(current_weather, current_soil_moisture)
         return decision
 
-    def make_decision(self, current_weather, current_soil_moisture, humidity, temperature):
+    def make_decision(self, current_weather, current_soil_moisture):
         cloudiness = current_weather["cloudiness"]
         sunrise = datetime.fromisoformat(current_weather["sunrise"])
         sunset = datetime.fromisoformat(current_weather["sunset"])
