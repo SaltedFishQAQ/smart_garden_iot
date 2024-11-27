@@ -24,11 +24,8 @@ class DataSource:
         self.history_date = '2024-11-01'
         self.history_data = None
 
-    def fetch_weather_data(self, data_type):
-        data = self._get_data()
-        if data_type == '':
-            return data
-        return {data_type: data[data_type]}
+    def fetch_weather_data(self, params):
+        return self._get_data()
 
     def _get_data(self):
         try:

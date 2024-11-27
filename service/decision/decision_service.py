@@ -3,6 +3,7 @@ import requests
 import logging
 import time
 import pytz
+import threading
 import constants.entity
 import message_broker.channels as mb_channel
 from datetime import datetime, timedelta
@@ -35,6 +36,8 @@ class DecisionService(BaseService):
     def start(self):
         super().start()
         self.init_mqtt_client()
+        self.register_controller()
+        threading.Thread(target=self.run).start()
 
     def stop(self):
         self.remove_mqtt_client()
@@ -59,16 +62,15 @@ class DecisionService(BaseService):
         """
         Main loop that fetches weather data once a day and checks for light control every 10 minutes.
         """
-        self.fetch_weather_data()
+        self.logger.info(f'decision service start..., there are {len(self.control_groups)} control groups')
 
-        next_weather_update = datetime.now(pytz.timezone(self.timezone)).replace(hour=0, minute=0, second=0) + timedelta(days=1)
-
+        next_weather_update = datetime.now(pytz.timezone(self.timezone)).replace(hour=0, minute=0, second=0)
         while True:
             current_time = datetime.now(pytz.timezone(self.timezone))
-
             if current_time >= next_weather_update:
+                self.logger.info("fetch weather data")
                 self.fetch_weather_data()
-                next_weather_update = current_time.replace(hour=0, minute=0, second=0) + timedelta(days=1)
+                next_weather_update = next_weather_update + timedelta(days=1)
 
             for group in self.control_groups:
                 group.handle_check()
