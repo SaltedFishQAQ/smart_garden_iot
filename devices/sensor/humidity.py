@@ -22,7 +22,7 @@ class HumiditySensor(BaseSensor):
             return json.dumps({'value': None})
 
         try:
-            url = f'{self.config.get("url")}:{self.config.get("ports/weather")}/weather/humidity'
+            url = f'{self.config.get("url_weather")}/weather/data'
             response = requests.get(url)
 
             weather_data = response.json()
@@ -38,7 +38,7 @@ class HumiditySensor(BaseSensor):
             adjusted_humidity = round(min(humidity + random_adjustment, 100), 2)
 
             return json.dumps({
-                'value': adjusted_humidity
+                'value': float(adjusted_humidity)
             })
 
         except Exception as e:

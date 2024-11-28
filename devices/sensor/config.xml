@@ -1,9 +1,6 @@
 <config>
-    <url>http://3.79.189.115</url>
-    <ports>
-        <weather>5000</weather>
-        <soil_moisture_sensor>5001</soil_moisture_sensor>
-    </ports>
+    <url_weather>http://43.131.48.203:5000</url_weather>
+    <url_soil>http://3.79.189.115:5001</url_soil>
     <data_keys>
         <temperature>weather/temperature</temperature>
         <humidity>weather/humidity</humidity>

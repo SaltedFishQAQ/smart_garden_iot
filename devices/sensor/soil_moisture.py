@@ -24,7 +24,7 @@ class SoilMoistureSensor(BaseSensor):
             return json.dumps({'value': None})
 
         try:
-            url = f'{self.config.get("url")}:{self.config.get("ports/soil_moisture_sensor")}/soil_moisture'
+            url = f'{self.config.get("url_soil")}/soil_moisture'
             response = requests.get(url)
             response.raise_for_status()
 
@@ -40,7 +40,7 @@ class SoilMoistureSensor(BaseSensor):
                 })
 
             return json.dumps({
-                'value': moisture_value
+                'value': float(moisture_value)
             })
 
         except Exception as e:

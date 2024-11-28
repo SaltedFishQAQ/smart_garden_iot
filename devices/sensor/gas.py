@@ -12,7 +12,7 @@ class GasDetector(BaseSensor):
 
     def monitor(self) -> str:
         return json.dumps({
-            'value': round(random.uniform(20, 22), 1)
+            'value': float(round(random.uniform(20, 22), 1))
         })
 
     def measurement(self) -> str:

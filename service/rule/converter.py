@@ -54,12 +54,12 @@ def convert_message(dst, opt):
 
     if opt == const.OPT_LIGHT_ON:
         msg = json.dumps({
-            'type': 'opt',
+            'type': 'action',
             'status': True
         })
     elif opt == const.OPT_LIGHT_OFF:
         msg = json.dumps({
-            'type': 'opt',
+            'type': 'action',
             'status': False
         })
     else:

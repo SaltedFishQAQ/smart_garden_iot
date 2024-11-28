@@ -33,7 +33,10 @@ class ScheduleService(BaseService):
 
     def get_schedule_list(self):
         while True:
-            params = {'is_deleted': 0}
+            params = {
+                'inner': True,
+                'is_deleted': 0
+            }
             try:
                 resp = requests.get(self.mysql_base_url + const_h.MYSQL_SCHEDULE_LIST, params=params)
                 resp.raise_for_status()  # Raise an error for bad responses

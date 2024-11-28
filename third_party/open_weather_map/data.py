@@ -21,11 +21,18 @@ class DataSource:
         self.historical_api_url = historical_api_url
         self.latitude = lat
         self.longitude = lon
+        self.last_data_get = datetime.now()
+        self.weather_data = None
         self.history_date = '2024-11-01'
         self.history_data = None
 
     def fetch_weather_data(self, params):
-        return self._get_data()
+        if self.weather_data is not None:
+            now = datetime.now()
+            if time_add(self.last_data_get, 5*60) > now:
+                return self.weather_data
+        self.weather_data = self._get_data()
+        return self.weather_data
 
     def _get_data(self):
         try:

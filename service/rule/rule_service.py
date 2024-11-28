@@ -11,6 +11,7 @@ import message_broker.channels as mb_channel
 
 from common.base_service import BaseService
 from service.rule.converter import convert_checker, convert_message
+from service.user.logic.base import Common
 
 
 class RuleService(BaseService):
@@ -20,6 +21,7 @@ class RuleService(BaseService):
         self.command_channel = mb_channel.DEVICE_COMMAND  # channel for send command
         self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
         self.rule_list = demo_rule()
+        self.inner_service = Common(self)
 
     def start(self):
         super().start()
@@ -32,6 +34,7 @@ class RuleService(BaseService):
     def get_rule_list(self):
         while True:
             params = {
+                'inner': True,
                 'is_deleted': 0
             }
             resp = requests.get(self.mysql_base_url + const_h.MYSQL_RULE_LIST, params)
