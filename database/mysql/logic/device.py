@@ -15,13 +15,15 @@ class Logic:
         self.delegate.http_client.add_route(const_h.MYSQL_DEVICE_APPROVE, HTTPMethod.POST, self.approve)
 
     def count(self, params):
-        if 'area_list' not in params or len(params['area_list']) == 0:
-            return {
-                'count': 0
-            }
-
-        area_ids_str = ",".join(map(str, params["area_list"]))
-        sql = f'select count(*) as total from device where area_id in ({area_ids_str})'
+        sql = 'select count(*) as total from device'
+        if 'inner' not in params:
+            if 'area_list' not in params or len(params['area_list']) == 0:
+                return {
+                    'count': 0
+                }
+            else:
+                area_ids_str = ",".join(map(str, params["area_list"]))
+                sql += f' where area_id in ({area_ids_str})'
         records = self.delegate.db_connect.query(sql)
         count = 0
         for record in records:
@@ -32,14 +34,16 @@ class Logic:
         }
 
     def list(self, params):
-        if 'area_list' not in params or len(params['area_list']) == 0:
-            return {
-                'list': []
-            }
+        sql = f'select d.*, a.name as area_name from device d left join area a on a.id = d.area_id'
+        if 'inner' not in params:
+            if 'area_list' not in params or len(params['area_list']) == 0:
+                return {
+                    'list': []
+                }
+            else:
+                area_ids_str = ",".join(map(str, params["area_list"]))
+                sql += f' where d.area_id in ({area_ids_str})'
 
-        area_ids_str = ",".join(map(str, params["area_list"]))
-        sql = (f'select d.*, a.name as area_name from device d left join area a on a.id = d.area_id'
-               f' where d.area_id in ({area_ids_str})')
         records = self.delegate.db_connect.query(sql)
         result = []
         for record in records:
