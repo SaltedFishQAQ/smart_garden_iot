@@ -48,7 +48,7 @@ class Authenticator:
                     return False, "Invalid server response. Please try again.", None, None
 
                 if result.get("code") == 0:
-                    token = response.headers.get("Authorization")  # Extract token from the header
+                    token = response.headers.get("Authorization")
                     role = result["data"]["role"]
                     logger.info(f"User {username} authenticated successfully.")
                     return True, result['data']['name'], token, role

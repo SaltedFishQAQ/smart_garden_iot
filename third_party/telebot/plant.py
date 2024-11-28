@@ -15,12 +15,11 @@ class PlantIDClient:
         return base64.b64encode(image_bytes.getvalue()).decode('ascii')
 
     def identify_plant(self, image_bytes: BytesIO) -> dict:
-        """Send the image to Plant.ID API as a base64-encoded string in JSON."""
         encoded_image = self.encode_image(image_bytes)
         data = {
             'images': [encoded_image],
             'similar_images': True,
-            'classification_level': 'species'  # Request classification at species level
+            'classification_level': 'species'
         }
         headers = {
             'Api-Key': self.api_key,
