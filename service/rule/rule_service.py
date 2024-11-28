@@ -36,6 +36,7 @@ class RuleService(BaseService):
             }
             resp = requests.get(self.mysql_base_url + const_h.MYSQL_RULE_LIST, params)
             self.rule_list = resp.json()['list']
+            self.logger.info(f'rule list: {self.rule_list}')
             time.sleep(60)
 
     def register_mqtt_service(self):
@@ -46,13 +47,16 @@ class RuleService(BaseService):
         entity = msg.topic.removeprefix(self.data_channel)
         content = msg.payload.decode('utf-8')
         data_dict = json.loads(content)
+        self.logger.info(f'data in {data_dict}')
         # when [entity] do ([entity.field] <compare> [value]) if true then {opt}
         for r in self.rule_list:
             if entity != r['entity']:  # rule not match
+                self.logger.info(f'rule not match')
                 continue
             if ("tags" not in data_dict or
                     "device" not in data_dict['tags'] or
                     r['src'] != data_dict["tags"]["device"]):  # device not match
+                self.logger.info(f'device not match')
                 continue
 
             compare = r['compare']  # comparison symbol
