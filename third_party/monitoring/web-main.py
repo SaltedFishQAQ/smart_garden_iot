@@ -5,6 +5,7 @@ from time import sleep
 from monitoring import DockerMonitor, APIHealthMonitor, DatabaseHealthMonitor
 import paho.mqtt.client as mqtt
 import json
+from pytz import timezone
 from constant_values import (
     IP_SERVER,
     REFRESH_TIME,
@@ -62,7 +63,8 @@ class IoTMonitoringWebApp:
             sleep(REFRESH_TIME)
 
     def monitor_all(self):
-        self.last_checked = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        localzone = timezone('Europe/Rome')
+        self.last_checked = datetime.now(localzone).strftime("%Y-%m-%d %H:%M:%S")
 
         # Monitor containers
         containers, events = self.docker_monitor.monitor()
@@ -163,4 +165,5 @@ if __name__ == "__main__":
         })
     finally:
         app.stop()
+
 
