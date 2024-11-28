@@ -34,17 +34,16 @@ class MQTTClient:
         except Exception as e:
             logger.error(f"Failed to connect to MQTT broker: {e}")
 
-    def on_connect(self, client, userdata, flags, rc):
+    def on_connect(self, rc):
         """Handle successful connection to the MQTT broker."""
         if rc == 0:
             logger.info(f"Connected to MQTT broker at {self.config.mqtt_broker}:{self.config.mqtt_port}")
-            # Subscribe to the topic
             self.mqtt_client.subscribe(self.config.command_channel + "alerts", qos=1)
             logger.info(f"Subscribed to topic: {self.config.command_channel}alerts")
         else:
             logger.error(f"Failed to connect to MQTT broker, return code {rc}")
 
-    def on_disconnect(self, client, userdata, rc):
+    def on_disconnect(self, client, rc):
         """Handle MQTT disconnection."""
         if rc != 0:
             logger.warning(f"Unexpected MQTT disconnection. Will attempt to reconnect. Reason Code: {rc}")
@@ -53,8 +52,8 @@ class MQTTClient:
             except Exception as e:
                 logger.error(f"Failed to reconnect: {e}")
 
-    def on_mqtt_message(self, client, userdata, msg):
-        """Handle incoming MQTT messages with a standardized format."""
+    def on_mqtt_message(self, msg):
+        """Handle incoming MQTT messages"""
         try:
             payload_str = msg.payload.decode('utf-8')
 
@@ -80,13 +79,12 @@ class MQTTClient:
         try:
             logger.info(f"Publishing to {topic}: {message}")
             result = self.mqtt_client.publish(topic, json.dumps(message))
-            result.wait_for_publish()  # Make sure the message is sent
+            result.wait_for_publish()
             logger.info(f"Published to {topic} with message: {message}")
         except Exception as e:
             logger.error(f"Failed to publish to MQTT: {e}")
 
     def start_mqtt_loop(self):
-        """Start the MQTT loop in a separate thread."""
         def mqtt_loop():
             try:
                 logger.info("Starting MQTT loop in a separate thread.")

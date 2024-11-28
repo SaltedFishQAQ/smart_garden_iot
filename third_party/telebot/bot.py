@@ -269,7 +269,6 @@ class IoTBot:
                     self.config.command_channel + 'light', {"type": "opt", 'status': False}),
             }
 
-            # Check if user is admin
             if role != 1:
                 await update.message.reply_text("You are not allowed to perform this operation.")
             else:
@@ -292,8 +291,7 @@ class IoTBot:
             [KeyboardButton("Identify plant"), KeyboardButton("View Rules")]
         ]
 
-        # Add admin-only buttons
-        if role == 1:  # Administrator
+        if role == 1:
             keyboard.append([KeyboardButton("Watering"), KeyboardButton("Light")])
 
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=False, resize_keyboard=True)
@@ -462,9 +460,8 @@ class IoTBot:
                             f"    Device: ❌  Sensor: ❌\n"
                         )
 
-            status_message += "\n"  # Add spacing between areas
+            status_message += "\n"
 
-        # Send the status message
         await update.message.reply_text(status_message)
 
     async def handle_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
