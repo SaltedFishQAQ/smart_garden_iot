@@ -23,7 +23,7 @@ class TemperatureSensor(BaseSensor):
             return json.dumps({'value': None})
 
         try:
-            url = f'{self.config.get("url")}:{self.config.get("ports/weather")}/weather/data'
+            url = f'{self.config.get("url_weather")}/weather/data'
             response = requests.get(url)
             weather_data = response.json()
             temperature = weather_data.get('temperature')
