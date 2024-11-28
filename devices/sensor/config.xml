@@ -1,5 +1,5 @@
 <config>
-    <url>http://3.79.189.115</url>
+    <url>http://43.131.48.203</url>
     <ports>
         <weather>5000</weather>
         <soil_moisture_sensor>5001</soil_moisture_sensor>

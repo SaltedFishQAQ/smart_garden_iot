@@ -22,7 +22,7 @@ class HumiditySensor(BaseSensor):
             return json.dumps({'value': None})
 
         try:
-            url = f'{self.config.get("url")}:{self.config.get("ports/weather")}/weather/humidity'
+            url = f'{self.config.get("url")}:{self.config.get("ports/weather")}/weather/data'
             response = requests.get(url)
 
             weather_data = response.json()
