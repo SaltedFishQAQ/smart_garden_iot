@@ -8,8 +8,8 @@ logging.basicConfig(filename='weather_fetcher.log', level=logging.INFO,
 
 class WeatherFetcher:
     def __init__(self):
-        self.current_api_url = "http://3.79.189.115:5000/weather/"
-        self.historical_api_url = "http://3.79.189.115:5000/historical_weather"
+        self.current_api_url = "http://43.131.48.203:5000/weather/data"
+        self.historical_api_url = "http://43.131.48.203:5000/weather/historical_weather"
 
     def fetch_current_weather_data(self):
         try:
