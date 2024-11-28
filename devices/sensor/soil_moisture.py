@@ -40,7 +40,7 @@ class SoilMoistureSensor(BaseSensor):
                 })
 
             return json.dumps({
-                'value': moisture_value
+                'value': float(moisture_value)
             })
 
         except Exception as e:

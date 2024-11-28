@@ -37,7 +37,7 @@ class TemperatureSensor(BaseSensor):
             adjusted_temperature = round(temperature + random_adjustment, 2)
 
             return json.dumps({
-                'value': adjusted_temperature
+                'value': float(adjusted_temperature)
             })
 
         except Exception as e:

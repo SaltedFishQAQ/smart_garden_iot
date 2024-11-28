@@ -38,7 +38,7 @@ class HumiditySensor(BaseSensor):
             adjusted_humidity = round(min(humidity + random_adjustment, 100), 2)
 
             return json.dumps({
-                'value': adjusted_humidity
+                'value': float(adjusted_humidity)
             })
 
         except Exception as e:
