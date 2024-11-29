@@ -18,18 +18,15 @@ class ScheduleService(BaseService):
         self.command_channel = mb_channel.DEVICE_COMMAND
         self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
         self.schedule_list = []
-        logging.info("Initialized ScheduleService")
 
     def start(self):
         super().start()
         self.init_mqtt_client()
-        logging.info("MQTT client initialized and ScheduleService started")
         threading.Thread(target=self.get_schedule_list).start()  # update schedule list regularly
         self.start_timer()
 
     def stop(self):
         self.remove_mqtt_client()
-        logging.info("MQTT client removed and ScheduleService stopped")
 
     def get_schedule_list(self):
         while True:
@@ -41,10 +38,10 @@ class ScheduleService(BaseService):
                 resp = requests.get(self.mysql_base_url + const_h.MYSQL_SCHEDULE_LIST, params=params)
                 resp.raise_for_status()  # Raise an error for bad responses
                 self.schedule_list = resp.json().get('list', [])
-                logging.info(f"Fetched {len(self.schedule_list)} schedules")
+                self.logger.info(f"Fetched {len(self.schedule_list)} schedules")
             except requests.RequestException as e:
                 logging.error(f"Failed to fetch schedule list: {e}")
-            time.sleep(60)
+            time.sleep(30)
 
     def start_timer(self):
         logging.info("Starting timers for minute, hour, and day schedules")
@@ -53,21 +50,24 @@ class ScheduleService(BaseService):
         threading.Thread(target=self.day_schedule).start()  # once per day
 
     def minute_schedule(self):
+        time.sleep(10)
         while True:
             time.sleep(60)
-            logging.info("Executing minute schedule")
+            self.logger.info("Executing minute schedule")
             self.do_schedule(60)
 
     def hour_schedule(self):
+        time.sleep(10)
         while True:
             time.sleep(3600)
-            logging.info("Executing hour schedule")
+            self.logger.info("Executing hour schedule")
             self.do_schedule(3600)
 
     def day_schedule(self):
+        time.sleep(10)
         while True:
             time.sleep(86400)
-            logging.info("Executing day schedule")
+            self.logger.info("Executing day schedule")
             self.do_schedule(86400)
 
     def do_schedule(self, duration):
@@ -83,4 +83,4 @@ class ScheduleService(BaseService):
                 self.mqtt_publish(self.command_channel + device, msg)
                 logging.info(f"Published message to {self.command_channel + device}: {msg}")
             except Exception as e:
-                logging.error(f"Failed to publish message to {self.command_channel + device}: {e}")
+                self.logger.error(f"Failed to publish message to {self.command_channel + device}: {e}")
