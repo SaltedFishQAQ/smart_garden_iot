@@ -1,6 +1,5 @@
 import json
 import time
-import logging
 import requests
 import constants.http as const_h
 import message_broker.channels as mb_channel

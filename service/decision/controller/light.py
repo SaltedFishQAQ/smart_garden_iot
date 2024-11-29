@@ -1,14 +1,14 @@
-import logging
 import json
-from datetime import datetime
 import pytz
+from common.log import Logger
+from datetime import datetime
 from service.decision.controller.base import BaseController
 
 
 class LightController(BaseController):
     def __init__(self, delegate):
         self.delegate = delegate
-        self.logger = self.delegate.logger
+        self.logger = Logger(prefix=f'light controller:')
         # flag
         self.sunrise = None
         self.sunset = None

@@ -1,6 +1,5 @@
 import os
 import requests
-import logging
 import time
 import pytz
 import threading
@@ -10,13 +9,6 @@ from datetime import datetime, timedelta
 from common.config import ConfigLoader
 from common.base_service import BaseService
 from service.decision.controller.light import LightController
-
-logging.basicConfig(
-    filename='/tmp/light_controller.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
 
 
 class DecisionService(BaseService):
@@ -47,16 +39,16 @@ class DecisionService(BaseService):
         Fetch weather data from the weather API and update sunrise and sunset times.
         """
         try:
-            logging.info(f"Fetching weather data from API: {self.weather_api_url}")
+            self.logger.info(f"Fetching weather data from API: {self.weather_api_url}")
             response = requests.get(self.weather_api_url, timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 for group in self.control_groups:
                     group.handle_data(data)
             else:
-                logging.error(f"Failed to fetch weather data. Status code: {response.status_code}")
+                self.logger.error(f"Failed to fetch weather data. Status code: {response.status_code}")
         except Exception as e:
-            logging.error(f"Error fetching weather data: {e}")
+            self.logger.error(f"Error fetching weather data: {e}")
 
     def run(self):
         """
