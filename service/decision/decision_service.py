@@ -96,12 +96,12 @@ class DecisionService(BaseService):
         self.control_groups = []
         self.command_channel = mb_channel.DEVICE_COMMAND
         config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configuration.xml')
-        config = ConfigLoader(config_path)
-        self.weather_api_url = config.get("./weather/api_url")
-        self.mqtt_broker = config.get("./mqtt/broker")
-        self.mqtt_port = config.get("./mqtt/port")
-        self.mqtt_topic = config.get("./mqtt/topic")
-        self.timezone = config.get("./weather/timezone")
+        self.config = ConfigLoader(config_path)
+        self.weather_api_url = self.config.get("./weather/api_url")
+        self.mqtt_broker = self.config.get("./mqtt/broker")
+        self.mqtt_port = self.config.get("./mqtt/port")
+        self.mqtt_topic = self.config.get("./mqtt/topic")
+        self.timezone = self.config.get("./weather/timezone")
         self.threshold_calculator = ThresholdCalculator(self)
 
     def start(self):
