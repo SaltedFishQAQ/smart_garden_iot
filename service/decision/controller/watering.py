@@ -58,11 +58,10 @@ class DataFetcher:
         sensor_data = {}
         for measurement in need_measurements:
             for area in self.delegate.area_list:
-                area_id = area['id']
                 params['measurement'] = measurement
-                params['area_list'] = [area_id]
+                params['area_list'] = [area['name']]
                 resp = requests.get(self.delegate.sensor_api_url, params)
-                sensor_data[(area_id, measurement)] = resp.json()['list']
+                sensor_data[(area['id'], measurement)] = resp.json()['list']
         self.delegate.sensor_data = sensor_data
         self.delegate.logger.info(f'sensor data: {self.delegate.sensor_data}')
 
