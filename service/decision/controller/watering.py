@@ -102,12 +102,11 @@ class DecisionMaker:
         self.area = area
         self.weather_data = delegate.weather_data
         self.soil_moisture = delegate.sensor_data[(area['id'], 'soil')]
-        self.threshold = self.delegate.threshold_calculator
 
     def calc_duration(self):
         weather_data = self.delegate.weather_data
         rain_mm = float(weather_data.get("rain_probability", 0))
-        threshold, adjustment_factor = self.threshold.calc_dynamic_threshold(self.area['soil_type'])
+        threshold, adjustment_factor = self.delegate.threshold.calc_dynamic_threshold(self.area['soil_type'])
         predictor = SoilMoisturePredictor(self)
         predicted_soil_moisture = predictor.predict_after_rain(self.area)
         if predicted_soil_moisture >= threshold:
@@ -141,6 +140,7 @@ class WateringController(BaseController):
         self.actuator_map = None
         self.historical_data = None
         self.area_list = []
+        self.threshold = delegate.threshold_calculator
         self.weather_api_url = delegate.weather_api_url
         self.sensor_api_url = delegate.config.get("./sensor/api_url")
         self.data_source = DataFetcher(self)
