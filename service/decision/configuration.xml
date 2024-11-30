@@ -1,8 +1,11 @@
 <config>
     <weather>
-        <api_url>http://3.79.189.115:5000/weather</api_url>
+        <api_url>http://3.79.189.115:5000</api_url>
         <timezone>Europe/Rome</timezone>
     </weather>
+    <sensor>
+        <api_url>http://3.79.189.115:8083/data</api_url>
+    </sensor>
     <mqtt>
         <broker>43.131.48.203</broker>
         <port>1883</port>
