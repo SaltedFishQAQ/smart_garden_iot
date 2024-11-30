@@ -13,6 +13,9 @@ class BaseActuator(object):
     def _off(self):
         pass
 
+    def measurement(self) -> str:
+        pass
+
     def switch(self, set_on):
         self.status = set_on
         if set_on:

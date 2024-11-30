@@ -13,3 +13,6 @@ class Irrigator(BaseActuator):
 
     def _off(self):
         return "stop watering"
+
+    def measurement(self) -> str:
+        return TAG

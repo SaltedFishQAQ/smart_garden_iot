@@ -48,4 +48,4 @@ class HumiditySensor(BaseSensor):
             })
 
     def measurement(self) -> str:
-        return 'humidity'
+        return TAG

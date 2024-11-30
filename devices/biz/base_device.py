@@ -117,10 +117,18 @@ class BaseDevice:
         data = {
             'name': self.device_name,
             'area': self.area_name,
+            'sensor': '',
+            'actuator': '',
             'status': 0
         }
         if self.working:
             data['status'] = 1
+
+        if self.sensor is not None:
+            data['sensor'] = self.sensor.measurement()
+
+        if self.actuator is not None:
+            data['actuator'] = self.actuator.measurement()
 
         _ = requests.post(self.register_url, json=data)
 

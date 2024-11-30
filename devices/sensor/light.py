@@ -28,4 +28,4 @@ class LightSensor(BaseSensor):
         })
 
     def measurement(self) -> str:
-        return 'light'
+        return TAG
