@@ -71,8 +71,8 @@ class ThresholdCalculator:
         adjusted_threshold = baseline_threshold * adjustment_factor
         return adjusted_threshold
 
-    def calc_dynamic_threshold(self, soil_type):
-        recent_data = self.delegate.historical_data.tail(15)
+    def calc_dynamic_threshold(self, historical_data, soil_type):
+        recent_data = historical_data.tail(15)
         avg_temp_24h = recent_data['avg_temp_24h'].mean()
         avg_humidity_24h = recent_data['avg_humidity_24h'].mean()
         baseline_threshold = self.get_daily_threshold(datetime.now(), soil_type)

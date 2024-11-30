@@ -106,7 +106,8 @@ class DecisionMaker:
     def calc_duration(self):
         weather_data = self.delegate.weather_data
         rain_mm = float(weather_data.get("rain_probability", 0))
-        threshold, adjustment_factor = self.delegate.threshold.calc_dynamic_threshold(self.area['soil_type'])
+        threshold, adjustment_factor = self.delegate.threshold.calc_dynamic_threshold(
+            self.delegate.historical_data, self.area['soil_type'])
         predictor = SoilMoisturePredictor(self)
         predicted_soil_moisture = predictor.predict_after_rain(self.area)
         if predicted_soil_moisture >= threshold:
