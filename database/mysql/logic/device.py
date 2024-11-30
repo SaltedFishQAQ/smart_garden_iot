@@ -100,8 +100,8 @@ class Logic:
             args = (name, status, 0, area_id, sensor, actuator)
             is_create = True
         else:
-            sql = 'update device set running_status = %s, area_id = %s where name = %s'
-            args = (status, area_id, name)
+            sql = 'update device set running_status = %s, area_id = %s, sensor = %s, actuator = %s where name = %s'
+            args = (status, area_id, sensor, actuator, name)
 
         self.delegate.db_connect.insert(sql, args, is_create=is_create)
 
