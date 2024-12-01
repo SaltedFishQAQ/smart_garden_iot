@@ -133,7 +133,7 @@ class DecisionService(BaseService):
         Main loop that fetches weather data once a day and checks for light control every 10 minutes.
         """
         self.logger.info(f'decision service start..., there are {len(self.control_groups)} control groups')
-        time.sleep(2*60)
+        # time.sleep(2*60)
         while True:
             self.logger.info('-------- check data start --------')
             self.fetch_weather_data()
