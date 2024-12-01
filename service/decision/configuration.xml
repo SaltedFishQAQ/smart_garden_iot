@@ -4,7 +4,7 @@
         <timezone>Europe/Rome</timezone>
     </weather>
     <sensor>
-        <api_url>http://43.131.48.203:8083/data</api_url>
+        <api_url>http://43.131.48.203:8084/data</api_url>
     </sensor>
     <mqtt>
         <broker>43.131.48.203</broker>

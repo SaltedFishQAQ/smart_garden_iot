@@ -100,15 +100,13 @@ class DecisionMaker:
         self.delegate = delegate
         self.logger = Logger(prefix=f'watering decision/{area["name"]}')
         self.area = area
-        self.weather_data = delegate.weather_data
         self.soil_moisture = delegate.sensor_data[(area['id'], 'soil')]
 
     def calc_duration(self):
-        weather_data = self.delegate.weather_data
-        rain_mm = float(weather_data.get("rain_probability", 0))
+        rain_mm = float(self.delegate.weather_data.get("rain_probability", 0))
         threshold, adjustment_factor = self.delegate.threshold.calc_dynamic_threshold(
             self.delegate.historical_data, self.area['soil_type'])
-        predictor = SoilMoisturePredictor(self)
+        predictor = SoilMoisturePredictor(self.delegate)
         predicted_soil_moisture = predictor.predict_after_rain(self.area)
         if predicted_soil_moisture >= threshold:
             return 0
@@ -120,9 +118,9 @@ class DecisionMaker:
         return max(0, duration)
 
     def make_decision(self):
-        cloudiness = self.weather_data["cloudiness"]
-        sunrise = datetime.fromisoformat(self.weather_data["sunrise"])
-        sunset = datetime.fromisoformat(self.weather_data["sunset"])
+        cloudiness = self.delegate.weather_data["cloudiness"]
+        sunrise = datetime.fromisoformat(self.delegate.weather_data["sunrise"])
+        sunset = datetime.fromisoformat(self.delegate.weather_data["sunset"])
         now = datetime.now(sunrise.tzinfo)
 
         if time_add(sunrise, 60*60) <= now <= time_add(sunset, -60*60) and cloudiness < MIN_CLOUDINESS_FOR_WATERING:
