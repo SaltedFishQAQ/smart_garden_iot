@@ -47,10 +47,12 @@ class DataFetcher:
             device_list.append(device)
             actuator_map[area_id] = device_list
         self.delegate.actuator_map = actuator_map
+        self.delegate.logger.info(f'fetch actuator: {self.delegate.actuator_map}')
 
     def get_area_list(self):
         resp = requests.get(self.mysql_base_url + const_h.MYSQL_AREA_LIST)
         self.delegate.area_list = resp.json()['list']
+        self.delegate.logger.info(f'fetch area list: {self.delegate.area_list}')
 
     def get_sensor_data(self):
         params = {'inner': True}
@@ -79,6 +81,7 @@ class DataFetcher:
         weather_df['avg_humidity_24h'] = weather_df['relative_humidity_2m'].rolling(window=24,
                                                                                     min_periods=min_periods).mean()
         self.delegate.historical_data = weather_df
+        self.delegate.logger.info(f'get history')
 
 
 class SoilMoisturePredictor:
