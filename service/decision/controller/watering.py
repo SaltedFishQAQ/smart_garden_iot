@@ -12,11 +12,11 @@ from service.decision.controller.base import BaseController
 
 
 SOIL_ABSORPTION_FACTOR = {
-    "sandy": "0.85",
-    "clay": "0.3",
-    "loamy": "0.7",
-    "silty": "0.6",
-    "peaty": "0.8"
+    "sandy": 0.85,
+    "clay": 0.3,
+    "loamy": 0.7,
+    "silty": 0.6,
+    "peaty": 0.8
 }
 
 
@@ -61,7 +61,6 @@ class DataFetcher:
                 params['area_list'] = [area['name']]
                 resp = requests.get(self.delegate.sensor_api_url, params)
                 data_list = resp.json()['list']
-                self.delegate.logger.info(f'{params}, {(area["id"], measurement)} fetch data: {data_list}')
                 if data_list is None or len(data_list) == 0:
                     sensor_data[(area['id'], measurement)] = None
                     continue
