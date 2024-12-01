@@ -1,4 +1,5 @@
 import time
+import json
 import requests
 import pandas as pd
 import constants.const as const
@@ -162,12 +163,12 @@ class WateringController(BaseController):
             'status': True
         }
         for device in device_list:
-            self.delegate.mqtt_publish(self.command_channel + device['name'], params)
+            self.delegate.mqtt_publish(self.command_channel + device['name'], json.dumps(params))
         time.sleep(duration)
         # irrigator off
         params['status'] = False
         for device in device_list:
-            self.delegate.mqtt_publish(self.command_channel + device['name'], params)
+            self.delegate.mqtt_publish(self.command_channel + device['name'], json.dumps(params))
 
     def handle_check(self):
         for area in self.area_list:
