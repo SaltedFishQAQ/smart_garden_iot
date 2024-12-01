@@ -27,6 +27,7 @@ class LightController(BaseController):
         """
         self.sunrise = datetime.fromisoformat(data['sunrise']).astimezone(pytz.timezone(self.delegate.timezone))
         self.sunset = datetime.fromisoformat(data['sunset']).astimezone(pytz.timezone(self.delegate.timezone))
+        self.get_light_list()
 
     def get_light_list(self):
         params = {'inner': True}
@@ -38,7 +39,6 @@ class LightController(BaseController):
                 continue
             light_list.append(device)
         self.light_list = light_list
-        self.logger.info(f'light list {self.light_list}')
 
     def handle_check(self):
         """
