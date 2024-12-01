@@ -1,6 +1,7 @@
 import time
 import json
 import requests
+import threading
 import pandas as pd
 import constants.const as const
 import constants.http as const_h
@@ -179,7 +180,7 @@ class WateringController(BaseController):
             if decision <= 0:
                 continue
             self.logger.info(f'Trigger decision - {area["name"]} watering for {decision} minutes')
-            self.handle_command(area, decision)
+            threading.Thread(target=self.handle_command, args=(area, decision)).start()
 
     def need_check(self, area):
         area_id = area['id']
