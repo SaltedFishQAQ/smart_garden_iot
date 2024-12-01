@@ -174,7 +174,7 @@ class WateringController(BaseController):
             decision = maker.make_decision()
             if decision <= 0:
                 continue
-            self.logger.info(f'Trigger decision - Watering for {decision} minutes')
+            self.logger.info(f'Trigger decision - {area["name"]} watering for {decision} minutes')
             self.handle_command(area, decision)
 
     def need_check(self, area):

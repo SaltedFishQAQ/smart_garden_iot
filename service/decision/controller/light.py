@@ -23,7 +23,6 @@ class LightController(BaseController):
         """
         self.sunrise = datetime.fromisoformat(data['sunrise']).astimezone(pytz.timezone(self.delegate.timezone))
         self.sunset = datetime.fromisoformat(data['sunset']).astimezone(pytz.timezone(self.delegate.timezone))
-        self.logger.info(f"Updated sunrise: {self.sunrise}, sunset: {self.sunset}")
 
     def handle_check(self):
         """
@@ -31,7 +30,6 @@ class LightController(BaseController):
         Check current time and trigger actions based on sunrise/sunset times.
         """
         current_time = datetime.now(pytz.timezone(self.delegate.timezone))
-        self.logger.info(f"Checking current time: {current_time}")
 
         # Check if sunrise has passed and if the sunrise action hasn't been triggered today
         if self.sunrise and current_time >= self.sunrise and not self.sunrise_triggered:
@@ -56,16 +54,12 @@ class LightController(BaseController):
         """
         Turn off the light after sunrise.
         """
-        self.logger.info("Action: Turning off the light")
         self.delegate.mqtt_publish(self.delegate.command_channel + 'light', json.dumps({"type": "opt", "status": False}))
         self.light_on = False
-        self.logger.info("Published MQTT message to turn off the lights.")
 
     def trigger_sunset_action(self):
         """
         Turn on the light after sunset.
         """
-        self.logger.info("Action: Turning on the light")
         self.delegate.mqtt_publish(self.delegate.command_channel + 'light', json.dumps({"type": "opt", "status": True}))
         self.light_on = True
-        self.logger.info("Published MQTT message to turn on the lights.")

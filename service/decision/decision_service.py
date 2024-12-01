@@ -118,7 +118,6 @@ class DecisionService(BaseService):
         Fetch weather data from the weather API and update sunrise and sunset times.
         """
         try:
-            self.logger.info(f"Fetching weather data from API: {self.weather_api_url}")
             response = requests.get(self.weather_api_url + const_h.WEATHER_DATA_GET, {})
             if response.status_code == 200:
                 data = response.json()
@@ -136,12 +135,11 @@ class DecisionService(BaseService):
         self.logger.info(f'decision service start..., there are {len(self.control_groups)} control groups')
         time.sleep(2*60)
         while True:
-            self.logger.info("fetch weather data")
+            self.logger.info('-------- check data start --------')
             self.fetch_weather_data()
-
             for group in self.control_groups:
                 group.handle_check()
-
+            self.logger.info('-------- check data end --------')
             time.sleep(10*60)
 
     def register_controller(self):
