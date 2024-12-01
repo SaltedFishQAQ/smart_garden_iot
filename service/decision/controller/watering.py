@@ -10,6 +10,7 @@ from common.time import time_add
 from constants.const import MIN_CLOUDINESS_FOR_WATERING, MIN_RAIN_PROBABILITY
 from service.decision.controller.base import BaseController
 
+
 SOIL_ABSORPTION_FACTOR = {
     "sandy": "0.85",
     "clay": "0.3",
@@ -57,7 +58,7 @@ class DataFetcher:
         for measurement in need_measurements:
             for area in self.delegate.area_list:
                 params['measurement'] = measurement
-                params['area_list'] = list([area['name']])
+                params['area_list'] = [area['name']]
                 resp = requests.get(self.delegate.sensor_api_url, params)
                 data_list = resp.json()['list']
                 self.delegate.logger.info(f'{params}, {(area["id"], measurement)} fetch data: {data_list}')
@@ -125,7 +126,7 @@ class DecisionMaker:
         sunset = datetime.fromisoformat(self.delegate.weather_data["sunset"])
         now = datetime.now(sunrise.tzinfo)
 
-        if time_add(sunrise, 60 * 60) <= now <= time_add(sunset, -60 * 60) and cloudiness < MIN_CLOUDINESS_FOR_WATERING:
+        if time_add(sunrise, 60*60) <= now <= time_add(sunset, -60*60) and cloudiness < MIN_CLOUDINESS_FOR_WATERING:
             # skip watering
             return 0
 

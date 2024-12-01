@@ -106,6 +106,10 @@ class InfluxdbAdapter(BaseService):
                 'list': []
             }
 
+        if isinstance(params['area_list'], str):
+            area = params['area_list']
+            params['area_list'] = [area]
+
         measurement = params['measurement']
         time_cond = []
         filter_cond = ""
