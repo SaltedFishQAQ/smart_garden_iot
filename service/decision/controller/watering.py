@@ -1,5 +1,4 @@
 import time
-
 import requests
 import pandas as pd
 import constants.const as const
@@ -41,11 +40,11 @@ class DataFetcher:
             if device['actuator'] != 'irrigator':
                 continue
             area_id = device['area_id']
-            device_list = []
+            irrigator_list = []
             if area_id in actuator_map:
-                device_list = actuator_map[area_id]
-            device_list.append(device)
-            actuator_map[area_id] = device_list
+                irrigator_list = actuator_map[area_id]
+            irrigator_list.append(device)
+            actuator_map[area_id] = irrigator_list
         self.delegate.actuator_map = actuator_map
 
     def get_area_list(self):
