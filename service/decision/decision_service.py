@@ -119,7 +119,7 @@ class DecisionService(BaseService):
         """
         try:
             self.logger.info(f"Fetching weather data from API: {self.weather_api_url}")
-            response = requests.get(self.weather_api_url + const_h.WEATHER_DATA_GET, timeout=10)
+            response = requests.get(self.weather_api_url + const_h.WEATHER_DATA_GET, {})
             if response.status_code == 200:
                 data = response.json()
                 for group in self.control_groups:
