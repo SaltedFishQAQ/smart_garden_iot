@@ -136,7 +136,7 @@ class WateringController(BaseController):
         self.logger = Logger(prefix=f'watering controller:')
         self.weather_data = None
         self.sensor_data = None
-        self.actuator_map = None
+        self.actuator_map = {}
         self.historical_data = None
         self.area_list = []
         self.threshold = delegate.threshold_calculator
