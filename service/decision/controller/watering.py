@@ -144,7 +144,8 @@ class WateringController(BaseController):
         self.area_list = []
         self.threshold = delegate.threshold_calculator
         self.weather_api_url = delegate.weather_api_url
-        self.sensor_api_url = delegate.config.get("./sensor/api_url")
+        # self.sensor_api_url = delegate.config.get("./sensor/api_url")
+        self.sensor_api_url = f'{const_h.INFLUX_HOST}:{const_h.SERVICE_PORT_INFLUX}{const_h.INFLUX_DATA_GET}'
         self.data_source = DataFetcher(self)
         self.command_channel = mb_channel.DEVICE_COMMAND
 
