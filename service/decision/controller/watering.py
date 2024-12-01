@@ -62,6 +62,7 @@ class DataFetcher:
                 resp = requests.get(self.delegate.sensor_api_url, params)
                 data_list = resp.json()['list']
                 if data_list is None or len(data_list) == 0:
+                    sensor_data[(area['id'], measurement)] = None
                     continue
                 sensor_data[(area['id'], measurement)] = data_list[0]
         self.delegate.sensor_data = sensor_data
