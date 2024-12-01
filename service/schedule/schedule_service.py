@@ -76,7 +76,7 @@ class ScheduleService(BaseService):
                 continue
             device = schedule['target']
             msg = json.dumps({
-                'type': 'opt',
+                'type': 'action',
                 'status': schedule['opt']
             })
             try:
