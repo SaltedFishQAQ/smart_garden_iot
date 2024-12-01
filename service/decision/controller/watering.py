@@ -64,7 +64,7 @@ class DataFetcher:
                 if data_list is None or len(data_list) == 0:
                     sensor_data[(area['id'], measurement)] = None
                     continue
-                sensor_data[(area['id'], measurement)] = data_list[0]
+                sensor_data[(area['id'], measurement)] = float(data_list[0]['value'])
         self.delegate.sensor_data = sensor_data
 
     def get_history_weather(self):
@@ -88,7 +88,7 @@ class SoilMoisturePredictor:
         self.delegate = delegate
 
     def predict_after_rain(self, area):
-        current_soil_moisture = float(self.delegate.sensor_data[(area['id'], 'soil')]['value'])
+        current_soil_moisture = self.delegate.sensor_data[(area['id'], 'soil')]
         rain_amount = self.delegate.weather_data['rain_probability']
         soil_absorption_factor = SOIL_ABSORPTION_FACTOR.get(area['soil_type'], float(0.5))
         moisture_increase = rain_amount * soil_absorption_factor
