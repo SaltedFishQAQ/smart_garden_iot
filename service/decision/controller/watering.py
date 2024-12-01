@@ -131,7 +131,7 @@ class DecisionMaker:
             # skip watering
             return 0
 
-        return self.calc_duration()
+        return round(self.calc_duration(), 2)
 
 
 class WateringController(BaseController):
