@@ -16,4 +16,4 @@ class GasDetector(BaseSensor):
         })
 
     def measurement(self) -> str:
-        return 'gas'
+        return TAG

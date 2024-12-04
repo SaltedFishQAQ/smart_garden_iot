@@ -47,4 +47,4 @@ class TemperatureSensor(BaseSensor):
             })
 
     def measurement(self) -> str:
-        return 'temperature'
+        return TAG

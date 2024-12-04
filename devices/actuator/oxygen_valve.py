@@ -13,3 +13,6 @@ class OxygenValve(BaseActuator):
 
     def _off(self):
         return "close the oxygen valve"
+
+    def measurement(self) -> str:
+        return TAG

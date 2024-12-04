@@ -6,7 +6,7 @@ from common.config import ConfigLoader
 from devices.biz.base_sensor import BaseSensor
 
 
-TAG = "soil_moisture"
+TAG = "soil"
 
 
 class SoilMoistureSensor(BaseSensor):
@@ -50,5 +50,5 @@ class SoilMoistureSensor(BaseSensor):
             })
 
     def measurement(self) -> str:
-        return 'soil'
+        return TAG
 

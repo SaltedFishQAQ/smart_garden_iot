@@ -13,3 +13,6 @@ class GateSwitch(BaseActuator):
 
     def _off(self):
         return "close the gate"
+
+    def measurement(self) -> str:
+        return TAG

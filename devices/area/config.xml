@@ -26,7 +26,7 @@
             <actuator>oxygen</actuator>
         </device1-4>
         <device1-5>
-            <sensor>soil_moisture</sensor>
+            <sensor>soil</sensor>
             <actuator>irrigator</actuator>
         </device1-5>
     </area1>
@@ -39,7 +39,7 @@
             <actuator>light</actuator>
         </device2-2>
         <device2-3>
-            <sensor>soil_moisture</sensor>
+            <sensor>soil</sensor>
             <actuator>irrigator</actuator>
         </device2-3>
         <device2-4>
@@ -55,7 +55,7 @@
             <actuator>oxygen</actuator>
         </device3-2>
         <device3-3>
-            <sensor>soil_moisture</sensor>
+            <sensor>soil</sensor>
             <actuator>irrigator</actuator>
         </device3-3>
         <device3-4>

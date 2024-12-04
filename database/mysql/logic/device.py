@@ -54,6 +54,8 @@ class Logic:
                 'auth_status': record['auth_status'],
                 'area_id': record['area_id'],
                 'area_name': record['area_name'],
+                'sensor': record['sensor'],
+                'actuator': record['actuator'],
                 'created_at': time_to_str(record['created_at']),
                 'updated_at': time_to_str(record['updated_at'])
             })
@@ -79,6 +81,8 @@ class Logic:
         name = params['name']
         area_name = params['area']
         status = params['status']
+        sensor = params['sensor']
+        actuator = params['actuator']
 
         area_id = 0
         records = self.delegate.db_connect.query('select id from area where name = %s limit 1', area_name)
@@ -91,13 +95,13 @@ class Logic:
 
         is_create = False
         if len(records) == 0:
-            sql = ('INSERT INTO device (name, running_status, auth_status, area_id)'
-                   'VALUES (%s, %s, %s, %s)')
-            args = (name, status, 0, area_id)
+            sql = ('INSERT INTO device (name, running_status, auth_status, area_id, sensor, actuator)'
+                   'VALUES (%s, %s, %s, %s, %s, %s)')
+            args = (name, status, 0, area_id, sensor, actuator)
             is_create = True
         else:
-            sql = 'update device set running_status = %s, area_id = %s where name = %s'
-            args = (status, area_id, name)
+            sql = 'update device set running_status = %s, area_id = %s, sensor = %s, actuator = %s where name = %s'
+            args = (status, area_id, sensor, actuator, name)
 
         self.delegate.db_connect.insert(sql, args, is_create=is_create)
 

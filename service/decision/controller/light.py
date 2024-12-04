@@ -1,19 +1,23 @@
-import logging
 import json
-from datetime import datetime
 import pytz
+import requests
+import constants.http as const_h
+from common.log import Logger
+from datetime import datetime
 from service.decision.controller.base import BaseController
 
 
 class LightController(BaseController):
     def __init__(self, delegate):
         self.delegate = delegate
-        self.logger = self.delegate.logger
+        self.logger = Logger(prefix=f'light controller:')
+        self.mysql_base_url = f'{const_h.MYSQL_HOST}:{const_h.SERVICE_PORT_MYSQL}'
         # flag
         self.sunrise = None
         self.sunset = None
         self.light_on = False
         # Track actions
+        self.light_list = []
         self.sunrise_triggered = False
         self.sunset_triggered = False
 
@@ -23,7 +27,18 @@ class LightController(BaseController):
         """
         self.sunrise = datetime.fromisoformat(data['sunrise']).astimezone(pytz.timezone(self.delegate.timezone))
         self.sunset = datetime.fromisoformat(data['sunset']).astimezone(pytz.timezone(self.delegate.timezone))
-        self.logger.info(f"Updated sunrise: {self.sunrise}, sunset: {self.sunset}")
+        self.get_light_list()
+
+    def get_light_list(self):
+        params = {'inner': True}
+        resp = requests.get(self.mysql_base_url + const_h.MYSQL_DEVICE_LIST, params)
+        device_list = resp.json()['list']
+        light_list = []
+        for device in device_list:
+            if device['actuator'] != 'light':
+                continue
+            light_list.append(device)
+        self.light_list = light_list
 
     def handle_check(self):
         """
@@ -31,19 +46,22 @@ class LightController(BaseController):
         Check current time and trigger actions based on sunrise/sunset times.
         """
         current_time = datetime.now(pytz.timezone(self.delegate.timezone))
-        self.logger.info(f"Checking current time: {current_time}")
 
         # Check if sunrise has passed and if the sunrise action hasn't been triggered today
         if self.sunrise and current_time >= self.sunrise and not self.sunrise_triggered:
-            self.logger.info(f"Triggering sunrise action: Turn off the lights at {self.sunrise}")
-            self.trigger_sunrise_action()
+            for light in self.light_list:
+                device_name = light['name']
+                self.logger.info(f'Triggering sunrise action: {device_name} turn off the lights at {self.sunrise}')
+                self.trigger_sunrise_action(device_name)
             self.sunrise_triggered = True  # Set sunrise as triggered
             self.sunset_triggered = False  # Reset sunset trigger for the next sunset
 
         # Check if sunset has passed and if the sunset action hasn't been triggered today
         elif self.sunset and current_time >= self.sunset and not self.sunset_triggered:
-            self.logger.info(f"Triggering sunset action: Turn on the lights at {self.sunset}")
-            self.trigger_sunset_action()
+            for light in self.light_list:
+                device_name = light['name']
+                self.logger.info(f'Triggering sunset action: {device_name} turn on the lights at {self.sunset}')
+                self.trigger_sunset_action(device_name)
             self.sunset_triggered = True  # Set sunset as triggered
             self.sunrise_triggered = False  # Reset sunrise trigger for the next sunrise
 
@@ -52,20 +70,18 @@ class LightController(BaseController):
             self.sunrise_triggered = False
             self.sunset_triggered = False
 
-    def trigger_sunrise_action(self):
+    def trigger_sunrise_action(self, device_name):
         """
         Turn off the light after sunrise.
         """
-        self.logger.info("Action: Turning off the light")
-        self.delegate.mqtt_publish(self.delegate.command_channel + 'light', json.dumps({"type": "opt", "status": False}))
+        self.delegate.mqtt_publish(self.delegate.command_channel + device_name,
+                                   json.dumps({"type": "action", "status": False}))
         self.light_on = False
-        self.logger.info("Published MQTT message to turn off the lights.")
 
-    def trigger_sunset_action(self):
+    def trigger_sunset_action(self, device_name):
         """
         Turn on the light after sunset.
         """
-        self.logger.info("Action: Turning on the light")
-        self.delegate.mqtt_publish(self.delegate.command_channel + 'light', json.dumps({"type": "opt", "status": True}))
+        self.delegate.mqtt_publish(self.delegate.command_channel + device_name,
+                                   json.dumps({"type": "action", "status": True}))
         self.light_on = True
-        self.logger.info("Published MQTT message to turn on the lights.")

@@ -13,3 +13,6 @@ class LightSwitch(BaseActuator):
 
     def _off(self):
         return "turn off the light"
+
+    def measurement(self) -> str:
+        return TAG
