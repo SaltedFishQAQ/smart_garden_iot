@@ -286,7 +286,7 @@ class IoTBot:
             await self.system_status(update)
         elif text in ["Open Up Valves", "Close Valves", "Turn On Light", "Turn Off Light"]:
             _, irrigation, light = parse_device_config()
-            logger.info(f"irrigation: {irrigation}, light: {light}")
+            #logger.info(f"irrigation: {irrigation}, light: {light}")
             actions = {
                 "Open Up Valves": lambda: [
                     self.mqtt_client.mqtt_publish(
