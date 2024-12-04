@@ -1,7 +1,7 @@
 <config>
     <weather>
         <api_url>https://api.openweathermap.org/data/2.5/weather</api_url>
-        <api_key>5dc8ece6e02d649d870e2e3a67ffc128</api_key>
+        <api_key>token</api_key>
         <timezone>Europe/Rome</timezone>
         <city>Turin,it</city>
     </weather>

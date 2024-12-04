@@ -26,13 +26,6 @@ BASE_WATERING_DURATION = 15
 TEMP_THRESHOLD = 25
 HUMIDITY_THRESHOLD = 40
 BASELINE_HUMIDITY_FOR_ADJUSTMENT = 60
-SENSOR_AUTH_TOKEN = (
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJ1c2VyX2luZm8iOnsiaWQiOjExLCJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJjcmVhdGVkX2F0Ijoi"
-        "MjAyNC0xMS0yNSAwOTo1NjoxMyIsInVwZGF0ZWRfYXQiOiIyMDI0LTExLTI1IDA5OjU2OjEzIn0sImV4"
-        "cCI6MTczNTExNzEwNSwiaWF0IjoxNzMyNTI1MTA1fQ.soBi3gJlaVCeXnd1X0dPzvWhtI-mS-Y1WmSqW_7U3_w"
-    )
-
 
 SOIL_TYPE = {
     "Sandy": {"field_capacity": 15, "wilting_point": 4, "adjustment_factor": 0.3},

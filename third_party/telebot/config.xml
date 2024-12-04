@@ -6,7 +6,7 @@
 	<data>/data</data>
     </api>
     <bot>
-        <token>7074896722:AAF34S5tMXWem4IJs3o8tY7Cjut0LvJKqxE</token>
+        <token>token</token>
     </bot>
     <mqtt>
         <broker>43.131.48.203</broker>
@@ -15,6 +15,6 @@
     </mqtt>
     <plantid>
         <api_url>https://plant.id/api/v3</api_url>
-        <api_key>U84sYkSbnrqVGHuXSm2wxElyZff8CRDAP03BmU3DSzIjb8LP7b</api_key>
+        <api_key>token</api_key>
     </plantid>
 </config>

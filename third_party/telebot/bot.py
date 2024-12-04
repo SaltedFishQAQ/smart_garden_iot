@@ -20,8 +20,14 @@ logging.basicConfig(
 )
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
-
 nest_asyncio.apply()
+
+
+#constant
+PAGE_NUMBER = 1
+PAGE_SIZE = 10
+ACTION = 'action'
+STATUS_BASE_PATH = '/device/status'
 
 # Load configuration
 class Config:
@@ -42,25 +48,40 @@ class Config:
         self.plant_api_key = root.find('plantid/api_key').text
 
 
-def parse_device_config():
+def parse_device_config(mode="all"):
     """Parse the device configuration XML and organize devices by area."""
     with importlib.resources.open_text("devices.area", "config.xml") as config_file:
         tree = ET.parse(config_file)
         root = tree.getroot()
+        area_devices = {}
+        irrigation = []
+        light = []
 
-    area_devices = {}
-    for area_tag in root.findall("./*"):
-        if area_tag.tag == "area":
-            continue
-        area_name = area_tag.tag
-        area_devices[area_name] = []
-        for device in area_tag:
-            device_name = device.tag
-            device_info = {child.tag: child.text for child in device}
-            device_info['name'] = device_name
-            area_devices[area_name].append(device_info)
+        for area_tag in root.findall("./*"):
+            if area_tag.tag == "area":
+                continue
+            area_name = area_tag.tag
+            area_devices[area_name] = []
+            for device in area_tag:
+                device_name = device.tag
+                device_info = {child.tag: child.text for child in device}
+                device_info['name'] = device_name
+                area_devices[area_name].append(device_info)
 
-    return area_devices
+                actuator = device_info.get("actuator", "").strip().lower()
+                if actuator == "irrigator":
+                    irrigation.append(device_name)
+                elif actuator == "light":
+                    light.append(device_name)
+
+        if mode == "irrigation":
+            return irrigation
+        elif mode == "light":
+            return light
+        elif mode == "all":
+            return area_devices, irrigation, light
+        elif mode == "areas":
+            return area_devices
 
 
 def process_identification_result(result: dict) -> str:
@@ -99,11 +120,11 @@ class APIClient:
         self.base_url = config.base_url
         self.data_endpoint = config.data_endpoint
         self.rules_endpoint = "/rules"
-        self.status_endpoint = "/status"
+        self.status_endpoint = STATUS_BASE_PATH
         self.plant_client = PlantIDClient(config.plant_api_url, config.plant_api_key)
         self.authenticator = authenticator
 
-    def fetch_data(self, measurement, user_id, page=1, size=5):
+    def fetch_data(self, measurement, user_id, page=PAGE_NUMBER, size=PAGE_SIZE):
         """Fetch data from the server for a specific measurement."""
         user_token = self.authenticator.get_user_token(user_id)
         if not user_token:
@@ -122,14 +143,20 @@ class APIClient:
                 return data.get("list", [])
         return []
 
-    def fetch_rules(self, page=1, size=10):
+    def fetch_rules(self, user_id, page=PAGE_NUMBER, size=PAGE_SIZE):
         """Fetch rules from the server."""
+        user_token = self.authenticator.get_user_token(user_id)
+        if not user_token:
+            return {}
+
         url = f"{self.base_url}{self.rules_endpoint}"
         params = {
             "page": page,
             "size": size
         }
-        response = requests.get(url, params=params)
+        headers = {"Authorization": user_token}
+
+        response = requests.get(url, params=params, headers=headers)
         if response.status_code == 200:
             data = response.json()
             if data.get("code") == 0:
@@ -142,7 +169,7 @@ class APIClient:
         if not user_token:
             return {}
 
-        url = f"{self.base_url}/device/status"
+        url = f"{self.base_url}{self.status_endpoint}"
         params = {"name": device_name}
         headers = {"Authorization": user_token}
 
@@ -258,15 +285,33 @@ class IoTBot:
         elif text == "Status":
             await self.system_status(update)
         elif text in ["Open Up Valves", "Close Valves", "Turn On Light", "Turn Off Light"]:
+            _, irrigation, light = parse_device_config()
+            #logger.info(f"irrigation: {irrigation}, light: {light}")
             actions = {
-                "Open Up Valves": lambda: self.mqtt_client.mqtt_publish(
-                    self.config.command_channel + 'irrigator', {"type": "opt", 'status': True}),
-                "Close Valves": lambda: self.mqtt_client.mqtt_publish(
-                    self.config.command_channel + 'irrigator', {"type": "opt", 'status': False}),
-                "Turn On Light": lambda: self.mqtt_client.mqtt_publish(
-                    self.config.command_channel + 'light', {"type": "opt", 'status': True}),
-                "Turn Off Light": lambda: self.mqtt_client.mqtt_publish(
-                    self.config.command_channel + 'light', {"type": "opt", 'status': False}),
+                "Open Up Valves": lambda: [
+                    self.mqtt_client.mqtt_publish(
+                        f"{self.config.command_channel}{device}",
+                        {"type": ACTION, "status": True}
+                    ) for device in irrigation
+                ],
+                "Close Valves": lambda: [
+                    self.mqtt_client.mqtt_publish(
+                        f"{self.config.command_channel}{device}",
+                        {"type": ACTION, "status": False}
+                    ) for device in irrigation
+                ],
+                "Turn On Light": lambda: [
+                    self.mqtt_client.mqtt_publish(
+                        f"{self.config.command_channel}{device}",
+                        {"type": ACTION, "status": True}
+                    ) for device in light
+                ],
+                "Turn Off Light": lambda: [
+                    self.mqtt_client.mqtt_publish(
+                        f"{self.config.command_channel}{device}",
+                        {"type": ACTION, "status": False}
+                    ) for device in light
+                ],
             }
 
             if role != 1:
@@ -368,7 +413,9 @@ class IoTBot:
 
     async def rules_menu(self, update: Update):
         """Fetch and display active rules to the user."""
-        rules = self.api_client.fetch_rules()
+        user_id = update.message.from_user.id
+        rules = self.api_client.fetch_rules(user_id)
+
 
         comparison_mapping = {
             "gt": "greater than",
@@ -416,7 +463,7 @@ class IoTBot:
         """Fetch and display status for the devices based on areas."""
         user_id = update.message.from_user.id
 
-        area_devices = parse_device_config()
+        area_devices = parse_device_config(mode="areas")
 
         status_message = ""
 
