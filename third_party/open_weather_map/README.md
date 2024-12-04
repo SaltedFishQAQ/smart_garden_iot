@@ -1,6 +1,6 @@
 # Smart Garden IoT: Weather Microservice
 
-This is a Weather Microservice for the **Smart Garden IoT** system, which interacts with the OpenWeatherMap API to fetch weather data (such as temperature, humidity, wind speed, sunrise, sunset, and rain probability). It provides parsed weather data that can be used for automating tasks like turning lights on or off during sunrise/sunset and managing irrigation systems based on rain forecasts.
+This is a Weather Microservice for the **Smart Garden IoT** system, which interacts with the OpenWeatherMap and OpenMeteo API to fetch current and forecasted weather data (such as temperature, humidity, wind speed, sunrise, sunset, and rain probability) and historical data for system management and decision making. It provides parsed weather data that can be used for automating tasks like turning lights on or off during sunrise/sunset and managing irrigation systems based on rain forecasts and historical weather pattern.
 
 ## Features
 
@@ -13,16 +13,18 @@ This is a Weather Microservice for the **Smart Garden IoT** system, which intera
   - **Description**
   - **Cloud Cover**
   - **Air pressure**
-
+- Fetches historical weather data from the OpenMeteo API for decision manipulation:
+  - **Humidity**
+  - **Temperature**
+  - **precipitation**
 
 - Modular design to simplify fetching and parsing weather data.
 - Parses and returns weather data in a structured format.
 
 ## File Structure
 
-- **`config_loader.py`**: Handles loading configuration from an XML file, including API keys, city, and timezone.
-- **`weather_api_adapter.py`**: Interacts with the OpenWeatherMap API to fetch weather data.
-- **`weather_service.py`**: Parses and processes the weather data fetched from the OpenWeatherMap API.
+- **`weather_adapter.py`**: adapter exposes the fetch data.
+- **`data.py`**: Parses and processes the weather data fetched from the OpenWeatherMap API and OpenMeteo
 - **`weather_config.xml`**: Configuration file that stores API URL, API key, city for weather data, and the timezone for processing sunrise/sunset times.
 - **`requirements.txt`**: Lists the Python dependencies required for the project.
 
