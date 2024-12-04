@@ -8,7 +8,7 @@ MQTT_TOPIC = "iot/lwx123321/test/device/command/alerts"
 
 # API Endpoints
 OPENWEATHERMAP_API = "https://api.openweathermap.org/data/2.5/weather"
-OPENWEATHERMAP_API_KEY = "5dc8ece6e02d649d870e2e3a67ffc128"
+OPENWEATHERMAP_API_KEY = "token"
 OPENMETEO_API = "https://api.open-meteo.com/v1/forecast"
 SAMPLE_CITY = "London"
 SAMPLE_LAT = 51.5074
@@ -18,9 +18,9 @@ SAMPLE_LONG = -0.1278
 MYSQL_CONFIG = {
     "host": "43.131.48.203",
     "port": 3306,
-    "user": "iot",
-    "password": "Test1234.",
-    "database": "iot_test",
+    "user": "username",
+    "password": "password.",
+    "database": "database_name",
 }
 INFLUXDB_HOST = "43.131.48.203"
 INFLUXDB_PORT = 18086
