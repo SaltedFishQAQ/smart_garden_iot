@@ -2,6 +2,11 @@
 *Automated Gardening with IoT Technology*
 
 ---
+## 🔗 Repositories
+- **[Frontend Code](https://github.com/SaltedFishQAQ/smart_garden_iot_frontend)**
+- **[Backend Code](https://github.com/SaltedFishQAQ/smart_garden_iot)** (Current Repository)
+
+---
 ### University
 Politecnico di Torino / Polytechnic University of Turin
 
@@ -46,17 +51,17 @@ The IoT Smart Gardening System is an advanced solution designed to automate and 
 ### 1. Clone the Repository
 ```shell
 git clone https://github.com/SaltedFishQAQ/smart_garden_iot.git
-cd smart_garden_iot
+git clone https://github.com/SaltedFishQAQ/smart_garden_iot_frontend.git
 ```
 ### 2. Start the Backend Server
 ```shell
+cd smart_garden_iot
 docker-compose up --build -d
 ```
 ### 3. Start the [Frontend Server](https://github.com/SaltedFishQAQ/smart_garden_iot_frontend)
 ```shell
- git clone https://github.com/SaltedFishQAQ/smart_garden_iot_frontend
- cd smart_garden_iot_frontend
- npm run build:prod
+cd ../smart_garden_iot_frontend
+npm run build:prod
 ```
 ---
 ## 🖥️ Usage
