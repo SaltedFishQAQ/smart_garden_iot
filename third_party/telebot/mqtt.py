@@ -4,8 +4,13 @@ import json
 import logging
 import asyncio
 
+from numpy.doc.constants import constants
+
 logger = logging.getLogger(__name__)
 
+
+#constants
+ALERT_TOPIC = "alerts"
 
 class MQTTClient:
     def __init__(self, config, notification_manager):
@@ -38,7 +43,7 @@ class MQTTClient:
         """Handle successful connection to the MQTT broker."""
         if rc == 0:
             logger.info(f"Connected to MQTT broker at {self.config.mqtt_broker}:{self.config.mqtt_port}")
-            self.mqtt_client.subscribe(self.config.command_channel + "alerts", qos=1)
+            self.mqtt_client.subscribe(self.config.command_channel + ALERT_TOPIC, qos=1)
             logger.info(f"Subscribed to topic: {self.config.command_channel}alerts")
         else:
             logger.error(f"Failed to connect to MQTT broker, return code {rc}")
