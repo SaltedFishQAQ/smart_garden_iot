@@ -33,8 +33,8 @@ class IoTMonitoringWebApp:
 
         self.mqtt_broker = MQTT_BROKER
         self.mqtt_port = MQTT_PORT
-        self.mqtt_topic = MQTT_TOPIC
-        self.mqtt_client = mqtt.Client()
+        self.mqtt_topic = MQTT_TOPIC        #pull constants from constant_values.py to configure server communication, database access, and API requests
+        self.mqtt_client = mqtt.Client()    #publish system alerts to MQTT broker
 
         try:
             self.mqtt_client.connect(self.mqtt_broker, self.mqtt_port)
@@ -45,7 +45,7 @@ class IoTMonitoringWebApp:
 
         self.docker_monitor = DockerMonitor(self.server_ip)
         self.api_monitor = APIHealthMonitor()
-        self.db_monitor = DatabaseHealthMonitor()
+        self.db_monitor = DatabaseHealthMonitor()     #handle Docker container health, API availability, and database status checks
 
         self.last_checked = None
         self.data = {"containers": [], "apis": {}, "databases": {}}
@@ -54,7 +54,7 @@ class IoTMonitoringWebApp:
         self.monitoring_thread = Thread(target=self.background_monitoring, daemon=True)
         self.monitoring_thread.start()
 
-    def background_monitoring(self):
+    def background_monitoring(self):    #Runs in a background thread to continuously monitor all system components
         while not self.stop_event.is_set():
             try:
                 self.monitor_all()
@@ -62,7 +62,7 @@ class IoTMonitoringWebApp:
                 print(f"Error during background monitoring: {e}")
             sleep(REFRESH_TIME)
 
-    def monitor_all(self):
+    def monitor_all(self):      #Collects the status of containers, APIs, and databases
         localzone = timezone('Europe/Rome')
         self.last_checked = datetime.now(localzone).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -146,7 +146,7 @@ class IoTMonitoringWebApp:
     @cherrypy.expose
     def index(self):
         """Serve the monitoring dashboard."""
-        return self.render_html()
+        return self.render_html()  #Renders the monitoring dashboard in the browser
 
     def stop(self):
         """Stop the monitoring thread and MQTT client."""
@@ -155,9 +155,9 @@ class IoTMonitoringWebApp:
 
 
 if __name__ == "__main__":
-    app = IoTMonitoringWebApp()
+    app = IoTMonitoringWebApp()     
     try:
-        cherrypy.quickstart(app, "/", {
+        cherrypy.quickstart(app, "/", {        #launches the application
             'global': {
                 'server.socket_host': SERVER_HOST,
                 'server.socket_port': SERVER_PORT,

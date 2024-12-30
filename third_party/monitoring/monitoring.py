@@ -43,7 +43,7 @@ class DockerMonitor:
         system_delta = system_cpu_usage - prev_system_cpu_usage
 
         cpu_percentage = (cpu_delta / system_delta) * online_cpus * 100 if system_delta > 0 else 0
-
+           #Memory usage is expressed as both percentage and MB
         memory_usage = stats["memory_stats"]["usage"]
         memory_limit = stats["memory_stats"]["limit"]
         memory_percentage = (memory_usage / memory_limit) * 100 if memory_limit > 0 else 0
@@ -178,7 +178,7 @@ class DatabaseHealthMonitor:
             )
             if connection.is_connected():
                 cursor = connection.cursor()
-                cursor.execute("SELECT 1;")
+                cursor.execute("SELECT 1;")  #Executes a simple query (SELECT 1;) to verify database health
                 result = cursor.fetchone()
                 cursor.close()
                 connection.close()

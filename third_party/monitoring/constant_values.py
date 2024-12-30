@@ -1,8 +1,8 @@
 # General
-REFRESH_TIME = 60
+REFRESH_TIME = 60       #All monitoring checks (Docker, APIs, databases) are performed every 60 seconds
 
 # MQTT Configuration
-MQTT_BROKER = "43.131.48.203"
+MQTT_BROKER = "43.131.48.203"  #ip for publishing alerts
 MQTT_PORT = 1883
 MQTT_TOPIC = "iot/lwx123321/test/device/command/alerts"
 
