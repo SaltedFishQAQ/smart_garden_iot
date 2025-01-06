@@ -7,11 +7,6 @@ MYSQL_HOST = "http://" + os.getenv('MYSQL_HOST', 'localhost')
 INFLUX_HOST = "http://" + os.getenv('INFLUXDB_HOST', 'localhost')
 WEATHER_HOST = "http://" + os.getenv('WEATHER_HOST', 'localhost')
 
-#added for decision service
-WEATHER_ADAPTER = "http://3.79.189.115"
-BROKER_ADDRESS = "43.131.48.203"
-SENSOR_SERVER_IP = "43.131.48.203"
-
 # service port
 SERVICE_PORT_AUTH = 8081
 SERVICE_PORT_RULE = 8082
