@@ -2,76 +2,76 @@ version: '3.8'
 
 services:
   auth_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-auth
+    build: .
+    container_name: auth_service
+    command: python service/auth/__main__.py
     ports:
       - "8081:8081"
     depends_on:
       - influx_service
       - mysql_service
     environment:
-      - INFLUXDB_HOST=influx_service
-      - INFLUXDB_PORT=8084
-      - MYSQL_HOST=mysql_service
-      - MYSQL_PORT=8085
+      INFLUXDB_HOST: influx_service
+      INFLUXDB_PORT: 8084
+      MYSQL_HOST: mysql_service
+      MYSQL_PORT: 8085
     networks:
       - app-network
 
   rule_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-rule
+    build: .
+    container_name: rule_service
+    command: python service/rule/__main__.py
     ports:
       - "8082:8082"
     depends_on:
       - influx_service
       - mysql_service
     environment:
-      - INFLUXDB_HOST=influx_service
-      - INFLUXDB_PORT=8084
-      - MYSQL_HOST=mysql_service
-      - MYSQL_PORT=8085
+      INFLUXDB_HOST: influx_service
+      INFLUXDB_PORT: 8084
+      MYSQL_HOST: mysql_service
+      MYSQL_PORT: 8085
     networks:
       - app-network
 
   user_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-user
+    build: .
+    container_name: user_service
+    command: python service/user/__main__.py
     ports:
       - "8083:8083"
     depends_on:
       - influx_service
       - mysql_service
     environment:
-      - INFLUXDB_HOST=influx_service
-      - INFLUXDB_PORT=8084
-      - MYSQL_HOST=mysql_service
-      - MYSQL_PORT=8085
+      INFLUXDB_HOST: influx_service
+      INFLUXDB_PORT: 8084
+      MYSQL_HOST: mysql_service
+      MYSQL_PORT: 8085
     networks:
       - app-network
 
   influx_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-influx
+    build: .
+    container_name: influx_service
+    command: python database/influxdb/__main__.py
     ports:
       - "8084:8084"
     depends_on:
       - mysql_service
     environment:
-      - MYSQL_HOST=mysql_service
-      - MYSQL_PORT=8085
+      MYSQL_HOST: mysql_service
+      MYSQL_PORT: 8085
     volumes:
       - influxdb_data:/var/lib/influxdb
     networks:
       - app-network
 
   mysql_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-mysql
+    build: .
+    container_name: mysql_service
+    command: python database/mysql/__main__.py
     ports:
       - "8085:8085"
     volumes:
@@ -80,66 +80,66 @@ services:
       - app-network
 
   schedule_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-schedule
+    build: .
+    container_name: schedule_service
+    command: python service/schedule/__main__.py
     ports:
       - "8086:8086"
     depends_on:
       - mysql_service
     environment:
-      - INFLUXDB_HOST=influx_service
-      - INFLUXDB_PORT=8084
-      - MYSQL_HOST=mysql_service
-      - MYSQL_PORT=8085
+      INFLUXDB_HOST: influx_service
+      INFLUXDB_PORT: 8084
+      MYSQL_HOST: mysql_service
+      MYSQL_PORT: 8085
     networks:
       - app-network
 
   device_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-device
+    build: .
+    container_name: device_service
+    command: python devices/server_main.py
     ports:
       - "8087:8087"
     depends_on:
       - influx_service
       - mysql_service
     environment:
-      - INFLUXDB_HOST=influx_service
-      - INFLUXDB_PORT=8084
-      - MYSQL_HOST=mysql_service
-      - MYSQL_PORT=8085
+      INFLUXDB_HOST: influx_service
+      INFLUXDB_PORT: 8084
+      MYSQL_HOST: mysql_service
+      MYSQL_PORT: 8085
     networks:
       - app-network
 
   decision_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-decision
+    build: .
+    container_name: decision_service
+    command: python service/decision/__main__.py
     ports:
       - "8089:8089"
     depends_on:
       - influx_service
       - mysql_service
     environment:
-      - INFLUXDB_HOST=influx_service
-      - INFLUXDB_PORT=8084
-      - MYSQL_HOST=mysql_service
-      - MYSQL_PORT=8085
+      INFLUXDB_HOST: influx_service
+      INFLUXDB_PORT: 8084
+      MYSQL_HOST: mysql_service
+      MYSQL_PORT: 8085
     networks:
       - app-network
 
   weather_service:
-    build:
-      context: .
-      dockerfile: Dockerfile-weather
+    build: .
+    container_name: weather_service
+    command: python third_party/open_weather_map/__main__.py
     ports:
       - "5000:5000"
     depends_on:
       - mysql_service
     environment:
-      - MYSQL_HOST=mysql_service
-      - MYSQL_PORT=8085
+      MYSQL_HOST: mysql_service
+      MYSQL_PORT: 8085
     networks:
       - app-network
 
